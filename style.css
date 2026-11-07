@@ -4218,8 +4218,20 @@ grid-template-columns: 1fr;
 
 
 /* ==========================================================================
-   FOXSA NEWS - INTERACTIVE COMMENTS & ADMIN DASHBOARD STYLES
+   FOXSA NEWS - ANDROID-FRIENDLY UX, SMART CATEGORIES, LOGIN & ADMIN STYLES
    ========================================================================== */
+
+html, body {
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Sticky Header for Smooth Desktop & Android Scrolling */
+#header-wrap {
+  position: sticky !important;
+  top: 0;
+  z-index: 1010;
+}
 
 /* Top Admin Floating/Header Badge */
 .admin-nav-btn {
@@ -4240,8 +4252,13 @@ grid-template-columns: 1fr;
   transition: transform 0.15s ease, box-shadow 0.15s ease !important;
 }
 .mobile-menu .admin-nav-btn {
-  margin-top: 6px !important;
+  margin-top: 8px !important;
   margin-left: 0 !important;
+  width: 100%;
+  justify-content: center;
+  height: 40px !important;
+  line-height: 40px !important;
+  box-sizing: border-box;
 }
 .admin-nav-btn:hover {
   transform: translateY(-1px);
@@ -4249,7 +4266,408 @@ grid-template-columns: 1fr;
   color: #ffffff !important;
 }
 
-/* Interactive Comments Section */
+/* --------------------------------------------------------------------------
+   1. SMART CATEGORY FILTER BAR (SCROLLABLE PILLS + DROPDOWN)
+   -------------------------------------------------------------------------- */
+.foxsa-category-bar {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(132, 132, 133, 0.12);
+  border: 1px solid #f0f1f7;
+}
+.foxsa-category-bar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.foxsa-cat-bar-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #090C1E;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.foxsa-cat-bar-title i {
+  color: #F08D39;
+  font-size: 14px;
+}
+.foxsa-cat-dropdown-wrap {
+  min-width: 220px;
+}
+.foxsa-cat-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #f7f8fc;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23090C1E' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 14px;
+  border: 1px solid #e2e5f0;
+  border-radius: 8px;
+  padding: 7px 32px 7px 12px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #090C1E;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.foxsa-cat-select:focus {
+  border-color: #F08D39;
+  box-shadow: 0 0 0 3px rgba(240, 141, 57, 0.15);
+  outline: none;
+}
+
+/* Horizontal Scrollable Pills */
+.foxsa-cat-pills-scroll {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+.foxsa-cat-pills-scroll::-webkit-scrollbar {
+  display: none;
+}
+.foxsa-cat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: #f4f6fb;
+  color: #2D3350;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #e6e9f2;
+  transition: all 0.18s ease;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.foxsa-cat-pill i {
+  font-size: 11px;
+  color: #F08D39;
+}
+.foxsa-cat-pill .pill-count {
+  background: rgba(9, 12, 30, 0.08);
+  color: #090C1E;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 99px;
+  font-weight: 700;
+}
+.foxsa-cat-pill:hover {
+  border-color: #F08D39;
+  color: #090C1E;
+  background: #fff8f2;
+}
+.foxsa-cat-pill.active {
+  background: #F08D39;
+  color: #ffffff;
+  border-color: #F08D39;
+  box-shadow: 0 4px 12px rgba(240, 141, 57, 0.35);
+}
+.foxsa-cat-pill.active i {
+  color: #ffffff !important;
+}
+.foxsa-cat-pill.active .pill-count {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* Sub-tags & Comment Badge on News Cards */
+.foxsa-card-tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px !important;
+}
+.index-post .post-info .post-tag {
+  margin: 0 !important;
+}
+.foxsa-sub-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 4px;
+  background: #f7f8fc;
+  color: #555 !important;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid #e8eaf2;
+  text-decoration: none;
+}
+.foxsa-sub-tag:hover {
+  background: #F08D39;
+  color: #fff !important;
+  border-color: #F08D39;
+}
+.foxsa-card-comment-count {
+  float: left;
+  margin-left: 10px;
+  color: #F08D39;
+  font-weight: 600;
+}
+
+/* Ensure crisp post-thumb cover inside cards */
+.index-post .post-image-wrap .post-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   2. SMART MULTI-SELECT CATEGORY PICKER IN ADMIN EDITOR
+   -------------------------------------------------------------------------- */
+.foxsa-smart-cat-box {
+  background: #f9faff;
+  border: 1px solid #dfe3f0;
+  border-radius: 12px;
+  padding: 14px;
+}
+.foxsa-smart-cat-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.foxsa-selectable-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1.5px solid #d5dae8;
+  background: #ffffff;
+  color: #2D3350;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.foxsa-selectable-pill i {
+  font-size: 12px;
+  color: #999;
+}
+.foxsa-selectable-pill:hover {
+  border-color: #F08D39;
+  background: #fff9f4;
+}
+.foxsa-selectable-pill.selected {
+  background: #F08D39;
+  color: #ffffff;
+  border-color: #F08D39;
+  box-shadow: 0 3px 10px rgba(240, 141, 57, 0.28);
+}
+.foxsa-selectable-pill.selected i {
+  color: #ffffff;
+}
+.foxsa-smart-cat-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #e2e6f2;
+}
+.foxsa-smart-cat-dropdown-col {
+  flex: 1;
+  min-width: 200px;
+}
+.foxsa-smart-cat-custom-col {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  gap: 6px;
+}
+.foxsa-selected-cat-summary {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #eef0f8;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.foxsa-active-cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #090C1E;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+.foxsa-active-cat-chip button {
+  background: none;
+  border: none;
+  color: #F08D39;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
+   3. STAFF LOGIN PORTAL & LOGGED-IN BANNER
+   -------------------------------------------------------------------------- */
+.foxsa-login-card {
+  max-width: 480px;
+  margin: 10px auto 40px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 32px 28px;
+  box-shadow: 0 15px 40px 5px rgba(132, 132, 133, 0.16);
+  border: 1px solid #eef0f7;
+}
+.foxsa-login-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.foxsa-login-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(240, 141, 57, 0.14);
+  color: #d97218;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 99px;
+  margin-bottom: 10px;
+}
+.foxsa-login-header h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 22px;
+  color: #090C1E;
+  margin: 0 0 8px;
+}
+.foxsa-login-header p {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+}
+.foxsa-input-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.foxsa-input-icon-wrap > i {
+  position: absolute;
+  left: 13px;
+  color: #999;
+  font-size: 14px;
+  pointer-events: none;
+}
+.foxsa-input-icon-wrap .foxsa-input {
+  padding-left: 38px;
+  padding-right: 40px;
+}
+.foxsa-pwd-toggle {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #777;
+  cursor: pointer;
+  padding: 6px;
+  font-size: 14px;
+}
+.foxsa-login-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+.foxsa-login-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+.foxsa-btn-full {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 18px;
+}
+
+/* Logged-in Staff Banner inside Admin Panel */
+.foxsa-staff-logged-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: #f8f9fe;
+  border: 1px solid #e6e9f4;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+.foxsa-staff-logged-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.foxsa-staff-logged-info img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #F08D39;
+  background: #fff;
+}
+.staff-logged-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #090C1E;
+}
+.staff-logged-role {
+  font-size: 11px;
+  color: #d97218;
+  font-weight: 600;
+}
+.foxsa-staff-logged-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   4. INTERACTIVE COMMENTS & ADMIN FORM STYLES
+   -------------------------------------------------------------------------- */
 .foxsa-comments-wrap {
   background: #ffffff;
   border-radius: 16px;
@@ -4367,7 +4785,7 @@ grid-template-columns: 1fr;
   margin-bottom: 20px;
 }
 
-/* Comment Form */
+/* Comment & Admin Forms */
 .foxsa-comment-form {
   background: #fdfdff;
   border: 1px solid #e6e8f0;
@@ -4464,27 +4882,9 @@ grid-template-columns: 1fr;
 .foxsa-admin-panel {
   background: #ffffff;
   border-radius: 20px;
-  padding: 28px;
+  padding: 24px;
   box-shadow: 0 15px 40px 5px rgba(132, 132, 133, 0.15);
   margin-bottom: 30px;
-}
-.foxsa-admin-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 18px;
-  margin-bottom: 22px;
-  border-bottom: 2px solid #f0f2f8;
-}
-.foxsa-admin-header h2 {
-  margin: 0;
-  font-size: 20px;
-  color: #090C1E;
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 .foxsa-admin-tabs {
   display: flex;
@@ -4493,10 +4893,10 @@ grid-template-columns: 1fr;
   margin-bottom: 22px;
 }
 .foxsa-admin-tab {
-  padding: 9px 16px;
+  padding: 9px 15px;
   border-radius: 8px;
   font-family: 'Poppins', sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   background: #f4f5fb;
@@ -4508,6 +4908,11 @@ grid-template-columns: 1fr;
 .foxsa-admin-tab:hover {
   background: #F08D39;
   color: #ffffff;
+}
+.foxsa-table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .foxsa-admin-table {
   width: 100%;
@@ -4579,6 +4984,135 @@ grid-template-columns: 1fr;
   line-height: 1.6;
 }
 
+/* --------------------------------------------------------------------------
+   5. ANDROID / MOBILE SLIDE-OUT DRAWER & RESPONSIVE OPTIMIZATIONS
+   -------------------------------------------------------------------------- */
+.foxsa-mobile-drawer-head,
+.foxsa-mobile-search-box,
+.foxsa-mobile-drawer-foot {
+  display: none;
+}
+
+@media screen and (max-width: 980px) {
+  .foxsa-mobile-drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid #eef0f7;
+    background: #ffffff;
+  }
+  .foxsa-drawer-logo img {
+    max-height: 36px;
+    width: auto;
+    display: block;
+  }
+  .foxsa-drawer-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid #e6e8f2;
+    background: #f7f8fc;
+    color: #090C1E;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .foxsa-mobile-search-box {
+    display: block;
+    padding: 12px 16px;
+    background: #f9faff;
+    border-bottom: 1px solid #eef0f7;
+  }
+  .foxsa-mobile-search-form {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #d8dce8;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .foxsa-mobile-search-form input {
+    flex: 1;
+    border: none;
+    padding: 9px 12px;
+    font-size: 14px;
+    color: #090C1E;
+    outline: none;
+    background: transparent;
+  }
+  .foxsa-mobile-search-form button {
+    background: #F08D39;
+    color: #ffffff;
+    border: none;
+    padding: 9px 14px;
+    cursor: pointer;
+  }
+  .foxsa-mobile-drawer-foot {
+    display: block;
+    padding: 14px 16px;
+    border-top: 1px solid #eef0f7;
+    margin-top: auto;
+  }
+  .foxsa-drawer-discord {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #5865F2;
+    color: #ffffff !important;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+  }
+
+  /* Slide-out Drawer from Left on Mobile */
+  .mobile-menu-wrap {
+    display: flex !important;
+    flex-direction: column;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 300px !important;
+    max-width: 84vw !important;
+    height: 100vh !important;
+    background: #ffffff !important;
+    z-index: 1050 !important;
+    box-shadow: 8px 0 30px rgba(9, 12, 30, 0.22);
+    transform: translateX(-105%);
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overflow-y: auto;
+  }
+  .nav-active .mobile-menu-wrap {
+    transform: translateX(0);
+  }
+  .nav-active .overlay {
+    display: block !important;
+    background: rgba(9, 12, 30, 0.55) !important;
+    backdrop-filter: blur(2px);
+    z-index: 1005 !important;
+  }
+  .mobile-menu {
+    padding: 12px 16px !important;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .mobile-menu ul li {
+    border-bottom: 1px solid #f2f4f9;
+    line-height: 42px !important;
+  }
+  .mobile-menu ul li:last-child {
+    border-bottom: none;
+  }
+}
+
 /* Toast Notification */
 .foxsa-toast {
   position: fixed;
@@ -4603,16 +5137,111 @@ grid-template-columns: 1fr;
   transform: translateY(0);
 }
 
+/* Android Phone Screen Optimizations (<= 680px) */
 @media screen and (max-width: 680px) {
+  #content-wrapper {
+    padding: 0 12px !important;
+    margin-top: 16px !important;
+  }
+  .foxsa-category-bar {
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    border-radius: 14px;
+  }
+  .foxsa-category-bar-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .foxsa-cat-dropdown-wrap {
+    width: 100%;
+  }
+  .foxsa-cat-select {
+    font-size: 13px;
+    padding: 9px 32px 9px 12px;
+  }
+  .grid-posts {
+    grid-gap: 20px !important;
+  }
+  .index-post {
+    padding: 15px !important;
+    border-radius: 16px !important;
+  }
+  .index-post .post-image-wrap,
+  .index-post .post-image-wrap .post-image-link {
+    width: 100% !important;
+    height: 195px !important;
+    border-radius: 12px !important;
+    margin: 0 0 12px 0 !important;
+    float: none !important;
+  }
+  .index-post .post-info {
+    width: 100% !important;
+    float: none !important;
+  }
+  .index-post .post-info > h2 {
+    font-size: 19px !important;
+    line-height: 1.35 !important;
+    margin-bottom: 6px !important;
+  }
+  .index-post .post-info .post-tag {
+    font-size: 13px !important;
+    height: 28px !important;
+    line-height: 28px !important;
+  }
+  .post-snippet {
+    font-size: 14.5px !important;
+    line-height: 1.55 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .item-post h1.post-title {
+    font-size: 22px !important;
+    line-height: 1.35 !important;
+  }
+  .foxsa-comments-wrap {
+    padding: 16px;
+  }
+  .foxsa-comment-form {
+    padding: 14px;
+  }
   .foxsa-form-row {
     flex-direction: column;
     gap: 0;
   }
-  .foxsa-admin-panel {
-    padding: 16px;
+  /* 16px font on inputs prevents unwanted auto-zoom on Android/iOS browsers */
+  .foxsa-input,
+  .foxsa-select,
+  .foxsa-textarea {
+    font-size: 16px;
   }
-  .foxsa-admin-table {
-    display: block;
+  .foxsa-admin-panel {
+    padding: 15px;
+    border-radius: 16px;
+  }
+  .foxsa-admin-tabs {
+    flex-wrap: nowrap;
     overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .foxsa-admin-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .foxsa-admin-tab {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .foxsa-login-card {
+    padding: 22px 18px;
+    margin: 6px auto 28px;
+  }
+  .foxsa-toast {
+    left: 14px;
+    right: 14px;
+    bottom: 16px;
+    text-align: center;
   }
 }
