@@ -1,0 +1,8 @@
+# Abaikan file backup Blogger XML dan dokumen PDF lokal saat push ke GitHub
+*.xml
+*.pdf
+.DS_Store
+Thumbs.db
+.vercel
+node_modules/
+
