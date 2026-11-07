@@ -4179,6 +4179,42 @@ grid-template-columns: 1fr;
 .blog-post-comments {
     display: block !important;
 }
+.mobile-menu ul li.has-sub.show > .m-sub {
+    display: block !important;
+}
+
+/* About Us Widget (HTML11 & HTML13 from Blogger XML) */
+.about-widget {
+  font-family: Arial, sans-serif;
+  text-align: left;
+  background: #fff;
+  padding: 12px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.about-widget img {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  display: block;
+}
+.about-widget p {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+  margin: 0;
+  text-align: justify;
+}
+.about-widget a {
+  display: inline-block;
+  margin-top: 6px;
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+.about-widget a:hover {
+  text-decoration: underline;
+}
 
 
 /* ==========================================================================
@@ -4198,10 +4234,14 @@ grid-template-columns: 1fr;
   border-radius: 6px !important;
   font-size: 12px !important;
   font-weight: 700 !important;
-  margin-top: 12px !important;
+  margin-top: 23px !important;
   margin-left: 8px !important;
   box-shadow: 0 3px 10px rgba(240, 141, 57, 0.3);
   transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+.mobile-menu .admin-nav-btn {
+  margin-top: 6px !important;
+  margin-left: 0 !important;
 }
 .admin-nav-btn:hover {
   transform: translateY(-1px);
