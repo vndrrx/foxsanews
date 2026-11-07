@@ -1,9 +1,10 @@
 /**
  * FoxSA News - Main Application Script (HTML/CSS/JS Static & Vercel Ready)
  * Features:
- * - Dynamic Home, Category, Archive, Author, Search, and Single Article views
- * - Interactive Comments System (Add & Delete comments)
- * - Full Admin Panel (Add, Edit, Delete News, Upload Images, Manage Authors & Comments)
+ * - Android-Friendly Responsive UI (Sticky Header, Slide Drawer, Category Bar)
+ * - Smart Category System: Scrollable Pills + Dropdown Filter (Home) & Multi-Select Chips + Dropdown (Admin)
+ * - Protected Staff/Admin Login System (Multi-Staff Accounts + Password Manager)
+ * - Interactive Comments System & Full News CRUD
  * - Persistent Storage: LocalStorage + JSON/JS Export-Import + Optional GitHub/Vercel Cloud Sync
  */
 
@@ -11,26 +12,94 @@
   'use strict';
 
   const STORAGE_KEY = 'foxsa_news_data_v1';
+  const AUTH_SESSION_KEY = 'foxsa_auth_session_v1';
   const GITHUB_CONFIG_KEY = 'foxsa_github_sync_config';
   const DEFAULT_AVATAR = 'https://4.bp.blogspot.com/-uCjYgVFIh70/VuOLn-mL7PI/AAAAAAAADUs/Kcu9wJbv790hIo83rI_s7lLW3zkLY01EA/s100/avatar.png';
+  const HASHTAG_ICON = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZ8ywHDFxR8Ve6lZmhowku3pgPCU-hcA-fO7LSE1kZcwLd6GrYvwegTY9qU92Pc5d3PqPFV9RtzYDB2k1sUM6sVLMvvZyBxtIo7xgbw64b3_S18fI3guFOUsaeZXGhZh7ThunBaeAkgs5OjJ7G8lN0myppggd5V4mmDirNri0Xkhxc2lW0tmi2kZRHd-_Y/s16000/Hash-tag.png';
 
   const MONTHS_ID = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
   ];
 
+  // Official preset categories so staff never have to type manually
+  const OFFICIAL_CATEGORIES = [
+    'Crime',
+    'LSPD',
+    'Motorsport',
+    'Los Santos Event',
+    'Government & Emergency Services',
+    'FoxSA Overview',
+    'Information',
+    'Recruitment',
+    'Update',
+    'Street Race',
+    'Traffic Incident'
+  ];
+
+  // Default Staff & Admin Accounts
+  const DEFAULT_STAFF_ACCOUNTS = [
+    {
+      username: 'admin',
+      password: 'foxsa2026',
+      displayName: 'Redaksi Utama (Admin)',
+      authorName: 'Arthur Redfields',
+      role: 'Chief Editor / Super Admin',
+      isAdmin: true,
+      avatar: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg8BFSDlMuk9oQMdt54bGJWdFRjLoRiTGicU3Tbo1g1ROZfwnbnGdEQ_XFe4LCNnan9EzICIdp6nE4pchL0FKgAfrgoxxEivmFrArKlg0yS94xAqXKLdT6pj6qOBvBqnTdBX5Hu1s0oNY64JRerTaU9hV0p6fNkH5bq0arILGTkG4mGS4Y/s200/FoxSA2.png'
+    },
+    {
+      username: 'arthur',
+      password: 'arthurfoxsa',
+      displayName: 'Arthur Redfields',
+      authorName: 'Arthur Redfields',
+      role: 'Senior Staff | Field Reporter',
+      isAdmin: true,
+      avatar: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiI9O-y-Htw6eF9xJ-2uWw8q2pXp2rK6-A0z-q3U5Y2X_9X1x0h8L3V1p0v2w1g5K9M/s220/Arthur%20PP%201-1.jpg'
+    },
+    {
+      username: 'ligma',
+      password: 'ligmafoxsa',
+      displayName: 'Ligma Deek',
+      authorName: 'Ligma Deek',
+      role: 'Executive Staff | Head of Affairs & Analyst',
+      isAdmin: true,
+      avatar: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg8BFSDlMuk9oQMdt54bGJWdFRjLoRiTGicU3Tbo1g1ROZfwnbnGdEQ_XFe4LCNnan9EzICIdp6nE4pchL0FKgAfrgoxxEivmFrArKlg0yS94xAqXKLdT6pj6qOBvBqnTdBX5Hu1s0oNY64JRerTaU9hV0p6fNkH5bq0arILGTkG4mGS4Y/s200/FoxSA2.png'
+    },
+    {
+      username: 'clarissa',
+      password: 'clarissafoxsa',
+      displayName: 'Clarissa Vencant',
+      authorName: 'Clarissa Vencant',
+      role: 'Senior Staff | Editor',
+      isAdmin: false,
+      avatar: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg8BFSDlMuk9oQMdt54bGJWdFRjLoRiTGicU3Tbo1g1ROZfwnbnGdEQ_XFe4LCNnan9EzICIdp6nE4pchL0FKgAfrgoxxEivmFrArKlg0yS94xAqXKLdT6pj6qOBvBqnTdBX5Hu1s0oNY64JRerTaU9hV0p6fNkH5bq0arILGTkG4mGS4Y/s200/FoxSA2.png'
+    },
+    {
+      username: 'shen',
+      password: 'shenfoxsa',
+      displayName: 'Shen Xander',
+      authorName: 'Shen Xander',
+      role: 'Junior Staff | Journalist',
+      isAdmin: false,
+      avatar: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg8BFSDlMuk9oQMdt54bGJWdFRjLoRiTGicU3Tbo1g1ROZfwnbnGdEQ_XFe4LCNnan9EzICIdp6nE4pchL0FKgAfrgoxxEivmFrArKlg0yS94xAqXKLdT6pj6qOBvBqnTdBX5Hu1s0oNY64JRerTaU9hV0p6fNkH5bq0arILGTkG4mGS4Y/s200/FoxSA2.png'
+    }
+  ];
+
   // Application State
   const state = {
     data: null,
+    currentUser: null,
     currentRoute: { view: 'home', param: null },
     visiblePostsCount: 5,
     adminTab: 'posts',
     editingPostId: null,
+    selectedEditorLabels: [],
     syncInProgress: false
   };
 
   // =========================================================================
-  // 1. DATA INITIALIZATION & PERSISTENCE
+  // 1. DATA & AUTH INITIALIZATION
   // =========================================================================
 
   function normalizeData(raw) {
@@ -38,9 +107,21 @@
     if (!cloned.siteInfo) cloned.siteInfo = window.FOXSA_INITIAL_DATA.siteInfo;
     if (!cloned.authors) cloned.authors = window.FOXSA_INITIAL_DATA.authors || {};
     if (!Array.isArray(cloned.posts)) cloned.posts = [];
+    if (!Array.isArray(cloned.staffAccounts) || cloned.staffAccounts.length === 0) {
+      cloned.staffAccounts = JSON.parse(JSON.stringify(DEFAULT_STAFF_ACCOUNTS));
+    }
+
+    // Sync avatars from authors object into staffAccounts if available
+    cloned.staffAccounts.forEach(acc => {
+      const known = cloned.authors[acc.authorName];
+      if (known && known.avatar && (!acc.avatar || acc.avatar === DEFAULT_AVATAR)) {
+        acc.avatar = known.avatar;
+      }
+    });
 
     cloned.posts.forEach(post => {
       if (!Array.isArray(post.labels)) post.labels = [];
+      post.labels = post.labels.map(l => String(l).trim()).filter(Boolean);
       if (!Array.isArray(post.comments)) post.comments = [];
       if (!post.authorAvatar) {
         const knownAuthor = cloned.authors[post.author];
@@ -54,7 +135,6 @@
       }
     });
 
-    // Sort posts newest first
     cloned.posts.sort((a, b) => new Date(b.published) - new Date(a.published));
     return cloned;
   }
@@ -66,6 +146,7 @@
         const parsed = JSON.parse(saved);
         if (parsed && Array.isArray(parsed.posts) && parsed.posts.length > 0) {
           state.data = normalizeData(parsed);
+          loadAuthSession();
           return;
         }
       }
@@ -74,6 +155,67 @@
     }
     state.data = normalizeData(window.FOXSA_INITIAL_DATA);
     saveDataToLocal(false);
+    loadAuthSession();
+  }
+
+  function loadAuthSession() {
+    try {
+      const raw = localStorage.getItem(AUTH_SESSION_KEY);
+      if (!raw) {
+        state.currentUser = null;
+        updateHeaderStaffBadge();
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.username) {
+        const matched = (state.data.staffAccounts || []).find(
+          a => a.username.toLowerCase() === String(parsed.username).toLowerCase()
+        );
+        state.currentUser = matched || null;
+      }
+    } catch (e) {
+      state.currentUser = null;
+    }
+    updateHeaderStaffBadge();
+  }
+
+  function loginStaff(username, password) {
+    const cleanUser = String(username || '').trim().toLowerCase();
+    const cleanPass = String(password || '');
+    const account = (state.data.staffAccounts || []).find(
+      a => a.username.toLowerCase() === cleanUser && a.password === cleanPass
+    );
+    if (!account) return false;
+    state.currentUser = account;
+    localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({
+      username: account.username,
+      loginAt: new Date().toISOString()
+    }));
+    updateHeaderStaffBadge();
+    return true;
+  }
+
+  function logoutStaff() {
+    state.currentUser = null;
+    state.editingPostId = null;
+    localStorage.removeItem(AUTH_SESSION_KEY);
+    updateHeaderStaffBadge();
+    showToast('Anda telah keluar dari sesi Staff FoxSA.');
+  }
+
+  function updateHeaderStaffBadge() {
+    const staffBtn = document.getElementById('header-staff-btn');
+    if (staffBtn) {
+      const labelSpan = staffBtn.querySelector('.staff-btn-label');
+      if (state.currentUser) {
+        if (labelSpan) labelSpan.textContent = `Panel (${state.currentUser.displayName.split(' ')[0]})`;
+        staffBtn.title = `Login sebagai ${state.currentUser.displayName} (${state.currentUser.role})`;
+      } else {
+        if (labelSpan) labelSpan.textContent = 'Staff Login';
+        staffBtn.title = 'Login khusus Redaksi & Staff FoxSA';
+      }
+    }
+    rebuildMobileDrawerMenu();
   }
 
   function saveDataToLocal(triggerCloud = true) {
@@ -102,14 +244,12 @@
     localStorage.setItem(GITHUB_CONFIG_KEY, JSON.stringify(cfg));
   }
 
-  // Optional Cloud / GitHub Sync for Vercel hosting
   async function syncToCloudIfConfigured() {
     const cfg = getGitHubConfig();
     if (!cfg.enabled) return;
 
     state.syncInProgress = true;
     try {
-      // Mode 1: Vercel Serverless API (/api/save) if enabled
       if (cfg.useServerlessApi) {
         const res = await fetch('/api/save', {
           method: 'POST',
@@ -118,15 +258,11 @@
         });
         if (res.ok) {
           showToast('Tersimpan ke Server Cloud / GitHub!');
-        } else {
-          const errData = await res.json().catch(() => ({}));
-          console.warn('Serverless sync warning:', errData);
         }
         state.syncInProgress = false;
         return;
       }
 
-      // Mode 2: Direct GitHub REST API commit from browser
       if (cfg.repo && cfg.token) {
         await commitFileToGitHub(
           cfg.repo,
@@ -186,7 +322,6 @@
     }
   }
 
-  // Try fetching latest data/posts.json from server/GitHub on load if hosted on HTTP/HTTPS
   async function tryFetchRemoteFreshData() {
     const cfg = getGitHubConfig();
     if (cfg.enabled && cfg.repo) {
@@ -198,6 +333,7 @@
           if (remoteData && Array.isArray(remoteData.posts)) {
             state.data = normalizeData(remoteData);
             saveDataToLocal(false);
+            loadAuthSession();
             renderAll();
           }
         }
@@ -208,7 +344,7 @@
   }
 
   // =========================================================================
-  // 2. HELPER FUNCTIONS
+  // 2. HELPER FUNCTIONS & CATEGORY UTILS
   // =========================================================================
 
   function escapeHtml(str) {
@@ -263,7 +399,6 @@
   function stripHtmlToSnippet(html, maxLen = 135) {
     const tmp = document.createElement('div');
     tmp.innerHTML = html || '';
-    // Remove style/script tags from snippet
     tmp.querySelectorAll('style, script').forEach(el => el.remove());
     const text = (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
     if (text.length <= maxLen) return text;
@@ -283,6 +418,41 @@
     return `#/post/${post.id}`;
   }
 
+  function getLabelCounts() {
+    const counts = {};
+    (state.data.posts || []).forEach(p => {
+      (p.labels || []).forEach(rawL => {
+        const l = String(rawL).trim();
+        if (l) counts[l] = (counts[l] || 0) + 1;
+      });
+    });
+    return counts;
+  }
+
+  function getAllAvailableCategories() {
+    const set = new Set(OFFICIAL_CATEGORIES);
+    (state.data.posts || []).forEach(p => {
+      (p.labels || []).forEach(l => {
+        const clean = String(l).trim();
+        if (clean) set.add(clean);
+      });
+    });
+    return Array.from(set);
+  }
+
+  function getCategoryIcon(label) {
+    const lower = String(label || '').toLowerCase();
+    if (lower.includes('crime')) return 'fa-solid fa-handcuffs';
+    if (lower.includes('lspd') || lower.includes('police')) return 'fa-solid fa-shield-halved';
+    if (lower.includes('motorsport') || lower.includes('race')) return 'fa-solid fa-flag-checkered';
+    if (lower.includes('government') || lower.includes('emergency')) return 'fa-solid fa-building-columns';
+    if (lower.includes('event')) return 'fa-solid fa-calendar-check';
+    if (lower.includes('traffic')) return 'fa-solid fa-car-burst';
+    if (lower.includes('recruitment')) return 'fa-solid fa-user-plus';
+    if (lower.includes('overview') || lower.includes('info')) return 'fa-solid fa-circle-info';
+    return 'fa-solid fa-hashtag';
+  }
+
   function showToast(message) {
     let toast = document.getElementById('foxsa-toast');
     if (!toast) {
@@ -299,7 +469,6 @@
     }, 3200);
   }
 
-  // Rewrite legacy Blogger URLs inside post content or navigation
   function processPostContentHtml(html) {
     if (!html) return '';
     return html.replace(/https?:\/\/foxsanews\.blogspot\.com\/\d{4}\/\d{2}\/([a-zA-Z0-9-_]+)\.html/g, (match, slug) => {
@@ -322,24 +491,13 @@
     const action = parts[0];
     const param = decodeURIComponent(parts.slice(1).join('/'));
 
-    if (action === 'post' && param) {
-      return { view: 'post', param };
-    }
-    if (action === 'label' && param) {
-      return { view: 'label', param };
-    }
-    if (action === 'archive' && param) {
-      return { view: 'archive', param };
-    }
-    if (action === 'author' && param) {
-      return { view: 'author', param };
-    }
-    if (action === 'search') {
-      return { view: 'search', param: param || '' };
-    }
-    if (action === 'admin') {
-      return { view: 'admin', param: param || 'posts' };
-    }
+    if (action === 'post' && param) return { view: 'post', param };
+    if (action === 'label' && param) return { view: 'label', param };
+    if (action === 'popular') return { view: 'popular', param: null };
+    if (action === 'archive' && param) return { view: 'archive', param };
+    if (action === 'author' && param) return { view: 'author', param };
+    if (action === 'search') return { view: 'search', param: param || '' };
+    if (action === 'admin') return { view: 'admin', param: param || 'posts' };
     return { view: 'home', param: null };
   }
 
@@ -351,29 +509,33 @@
       state.visiblePostsCount = (state.data && state.data.siteInfo && state.data.siteInfo.postPerPage) || 5;
     }
 
+    document.body.classList.remove('nav-active');
     renderMainView();
     renderWidgets();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   // =========================================================================
-  // 4. RENDERING: LIST VIEW (HOME / CATEGORY / ARCHIVE / AUTHOR / SEARCH)
+  // 4. RENDERING: LIST VIEW + SMART CATEGORY BAR (PILLS + DROPDOWN)
   // =========================================================================
 
   function getFilteredPosts() {
     const posts = state.data.posts || [];
     const { view, param } = state.currentRoute;
 
+    if (view === 'popular') {
+      return posts.filter(p => p.popular);
+    }
     if (view === 'label') {
-      const target = param.toLowerCase();
-      return posts.filter(p => (p.labels || []).some(l => l.toLowerCase() === target));
+      const target = param.trim().toLowerCase();
+      return posts.filter(p => (p.labels || []).some(l => l.trim().toLowerCase() === target));
     }
     if (view === 'archive') {
       return posts.filter(p => getArchiveKey(p.published) === param);
     }
     if (view === 'author') {
-      const target = param.toLowerCase();
-      return posts.filter(p => (p.author || '').toLowerCase() === target);
+      const target = param.trim().toLowerCase();
+      return posts.filter(p => (p.author || '').trim().toLowerCase() === target);
     }
     if (view === 'search') {
       const q = (param || '').toLowerCase().trim();
@@ -387,6 +549,62 @@
       );
     }
     return posts;
+  }
+
+  function buildCategoryFilterBarHtml() {
+    const { view, param } = state.currentRoute;
+    const labelCounts = getLabelCounts();
+    const sortedCategories = Object.keys(labelCounts).sort((a, b) => {
+      if (labelCounts[b] !== labelCounts[a]) return labelCounts[b] - labelCounts[a];
+      return a.localeCompare(b);
+    });
+
+    const isHome = view === 'home';
+    const isPopular = view === 'popular';
+    const activeLabelLower = view === 'label' && param ? param.trim().toLowerCase() : '';
+
+    const pillsHtml = [
+      `<a href="#/" class="foxsa-cat-pill ${isHome ? 'active' : ''}">
+         <i class="fa-solid fa-newspaper"></i> Semua <span class="pill-count">${state.data.posts.length}</span>
+       </a>`,
+      `<a href="#/popular" class="foxsa-cat-pill ${isPopular ? 'active' : ''}">
+         <i class="fa-solid fa-fire" style="color:${isPopular ? '#fff' : '#F08D39'};"></i> Terpopuler
+       </a>`,
+      ...sortedCategories.map(cat => {
+        const isActive = activeLabelLower === cat.toLowerCase();
+        return `
+          <a href="#/label/${encodeURIComponent(cat)}" class="foxsa-cat-pill ${isActive ? 'active' : ''}">
+            <i class="${getCategoryIcon(cat)}"></i> ${escapeHtml(cat)}
+            <span class="pill-count">${labelCounts[cat]}</span>
+          </a>
+        `;
+      })
+    ].join('');
+
+    return `
+      <div class="foxsa-category-bar">
+        <div class="foxsa-category-bar-top">
+          <div class="foxsa-cat-bar-title">
+            <i class="fa-solid fa-layer-group"></i> Kategori Berita
+          </div>
+          <div class="foxsa-cat-dropdown-wrap">
+            <select id="foxsa-quick-category-select" class="foxsa-cat-select" aria-label="Pilih Kategori Berita">
+              <option value="#/" ${isHome ? 'selected' : ''}>📂 Semua Kategori (${state.data.posts.length} Berita)</option>
+              <option value="#/popular" ${isPopular ? 'selected' : ''}>🔥 Berita Terpopuler</option>
+              <optgroup label="Pilih Kategori Spesifik:">
+                ${sortedCategories.map(cat => {
+                  const isSelected = activeLabelLower === cat.toLowerCase();
+                  return `<option value="#/label/${encodeURIComponent(cat)}" ${isSelected ? 'selected' : ''}>#${escapeHtml(cat)} (${labelCounts[cat]} berita)</option>`;
+                }).join('')}
+              </optgroup>
+            </select>
+          </div>
+        </div>
+        <div class="foxsa-cat-pills-scroll" id="foxsa-cat-pills-scroll">
+          ${pillsHtml}
+        </div>
+      </div>
+    `;
   }
 
   function renderListView() {
@@ -404,7 +622,15 @@
       filterMessageHtml = `
         <div class="queryMessage">
           <span class="query-info query-label query-success">
-            Menampilkan berita dengan kategori: <strong>${escapeHtml(param)}</strong> (${filteredPosts.length} berita)
+            Kategori: <strong>#${escapeHtml(param)}</strong> (${filteredPosts.length} berita)
+            <a class="show-more" href="#/">Reset Filter</a>
+          </span>
+        </div>`;
+    } else if (view === 'popular') {
+      filterMessageHtml = `
+        <div class="queryMessage">
+          <span class="query-info query-success">
+            Menampilkan: <strong>🔥 Berita Terpopuler FoxSA News</strong> (${filteredPosts.length} berita)
             <a class="show-more" href="#/">Tampilkan Semua</a>
           </span>
         </div>`;
@@ -412,7 +638,7 @@
       filterMessageHtml = `
         <div class="queryMessage">
           <span class="query-info query-success">
-            Arsip Berita Bulan: <strong>${escapeHtml(formatArchiveLabel(param))}</strong> (${filteredPosts.length} berita)
+            Arsip Bulan: <strong>${escapeHtml(formatArchiveLabel(param))}</strong> (${filteredPosts.length} berita)
             <a class="show-more" href="#/">Tampilkan Semua</a>
           </span>
         </div>`;
@@ -420,7 +646,7 @@
       filterMessageHtml = `
         <div class="queryMessage">
           <span class="query-info query-success">
-            Berita oleh Jurnalis: <strong>${escapeHtml(param)}</strong> (${filteredPosts.length} berita)
+            Jurnalis: <strong>${escapeHtml(param)}</strong> (${filteredPosts.length} berita)
             <a class="show-more" href="#/">Tampilkan Semua</a>
           </span>
         </div>`;
@@ -428,16 +654,22 @@
       filterMessageHtml = `
         <div class="queryMessage">
           <span class="query-info query-success">
-            Hasil pencarian untuk: <strong>"${escapeHtml(param)}"</strong> (${filteredPosts.length} ditemukan)
+            Hasil pencarian: <strong>"${escapeHtml(param)}"</strong> (${filteredPosts.length} ditemukan)
             <a class="show-more" href="#/">Reset Pencarian</a>
           </span>
         </div>`;
     }
 
     const postsCardsHtml = visiblePosts.length === 0
-      ? `<div class="queryEmpty">Tidak ada berita yang ditemukan.</div>`
+      ? `<div class="queryEmpty">
+           <i class="fa-regular fa-folder-open" style="font-size:32px;color:#ccc;display:block;margin-bottom:10px;"></i>
+           Tidak ada berita yang ditemukan pada filter ini.
+           <div style="margin-top:12px;"><a href="#/" class="foxsa-btn" style="text-decoration:none;">Kembali ke Semua Berita</a></div>
+         </div>`
       : visiblePosts.map((post, idx) => {
-          const primaryTag = (post.labels && post.labels.length > 0) ? post.labels[0] : 'News';
+          const labels = Array.isArray(post.labels) && post.labels.length > 0 ? post.labels : ['News'];
+          const primaryTag = labels[0];
+          const extraTagsCount = labels.length > 1 ? labels.length - 1 : 0;
           const commentCount = (post.comments || []).length;
           const postHref = getPostHref(post);
           const snippet = post.snippet || stripHtmlToSnippet(post.content, 135);
@@ -451,11 +683,16 @@
                 </a>
               </div>
               <div class="post-info">
-                <div class="post-meta">
+                <div class="post-meta foxsa-card-tags">
                   <a class="post-tag" href="#/label/${encodeURIComponent(primaryTag)}">
-                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZ8ywHDFxR8Ve6lZmhowku3pgPCU-hcA-fO7LSE1kZcwLd6GrYvwegTY9qU92Pc5d3PqPFV9RtzYDB2k1sUM6sVLMvvZyBxtIo7xgbw64b3_S18fI3guFOUsaeZXGhZh7ThunBaeAkgs5OjJ7G8lN0myppggd5V4mmDirNri0Xkhxc2lW0tmi2kZRHd-_Y/s16000/Hash-tag.png" alt="#" />
+                    <img src="${HASHTAG_ICON}" alt="#" />
                     ${escapeHtml(primaryTag)}
                   </a>
+                  ${extraTagsCount > 0
+                    ? labels.slice(1, 3).map(t => `
+                        <a class="foxsa-sub-tag" href="#/label/${encodeURIComponent(t)}">#${escapeHtml(t)}</a>
+                      `).join('')
+                    : ''}
                 </div>
                 <h2 class="post-title">
                   <a href="${postHref}">${escapeHtml(post.title)}</a>
@@ -464,7 +701,7 @@
                   <div class="post-meta">
                     <span class="post-author"><a href="#/author/${encodeURIComponent(post.author)}" title="${escapeHtml(post.author)}">${escapeHtml(post.author)}</a></span>
                     <span class="post-date published" datetime="${escapeHtml(post.published)}">${escapeHtml(formatDateID(post.published))}</span>
-                    ${commentCount > 0 ? `<span style="float:left;margin-left:10px;color:#F08D39;font-weight:600;"><i class="fa-regular fa-comment"></i> ${commentCount}</span>` : ''}
+                    ${commentCount > 0 ? `<span class="foxsa-card-comment-count"><i class="fa-regular fa-comment"></i> ${commentCount}</span>` : ''}
                   </div>
                   <p class="post-snippet">${escapeHtml(snippet)}</p>
                 </div>
@@ -476,7 +713,7 @@
     const paginationHtml = hasMore
       ? `<div class="blog-pager" id="blog-pager">
            <a class="blog-pager-older-link load-more" href="javascript:void(0)" id="foxsa-load-more-btn">
-             Load More (${filteredPosts.length - visiblePosts.length} lagi)
+             Muat Berita Lainnya (${filteredPosts.length - visiblePosts.length} lagi)
            </a>
          </div>`
       : (filteredPosts.length > 0
@@ -487,9 +724,7 @@
 
     mainEl.innerHTML = `
       <div class="widget Blog" id="Blog1">
-        <div class="home-posts-headline title-wrap">
-          <h3 class="title">Recent Posts</h3>
-        </div>
+        ${buildCategoryFilterBarHtml()}
         ${filterMessageHtml}
         <div class="blog-posts hfeed index-post-wrap">
           <div class="grid-posts">
@@ -499,6 +734,23 @@
         ${paginationHtml}
       </div>
     `;
+
+    // Bind Category Dropdown Filter
+    const quickCatSelect = document.getElementById('foxsa-quick-category-select');
+    if (quickCatSelect) {
+      quickCatSelect.addEventListener('change', () => {
+        if (quickCatSelect.value) {
+          window.location.hash = quickCatSelect.value;
+        }
+      });
+    }
+
+    // Scroll active pill into view horizontally on mobile
+    const activePill = mainEl.querySelector('.foxsa-cat-pill.active');
+    const pillScrollContainer = document.getElementById('foxsa-cat-pills-scroll');
+    if (activePill && pillScrollContainer && activePill.offsetLeft > 80) {
+      pillScrollContainer.scrollLeft = activePill.offsetLeft - 24;
+    }
 
     const loadMoreBtn = document.getElementById('foxsa-load-more-btn');
     if (loadMoreBtn) {
@@ -540,6 +792,7 @@
       return;
     }
 
+    const isStaffLoggedIn = !!state.currentUser;
     const postIdx = state.data.posts.findIndex(p => p.id === post.id);
     const newerPost = postIdx > 0 ? state.data.posts[postIdx - 1] : null;
     const olderPost = (postIdx >= 0 && postIdx < state.data.posts.length - 1) ? state.data.posts[postIdx + 1] : null;
@@ -551,7 +804,6 @@
       bio: post.authorBio || 'Jurnalis & Tim Redaksi FoxSA News.'
     };
 
-    // Related posts (prefer sharing a label, otherwise recent other posts)
     let related = state.data.posts.filter(p =>
       p.id !== post.id &&
       (p.labels || []).some(l => (post.labels || []).includes(l))
@@ -565,7 +817,8 @@
     const labelsHtml = (post.labels && post.labels.length > 0)
       ? `<div class="post-labels">
            <div class="labels-Edges">
-             ${post.labels.map(l => `<a class="label-link" href="#/label/${encodeURIComponent(l)}" rel="tag">${escapeHtml(l)}</a>`).join('')}
+             <span style="font-size:12px;font-weight:700;color:#090C1E;margin-right:8px;"><i class="fa-solid fa-tags" style="color:#F08D39;"></i> Kategori:</span>
+             ${post.labels.map(l => `<a class="label-link" href="#/label/${encodeURIComponent(l)}" rel="tag">#${escapeHtml(l)}</a>`).join('')}
            </div>
          </div>`
       : '';
@@ -585,9 +838,11 @@
                    <span class="foxsa-comment-author">${escapeHtml(c.author)}</span>
                    ${c.role ? `<span class="foxsa-comment-role">${escapeHtml(c.role)}</span>` : ''}
                    <span class="foxsa-comment-date">${escapeHtml(formatDateTimeID(c.date))}</span>
-                   <button type="button" class="foxsa-comment-delete" data-del-comment="${escapeHtml(c.id)}" title="Hapus Komentar">
-                     <i class="fa-solid fa-trash-can"></i> Hapus
-                   </button>
+                   ${isStaffLoggedIn
+                     ? `<button type="button" class="foxsa-comment-delete" data-del-comment="${escapeHtml(c.id)}" title="Hapus Komentar (Khusus Staff)">
+                          <i class="fa-solid fa-trash-can"></i> Hapus
+                        </button>`
+                     : ''}
                  </div>
                  <div class="foxsa-comment-body">${escapeHtml(c.body).replace(/\n/g, '<br/>')}</div>
                </div>
@@ -602,7 +857,7 @@
             <div class="post-item-inner">
               <div class="post-header">
                 <nav id="breadcrumb">
-                  <a href="#/">Beranda</a>
+                  <a href="#/"><i class="fa-solid fa-house"></i> Beranda</a>
                   <em class="delimiter"></em>
                   <a class="b-label" href="#/label/${encodeURIComponent(primaryCategory)}">${escapeHtml(primaryCategory)}</a>
                   <em class="delimiter"></em>
@@ -615,9 +870,11 @@
                     <span class="post-date published" datetime="${escapeHtml(post.published)}">${escapeHtml(formatDateID(post.published))}</span>
                     <span style="margin-left:10px;color:#F08D39;font-weight:600;"><i class="fa-regular fa-comments"></i> ${comments.length} Komentar</span>
                   </div>
-                  <button type="button" id="foxsa-quick-edit-post" class="foxsa-btn foxsa-btn-outline" style="padding:4px 10px;font-size:11px;">
-                    <i class="fa-solid fa-pen"></i> Edit Berita
-                  </button>
+                  ${isStaffLoggedIn
+                    ? `<button type="button" id="foxsa-quick-edit-post" class="foxsa-btn foxsa-btn-outline" style="padding:5px 12px;font-size:12px;">
+                         <i class="fa-solid fa-pen"></i> Edit Berita (Staff)
+                       </button>`
+                    : ''}
                 </div>
               </div>
 
@@ -633,7 +890,7 @@
                     <li class="share-icon"><span class="s-icon"></span></li>
                     <li class="facebook"><a class="facebook" href="https://www.facebook.com/sharer.php?u=${shareUrl}" target="_blank" rel="noopener" title="Share to Facebook"></a></li>
                     <li class="twitter"><a class="twitter" href="https://twitter.com/intent/tweet?text=${shareTitle}&url=${shareUrl}" target="_blank" rel="noopener" title="Share to X/Twitter"></a></li>
-                    <li class="whatsapp whatsapp-desktop"><a class="whatsapp" href="https://web.whatsapp.com/send?text=${shareTitle}%20-%20${shareUrl}" target="_blank" rel="noopener" title="Share to WhatsApp"></a></li>
+                    <li class="whatsapp whatsapp-desktop"><a class="whatsapp" href="https://api.whatsapp.com/send?text=${shareTitle}%20-%20${shareUrl}" target="_blank" rel="noopener" title="Share to WhatsApp"></a></li>
                     <li class="email"><a class="email" href="javascript:void(0)" id="foxsa-copy-link-btn" title="Salin Link Berita"></a></li>
                   </ul>
                 </div>
@@ -642,16 +899,16 @@
                   <li class="post-next">
                     ${newerPost
                       ? `<a class="next-post-link" href="${getPostHref(newerPost)}" id="Blog1_blog-pager-newer-link" rel="next">
-                           <div class="post-nav-inner"><span>Newer</span><p>${escapeHtml(newerPost.title)}</p></div>
+                           <div class="post-nav-inner"><span>Berita Berikutnya</span><p>${escapeHtml(newerPost.title)}</p></div>
                          </a>`
-                      : `<div class="post-nav-inner"><span>Newer</span><p>Ini adalah berita terbaru</p></div>`}
+                      : `<div class="post-nav-inner"><span>Berita Berikutnya</span><p>Ini adalah berita terbaru</p></div>`}
                   </li>
                   <li class="post-prev">
                     ${olderPost
                       ? `<a class="prev-post-link" href="${getPostHref(olderPost)}" id="Blog1_blog-pager-older-link" rel="prev">
-                           <div class="post-nav-inner"><span>Older</span><p>${escapeHtml(olderPost.title)}</p></div>
+                           <div class="post-nav-inner"><span>Berita Sebelumnya</span><p>${escapeHtml(olderPost.title)}</p></div>
                          </a>`
-                      : `<div class="post-nav-inner"><span>Older</span><p>Ini adalah berita pertama</p></div>`}
+                      : `<div class="post-nav-inner"><span>Berita Sebelumnya</span><p>Ini adalah berita pertama</p></div>`}
                   </li>
                 </ul>
 
@@ -660,7 +917,7 @@
                     <img alt="${escapeHtml(authorInfo.name)}" class="author-avatar" src="${escapeHtml(authorInfo.avatar || DEFAULT_AVATAR)}" onerror="this.src='${DEFAULT_AVATAR}'"/>
                   </div>
                   <h3 class="author-name">
-                    <span>Posted by:</span>
+                    <span>Jurnalis / Penulis:</span>
                     <a href="#/author/${encodeURIComponent(authorInfo.name)}">${escapeHtml(authorInfo.name)}</a>
                   </h3>
                   <span class="author-description">${escapeHtml(authorInfo.bio)}</span>
@@ -668,7 +925,7 @@
 
                 <div id="related-wrap">
                   <div class="title-wrap">
-                    <h3>You May Like</h3>
+                    <h3>Berita Terkait Lainnya</h3>
                   </div>
                   <div class="related-ready">
                     <ul class="related-posts">
@@ -692,8 +949,8 @@
                 <!-- Interactive Comments Section -->
                 <div class="foxsa-comments-wrap" id="comments-section">
                   <div class="foxsa-comments-header">
-                    <h3><i class="fa-regular fa-comments" style="color:#F08D39;margin-right:6px;"></i> Komentar Pembaca</h3>
-                    <span class="foxsa-comment-badge">${comments.length} Komentar</span>
+                    <h3><i class="fa-regular fa-comments"></i> Komentar Pembaca</h3>
+                    <span class="foxsa-badge">${comments.length} Komentar</span>
                   </div>
 
                   ${commentsListHtml}
@@ -703,11 +960,11 @@
                     <div class="foxsa-form-row">
                       <div class="foxsa-form-group">
                         <label for="comment-author-input">Nama Anda / Karakter IC *</label>
-                        <input type="text" id="comment-author-input" class="foxsa-input" placeholder="Contoh: Ligma Deek / Akio Asakura" required />
+                        <input type="text" id="comment-author-input" class="foxsa-input" value="${state.currentUser ? escapeHtml(state.currentUser.displayName) : ''}" placeholder="Contoh: Akio Asakura / Warga Los Santos" required />
                       </div>
                       <div class="foxsa-form-group">
                         <label for="comment-role-input">Afiliasi / Status (Opsional)</label>
-                        <input type="text" id="comment-role-input" class="foxsa-input" placeholder="Contoh: Citizen / LSPD / LSFD / Pembalap" />
+                        <input type="text" id="comment-role-input" class="foxsa-input" value="${state.currentUser ? 'FoxSA News Staff' : ''}" placeholder="Contoh: Citizen / LSPD / LSFD / Pembalap" />
                       </div>
                     </div>
                     <div class="foxsa-form-group">
@@ -727,9 +984,9 @@
       </div>
     `;
 
-    // Bind Quick Edit Post
+    // Bind Quick Edit Post (Staff only)
     const quickEditBtn = document.getElementById('foxsa-quick-edit-post');
-    if (quickEditBtn) {
+    if (quickEditBtn && isStaffLoggedIn) {
       quickEditBtn.addEventListener('click', () => {
         state.editingPostId = post.id;
         state.adminTab = 'editor';
@@ -759,7 +1016,6 @@
 
         if (!authorVal || !bodyVal) return;
 
-        // Check if commenter matches a known author avatar
         const knownAuthor = state.data.authors[authorVal];
         const avatarUrl = (knownAuthor && knownAuthor.avatar) ? knownAuthor.avatar : DEFAULT_AVATAR;
 
@@ -780,38 +1036,141 @@
       });
     }
 
-    // Bind Delete Comment buttons
-    mainEl.querySelectorAll('[data-del-comment]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const cId = btn.getAttribute('data-del-comment');
-        if (!confirm('Hapus komentar ini?')) return;
-        post.comments = (post.comments || []).filter(c => String(c.id) !== String(cId));
-        saveDataToLocal(true);
-        showToast('Komentar telah dihapus.');
-        renderSinglePostView(post.id);
+    // Bind Delete Comment buttons (Staff only)
+    if (isStaffLoggedIn) {
+      mainEl.querySelectorAll('[data-del-comment]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cId = btn.getAttribute('data-del-comment');
+          if (!confirm('Hapus komentar ini?')) return;
+          post.comments = (post.comments || []).filter(c => String(c.id) !== String(cId));
+          saveDataToLocal(true);
+          showToast('Komentar telah dihapus.');
+          renderSinglePostView(post.id);
+        });
       });
-    });
+    }
   }
 
   // =========================================================================
-  // 6. RENDERING: ADMIN PANEL (MANAGE NEWS, AUTHORS, COMMENTS, CLOUD SYNC)
+  // 6. RENDERING: STAFF LOGIN & PROTECTED ADMIN PANEL
   // =========================================================================
 
-  function getAllUniqueLabels() {
-    const set = new Set();
-    (state.data.posts || []).forEach(p => {
-      (p.labels || []).forEach(l => set.add(l));
-    });
-    return Array.from(set).sort();
+  function renderStaffLoginView() {
+    document.body.className = 'item';
+    const mainEl = document.getElementById('main');
+    if (!mainEl) return;
+
+    const accounts = state.data.staffAccounts || [];
+
+    mainEl.innerHTML = `
+      <div class="foxsa-login-card">
+        <div class="foxsa-login-header">
+          <div class="foxsa-login-badge">
+            <i class="fa-solid fa-user-shield"></i> PORTAL REDAKSI FOXSA NEWS
+          </div>
+          <h2>Login Khusus Staff &amp; Admin</h2>
+          <p>Halaman ini dikhususkan bagi Jurnalis, Editor, dan Staff Redaksi FoxSA News untuk menambah berita serta mengelola komentar.</p>
+        </div>
+
+        <form id="foxsa-staff-login-form" class="foxsa-login-form">
+          <div class="foxsa-form-group">
+            <label for="login-quick-account">Pilih Nama Staff Cepat (Opsional)</label>
+            <select id="login-quick-account" class="foxsa-select">
+              <option value="">-- Pilih Akun Staff atau Ketik Username Manual --</option>
+              ${accounts.map(acc => `
+                <option value="${escapeHtml(acc.username)}">${escapeHtml(acc.displayName)} — (${escapeHtml(acc.role)})</option>
+              `).join('')}
+            </select>
+          </div>
+
+          <div class="foxsa-form-group">
+            <label for="login-username">Username Staff / Admin *</label>
+            <div class="foxsa-input-icon-wrap">
+              <i class="fa-solid fa-user"></i>
+              <input type="text" id="login-username" class="foxsa-input" placeholder="Contoh: admin, arthur, ligma, clarissa, shen" autocomplete="username" required />
+            </div>
+          </div>
+
+          <div class="foxsa-form-group">
+            <label for="login-password">Password *</label>
+            <div class="foxsa-input-icon-wrap">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="login-password" class="foxsa-input" placeholder="Masukkan password staff..." autocomplete="current-password" required />
+              <button type="button" class="foxsa-pwd-toggle" id="login-toggle-pwd" aria-label="Tampilkan Password">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="login-error-msg" class="foxsa-login-error" style="display:none;">
+            <i class="fa-solid fa-triangle-exclamation"></i> Username atau Password salah! Silakan periksa kembali.
+          </div>
+
+          <div class="foxsa-login-actions">
+            <button type="submit" class="foxsa-btn foxsa-btn-full">
+              <i class="fa-solid fa-right-to-bracket"></i> Masuk ke Panel Redaksi
+            </button>
+            <a href="#/" class="foxsa-btn foxsa-btn-outline foxsa-btn-full" style="text-decoration:none;">
+              <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda Berita
+            </a>
+          </div>
+        </form>
+      </div>
+    `;
+
+    const quickSelect = document.getElementById('login-quick-account');
+    const userInp = document.getElementById('login-username');
+    const passInp = document.getElementById('login-password');
+    const togglePwdBtn = document.getElementById('login-toggle-pwd');
+    const errBox = document.getElementById('login-error-msg');
+    const form = document.getElementById('foxsa-staff-login-form');
+
+    if (quickSelect) {
+      quickSelect.addEventListener('change', () => {
+        if (quickSelect.value) {
+          userInp.value = quickSelect.value;
+          passInp.focus();
+        }
+      });
+    }
+
+    if (togglePwdBtn && passInp) {
+      togglePwdBtn.addEventListener('click', () => {
+        const isPwd = passInp.type === 'password';
+        passInp.type = isPwd ? 'text' : 'password';
+        togglePwdBtn.innerHTML = isPwd ? '<i class="fa-regular fa-eye-slash"></i>' : '<i class="fa-regular fa-eye"></i>';
+      });
+    }
+
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const ok = loginStaff(userInp.value, passInp.value);
+        if (ok) {
+          showToast(`Selamat datang, ${state.currentUser.displayName}!`);
+          renderAdminView();
+        } else {
+          if (errBox) errBox.style.display = 'flex';
+          passInp.value = '';
+          passInp.focus();
+        }
+      });
+    }
   }
 
   function renderAdminView() {
+    if (!state.currentUser) {
+      renderStaffLoginView();
+      return;
+    }
+
     document.body.className = 'item';
     const mainEl = document.getElementById('main');
     if (!mainEl) return;
 
     const totalPosts = state.data.posts.length;
     const totalComments = state.data.posts.reduce((acc, p) => acc + ((p.comments && p.comments.length) || 0), 0);
+    const totalStaff = (state.data.staffAccounts || []).length;
 
     let tabContentHtml = '';
 
@@ -826,67 +1185,77 @@
             <i class="fa-solid fa-plus"></i> Tambah Berita Baru
           </button>
         </div>
-        <table class="foxsa-admin-table">
-          <thead>
-            <tr>
-              <th>Thumb</th>
-              <th>Judul & Kategori</th>
-              <th>Penulis</th>
-              <th>Tanggal</th>
-              <th>Populer</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${state.data.posts.map(p => `
+        <div class="foxsa-table-responsive">
+          <table class="foxsa-admin-table">
+            <thead>
               <tr>
-                <td>
-                  <img class="foxsa-admin-thumb" src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" alt="thumb"/>
-                </td>
-                <td>
-                  <a href="${getPostHref(p)}" style="font-weight:700;color:#090C1E;display:block;margin-bottom:4px;">${escapeHtml(p.title)}</a>
-                  <div>
-                    ${(p.labels || []).map(l => `<span class="foxsa-badge">${escapeHtml(l)}</span>`).join('')}
-                    ${(p.comments && p.comments.length > 0) ? `<span class="foxsa-badge" style="background:#e0f2fe;color:#0369a1;"><i class="fa-regular fa-comment"></i> ${p.comments.length}</span>` : ''}
-                  </div>
-                </td>
-                <td>${escapeHtml(p.author)}</td>
-                <td style="white-space:nowrap;">${escapeHtml(formatDateID(p.published))}</td>
-                <td style="text-align:center;">
-                  <button type="button" class="foxsa-editor-btn" data-toggle-pop="${escapeHtml(p.id)}" title="Tampilkan di Most Popular">
-                    <i class="fa-${p.popular ? 'solid' : 'regular'} fa-star" style="color:${p.popular ? '#F08D39' : '#999'};"></i>
-                  </button>
-                </td>
-                <td style="white-space:nowrap;">
-                  <button type="button" class="foxsa-editor-btn" data-edit-post="${escapeHtml(p.id)}" title="Edit Berita">
-                    <i class="fa-solid fa-pen"></i> Edit
-                  </button>
-                  <button type="button" class="foxsa-editor-btn" style="color:#dc2626;border-color:#fecaca;" data-delete-post="${escapeHtml(p.id)}" title="Hapus Berita">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </td>
+                <th>Thumb</th>
+                <th>Judul &amp; Kategori</th>
+                <th>Penulis</th>
+                <th>Tanggal</th>
+                <th>Populer</th>
+                <th>Aksi</th>
               </tr>
-            `).join('')}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              ${state.data.posts.map(p => `
+                <tr>
+                  <td>
+                    <img class="foxsa-admin-thumb" src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" alt="thumb"/>
+                  </td>
+                  <td>
+                    <a href="${getPostHref(p)}" style="font-weight:700;color:#090C1E;display:block;margin-bottom:4px;">${escapeHtml(p.title)}</a>
+                    <div>
+                      ${(p.labels || []).map(l => `<span class="foxsa-badge">#${escapeHtml(l)}</span>`).join('')}
+                      ${(p.comments && p.comments.length > 0) ? `<span class="foxsa-badge" style="background:#e0f2fe;color:#0369a1;"><i class="fa-regular fa-comment"></i> ${p.comments.length}</span>` : ''}
+                    </div>
+                  </td>
+                  <td>${escapeHtml(p.author)}</td>
+                  <td style="white-space:nowrap;">${escapeHtml(formatDateID(p.published))}</td>
+                  <td style="text-align:center;">
+                    <button type="button" class="foxsa-editor-btn" data-toggle-pop="${escapeHtml(p.id)}" title="Tampilkan di Most Popular">
+                      <i class="fa-${p.popular ? 'solid' : 'regular'} fa-star" style="color:${p.popular ? '#F08D39' : '#999'};"></i>
+                    </button>
+                  </td>
+                  <td style="white-space:nowrap;">
+                    <button type="button" class="foxsa-editor-btn" data-edit-post="${escapeHtml(p.id)}" title="Edit Berita">
+                      <i class="fa-solid fa-pen"></i> Edit
+                    </button>
+                    <button type="button" class="foxsa-editor-btn" style="color:#dc2626;border-color:#fecaca;" data-delete-post="${escapeHtml(p.id)}" title="Hapus Berita">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
       `;
     }
 
-    // TAB 2: TAMBAH / EDIT BERITA
+    // TAB 2: TAMBAH / EDIT BERITA (DENGAN MULTI-SELECT PIL KATEGORI + DROPDOWN)
     else if (state.adminTab === 'editor') {
       const editingPost = state.editingPostId
         ? state.data.posts.find(p => p.id === state.editingPostId)
         : null;
 
+      if (editingPost) {
+        state.selectedEditorLabels = Array.isArray(editingPost.labels) && editingPost.labels.length > 0
+          ? [...editingPost.labels]
+          : ['Crime'];
+      } else if (!Array.isArray(state.selectedEditorLabels) || state.selectedEditorLabels.length === 0) {
+        state.selectedEditorLabels = ['Crime', 'LSPD'];
+      }
+
       const authorNames = Object.keys(state.data.authors || {});
-      const defaultAuthorName = editingPost ? editingPost.author : (authorNames[0] || 'Arthur Redfields');
+      const loggedInAuthor = (state.currentUser && state.currentUser.authorName) || authorNames[0] || 'Arthur Redfields';
+      const defaultAuthorName = editingPost ? editingPost.author : loggedInAuthor;
       const defaultAuthorObj = state.data.authors[defaultAuthorName] || {};
 
       const titleVal = editingPost ? editingPost.title : '';
       const authorVal = editingPost ? editingPost.author : defaultAuthorName;
       const authorAvatarVal = editingPost ? (editingPost.authorAvatar || defaultAuthorObj.avatar || DEFAULT_AVATAR) : (defaultAuthorObj.avatar || DEFAULT_AVATAR);
       const authorBioVal = editingPost ? (editingPost.authorBio || defaultAuthorObj.bio || '') : (defaultAuthorObj.bio || '');
-      const labelsVal = editingPost ? (editingPost.labels || []).join(', ') : 'Crime, LSPD';
       const imageVal = editingPost ? (editingPost.featuredImage || '') : '';
       const popularChecked = editingPost ? !!editingPost.popular : true;
       const dateVal = editingPost && editingPost.published
@@ -894,11 +1263,11 @@
         : new Date().toISOString().slice(0, 16);
       const contentVal = editingPost ? editingPost.content : `<p style="text-align: justify;">Los Santos, FoxSA News — Tulis paragraf pembuka berita di sini...</p>\n<p style="text-align: justify;">Tulis kronologi lengkap kejadian di sini...</p>`;
 
-      const allLabels = getAllUniqueLabels();
+      const allCategories = getAllAvailableCategories();
 
       tabContentHtml = `
         <form id="foxsa-post-editor-form">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
             <h3 style="margin:0;color:#090C1E;">
               ${editingPost ? `<i class="fa-solid fa-pen-to-square" style="color:#F08D39;"></i> Edit Berita` : `<i class="fa-solid fa-circle-plus" style="color:#F08D39;"></i> Tambah Berita Baru`}
             </h3>
@@ -908,6 +1277,44 @@
           <div class="foxsa-form-group">
             <label>Judul Berita *</label>
             <input type="text" id="post-title-input" class="foxsa-input" value="${escapeHtml(titleVal)}" placeholder="Contoh: Polisi Lakukan Pengejaran di Los Santos, Dua Pelaku Berhasil Diamankan" required />
+          </div>
+
+          <!-- SMART CATEGORY SELECTOR (NO MANUAL COMMA TYPING NEEDED) -->
+          <div class="foxsa-form-group">
+            <label><i class="fa-solid fa-tags" style="color:#F08D39;"></i> Pilih Kategori Berita (Tinggal Klik / Tap, Bisa Pilih Lebih dari 1) *</label>
+            <div class="foxsa-smart-cat-box">
+              <div class="foxsa-smart-cat-pills" id="editor-category-pills">
+                ${allCategories.map(cat => {
+                  const isSelected = state.selectedEditorLabels.some(s => s.toLowerCase() === cat.toLowerCase());
+                  return `
+                    <button type="button" class="foxsa-selectable-pill ${isSelected ? 'selected' : ''}" data-toggle-cat="${escapeHtml(cat)}">
+                      <i class="fa-solid ${isSelected ? 'fa-circle-check' : 'fa-plus'}"></i>
+                      <span>${escapeHtml(cat)}</span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+
+              <div class="foxsa-smart-cat-controls">
+                <div class="foxsa-smart-cat-dropdown-col">
+                  <select id="editor-category-dropdown" class="foxsa-select">
+                    <option value="">-- Atau Pilih Cepat dari Dropdown Kategori --</option>
+                    ${allCategories.map(cat => `<option value="${escapeHtml(cat)}">+ Pilih: ${escapeHtml(cat)}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="foxsa-smart-cat-custom-col">
+                  <input type="text" id="editor-new-cat-input" class="foxsa-input" placeholder="Buat kategori baru..." />
+                  <button type="button" class="foxsa-btn foxsa-btn-secondary" id="editor-add-new-cat-btn" style="white-space:nowrap;">
+                    <i class="fa-solid fa-plus"></i> Tambah
+                  </button>
+                </div>
+              </div>
+
+              <div class="foxsa-selected-cat-summary" id="editor-selected-summary">
+                <!-- Updated dynamically -->
+              </div>
+              <input type="hidden" id="post-labels-input" value="${escapeHtml(state.selectedEditorLabels.join(', '))}" />
+            </div>
           </div>
 
           <div class="foxsa-form-row">
@@ -937,15 +1344,17 @@
 
           <div class="foxsa-form-row">
             <div class="foxsa-form-group">
-              <label>Kategori / Label (Pisahkan dengan koma) *</label>
-              <input type="text" id="post-labels-input" class="foxsa-input" value="${escapeHtml(labelsVal)}" placeholder="Crime, LSPD, Los Santos Event" required />
-              <div style="margin-top:6px;">
-                <span style="font-size:11px;color:#666;margin-right:4px;">Klik untuk tambah cepat:</span>
-                ${allLabels.map(l => `<button type="button" class="foxsa-editor-btn" style="padding:2px 7px;font-size:11px;margin:2px;" data-add-label="${escapeHtml(l)}">+ ${escapeHtml(l)}</button>`).join('')}
+              <label>Gambar Utama Berita (URL Gambar atau Upload dari HP/Komputer)</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <input type="text" id="post-image-input" class="foxsa-input" style="flex:1;min-width:180px;" value="${escapeHtml(imageVal)}" placeholder="Paste link gambar (https://...) atau klik Upload" />
+                <label class="foxsa-btn foxsa-btn-secondary" style="cursor:pointer;margin:0;">
+                  <i class="fa-solid fa-upload"></i> Upload Gambar
+                  <input type="file" id="post-image-file" accept="image/*" style="display:none;" />
+                </label>
               </div>
             </div>
-            <div class="foxsa-form-group" style="max-width:240px;">
-              <label>Tanggal & Waktu Publikasi</label>
+            <div class="foxsa-form-group" style="max-width:260px;">
+              <label>Tanggal &amp; Waktu Publikasi</label>
               <input type="datetime-local" id="post-date-input" class="foxsa-input" value="${escapeHtml(dateVal)}" />
               <label style="display:flex;align-items:center;gap:6px;margin-top:8px;cursor:pointer;">
                 <input type="checkbox" id="post-popular-input" ${popularChecked ? 'checked' : ''} />
@@ -955,26 +1364,15 @@
           </div>
 
           <div class="foxsa-form-group">
-            <label>Gambar Utama Berita (URL Gambar atau Upload dari Komputer)</label>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <input type="text" id="post-image-input" class="foxsa-input" style="flex:1;" value="${escapeHtml(imageVal)}" placeholder="Paste link gambar (https://...) atau gunakan tombol Upload File" />
-              <label class="foxsa-btn foxsa-btn-secondary" style="cursor:pointer;margin:0;">
-                <i class="fa-solid fa-upload"></i> Upload Gambar
-                <input type="file" id="post-image-file" accept="image/*" style="display:none;" />
-              </label>
-            </div>
-          </div>
-
-          <div class="foxsa-form-group">
-            <label>Isi Artikel Berita (Mendukung Teks & HTML)</label>
+            <label>Isi Artikel Berita (Mendukung Teks &amp; HTML)</label>
             <div class="foxsa-editor-toolbar">
               <button type="button" class="foxsa-editor-btn" data-insert-tag="p"><i class="fa-solid fa-paragraph"></i> Paragraf</button>
               <button type="button" class="foxsa-editor-btn" data-insert-tag="b"><i class="fa-solid fa-bold"></i> Bold</button>
               <button type="button" class="foxsa-editor-btn" data-insert-tag="i"><i class="fa-solid fa-italic"></i> Italic</button>
               <button type="button" class="foxsa-editor-btn" data-insert-tag="h2"><i class="fa-solid fa-heading"></i> Subjudul H2</button>
-              <button type="button" class="foxsa-editor-btn" data-insert-tag="blockquote"><i class="fa-solid fa-quote-left"></i> Kutipan Narasumber</button>
-              <button type="button" class="foxsa-editor-btn" id="editor-insert-img-url"><i class="fa-regular fa-image"></i> + Gambar di Isi Berita</button>
-              <button type="button" class="foxsa-editor-btn" id="editor-toggle-preview" style="margin-left:auto;"><i class="fa-solid fa-eye"></i> Lihat Preview</button>
+              <button type="button" class="foxsa-editor-btn" data-insert-tag="blockquote"><i class="fa-solid fa-quote-left"></i> Kutipan</button>
+              <button type="button" class="foxsa-editor-btn" id="editor-insert-img-url"><i class="fa-regular fa-image"></i> + Gambar Link</button>
+              <button type="button" class="foxsa-editor-btn" id="editor-toggle-preview" style="margin-left:auto;"><i class="fa-solid fa-eye"></i> Preview</button>
             </div>
             <textarea id="post-content-input" class="foxsa-textarea" rows="12" style="border-radius:0 0 8px 8px;font-family:monospace;font-size:13px;" required>${escapeHtml(contentVal)}</textarea>
           </div>
@@ -984,7 +1382,7 @@
             <div class="post-body" id="editor-preview-body"></div>
           </div>
 
-          <div style="display:flex;gap:10px;align-items:center;">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
             <button type="submit" class="foxsa-btn">
               <i class="fa-solid fa-floppy-disk"></i> ${editingPost ? 'Simpan Perubahan Berita' : 'Publikasikan Berita Sekarang'}
             </button>
@@ -1016,49 +1414,129 @@
         </div>
         ${allComments.length === 0
           ? `<div class="foxsa-no-comments">Belum ada komentar.</div>`
-          : `<table class="foxsa-admin-table">
-               <thead>
-                 <tr>
-                   <th>Penulis</th>
-                   <th>Isi Komentar</th>
-                   <th>Pada Berita</th>
-                   <th>Tanggal</th>
-                   <th>Aksi</th>
-                 </tr>
-               </thead>
-               <tbody>
-                 ${allComments.map(c => `
+          : `<div class="foxsa-table-responsive">
+               <table class="foxsa-admin-table">
+                 <thead>
                    <tr>
-                     <td>
-                       <strong>${escapeHtml(c.author)}</strong>
-                       ${c.role ? `<br/><span class="foxsa-badge">${escapeHtml(c.role)}</span>` : ''}
-                     </td>
-                     <td>${escapeHtml(c.body)}</td>
-                     <td><a href="#/post/${escapeHtml(c.postId)}" style="color:#F08D39;font-weight:600;">${escapeHtml(c.postTitle)}</a></td>
-                     <td style="white-space:nowrap;">${escapeHtml(formatDateTimeID(c.date))}</td>
-                     <td>
-                       <button type="button" class="foxsa-editor-btn" style="color:#dc2626;border-color:#fecaca;" data-admin-del-comment="${escapeHtml(c.id)}" data-post-id="${escapeHtml(c.postId)}">
-                         <i class="fa-solid fa-trash"></i> Hapus
-                       </button>
-                     </td>
+                     <th>Penulis</th>
+                     <th>Isi Komentar</th>
+                     <th>Pada Berita</th>
+                     <th>Tanggal</th>
+                     <th>Aksi</th>
                    </tr>
-                 `).join('')}
-               </tbody>
-             </table>`
+                 </thead>
+                 <tbody>
+                   ${allComments.map(c => `
+                     <tr>
+                       <td>
+                         <strong>${escapeHtml(c.author)}</strong>
+                         ${c.role ? `<br/><span class="foxsa-badge">${escapeHtml(c.role)}</span>` : ''}
+                       </td>
+                       <td>${escapeHtml(c.body)}</td>
+                       <td><a href="#/post/${escapeHtml(c.postId)}" style="color:#F08D39;font-weight:600;">${escapeHtml(c.postTitle)}</a></td>
+                       <td style="white-space:nowrap;">${escapeHtml(formatDateTimeID(c.date))}</td>
+                       <td>
+                         <button type="button" class="foxsa-editor-btn" style="color:#dc2626;border-color:#fecaca;" data-admin-del-comment="${escapeHtml(c.id)}" data-post-id="${escapeHtml(c.postId)}">
+                           <i class="fa-solid fa-trash"></i> Hapus
+                         </button>
+                       </td>
+                     </tr>
+                   `).join('')}
+                 </tbody>
+               </table>
+             </div>`
         }
       `;
     }
 
-    // TAB 4: PENYIMPANAN & CLOUD SYNC (GITHUB / VERCEL)
+    // TAB 4: KELOLA STAFF & PASSWORD
+    else if (state.adminTab === 'staff') {
+      const staffList = state.data.staffAccounts || [];
+      tabContentHtml = `
+        <div class="foxsa-status-box">
+          <strong><i class="fa-solid fa-users-gear" style="color:#F08D39;"></i> Manajemen Akun Staff &amp; Password Redaksi FoxSA:</strong>
+          <p style="margin:6px 0 0;">Di sini kamu bisa mengubah password akunmu, menambah akun untuk anggota staff FoxSA baru, atau mengatur jabatan penulis.</p>
+        </div>
+
+        <div class="foxsa-table-responsive" style="margin-bottom:24px;">
+          <table class="foxsa-admin-table">
+            <thead>
+              <tr>
+                <th>Username Login</th>
+                <th>Nama Jurnalis / Tampilan</th>
+                <th>Jabatan / Role</th>
+                <th>Password Saat Ini</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${staffList.map(acc => `
+                <tr>
+                  <td><code>${escapeHtml(acc.username)}</code></td>
+                  <td><strong>${escapeHtml(acc.displayName)}</strong></td>
+                  <td><span class="foxsa-badge">${escapeHtml(acc.role)}</span></td>
+                  <td>
+                    <span class="pwd-mask" data-pwd="${escapeHtml(acc.password)}">••••••••</span>
+                    <button type="button" class="foxsa-editor-btn" style="padding:2px 6px;font-size:11px;margin-left:6px;" data-show-staff-pwd="${escapeHtml(acc.username)}">
+                      <i class="fa-regular fa-eye"></i>
+                    </button>
+                  </td>
+                  <td style="white-space:nowrap;">
+                    <button type="button" class="foxsa-editor-btn" data-change-pwd="${escapeHtml(acc.username)}">
+                      <i class="fa-solid fa-key"></i> Ubah Password
+                    </button>
+                    ${acc.username !== 'admin' ? `
+                      <button type="button" class="foxsa-editor-btn" style="color:#dc2626;border-color:#fecaca;" data-del-staff="${escapeHtml(acc.username)}">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    ` : ''}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="foxsa-comment-form">
+          <h4><i class="fa-solid fa-user-plus" style="color:#F08D39;"></i> Tambah Akun Staff / Jurnalis Baru</h4>
+          <form id="foxsa-add-staff-form">
+            <div class="foxsa-form-row">
+              <div class="foxsa-form-group">
+                <label>Username Login (Tanpa spasi) *</label>
+                <input type="text" id="new-staff-username" class="foxsa-input" placeholder="Contoh: kevin" required />
+              </div>
+              <div class="foxsa-form-group">
+                <label>Password Login *</label>
+                <input type="text" id="new-staff-password" class="foxsa-input" placeholder="Contoh: kevinfoxsa" required />
+              </div>
+            </div>
+            <div class="foxsa-form-row">
+              <div class="foxsa-form-group">
+                <label>Nama Lengkap IC Jurnalis *</label>
+                <input type="text" id="new-staff-name" class="foxsa-input" placeholder="Contoh: Kevin Salvatore" required />
+              </div>
+              <div class="foxsa-form-group">
+                <label>Jabatan di FoxSA News *</label>
+                <input type="text" id="new-staff-role" class="foxsa-input" value="Junior Staff | Journalist" required />
+              </div>
+            </div>
+            <button type="submit" class="foxsa-btn">
+              <i class="fa-solid fa-user-check"></i> Simpan Akun Staff Baru
+            </button>
+          </form>
+        </div>
+      `;
+    }
+
+    // TAB 5: PENYIMPANAN & CLOUD SYNC (GITHUB / VERCEL)
     else if (state.adminTab === 'storage') {
       const cfg = getGitHubConfig();
       tabContentHtml = `
         <div class="foxsa-status-box">
-          <strong><i class="fa-solid fa-database" style="color:#F08D39;"></i> Cara Kerja Penyimpanan Data (Local & Vercel/GitHub):</strong>
+          <strong><i class="fa-solid fa-database" style="color:#F08D39;"></i> Cara Kerja Penyimpanan Data (Local &amp; Vercel/GitHub):</strong>
           <ul style="margin:8px 0 0 18px;padding:0;">
-            <li><strong>Otomatis Tersimpan di Browser (LocalStorage):</strong> Setiap kali kamu menambah berita atau komentar, data langsung tersimpan secara instan di browser kamu.</li>
-            <li><strong>Update Permanen ke GitHub / Vercel (Cara Manual - 1 Klik):</strong> Klik tombol <strong>"Download data.js"</strong> dan <strong>"Download posts.json"</strong> di bawah, lalu timpa ke folder <code>js/data.js</code> dan <code>data/posts.json</code> sebelum push ke GitHub.</li>
-            <li><strong>Auto-Save Langsung ke GitHub dari Website (Cara Otomatis di Vercel):</strong> Isi pengaturan GitHub Repository & Token di bawah agar setiap ada penambahan berita/komentar di website langsung otomatis ter-commit ke GitHub & ter-update untuk semua pengunjung!</li>
+            <li><strong>Otomatis Tersimpan di Browser (LocalStorage):</strong> Setiap kali kamu menambah berita, komentar, atau akun staff, data langsung tersimpan di perangkat kamu.</li>
+            <li><strong>Update Permanen ke GitHub / Vercel (1 Klik):</strong> Klik tombol <strong>"Download data.js"</strong> atau aktifkan <strong>Auto-Sync GitHub</strong> di bawah agar setiap perubahan langsung ter-commit ke GitHub &amp; tampil untuk semua pengunjung di Vercel.</li>
           </ul>
         </div>
 
@@ -1081,7 +1559,7 @@
         <div class="foxsa-comment-form">
           <h4><i class="fa-brands fa-github"></i> Pengaturan Auto-Save ke GitHub / Vercel Cloud (Opsional)</h4>
           <p style="font-size:12px;color:#666;margin-bottom:14px;">
-            Jika diaktifkan, setiap perubahan berita dan komentar akan langsung di-push otomatis ke repository GitHub kamu.
+            Jika diaktifkan, setiap penambahan berita dan komentar akan langsung di-push otomatis ke repository GitHub <code>vndrrx/foxsanews</code>.
           </p>
           <form id="foxsa-github-sync-form">
             <div class="foxsa-form-group">
@@ -1093,7 +1571,7 @@
             <div class="foxsa-form-row">
               <div class="foxsa-form-group">
                 <label>Nama Repository GitHub (username/nama-repo)</label>
-                <input type="text" id="gh-repo" class="foxsa-input" value="${escapeHtml(cfg.repo || '')}" placeholder="Contoh: foxsanews/foxsa-web" />
+                <input type="text" id="gh-repo" class="foxsa-input" value="${escapeHtml(cfg.repo || 'vndrrx/foxsanews')}" placeholder="vndrrx/foxsanews" />
               </div>
               <div class="foxsa-form-group" style="max-width:180px;">
                 <label>Branch</label>
@@ -1101,7 +1579,7 @@
               </div>
             </div>
             <div class="foxsa-form-group">
-              <label>GitHub Personal Access Token (Fine-grained / Classic dengan izin Contents: Read & Write)</label>
+              <label>GitHub Personal Access Token (Fine-grained / Classic dengan izin Contents: Read &amp; Write)</label>
               <input type="password" id="gh-token" class="foxsa-input" value="${escapeHtml(cfg.token || '')}" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" />
             </div>
             <div class="foxsa-form-group">
@@ -1112,7 +1590,7 @@
             </div>
             <div style="display:flex;gap:10px;">
               <button type="submit" class="foxsa-btn">
-                <i class="fa-solid fa-cloud-arrow-up"></i> Simpan & Test Sinkronisasi
+                <i class="fa-solid fa-cloud-arrow-up"></i> Simpan &amp; Test Sinkronisasi
               </button>
             </div>
           </form>
@@ -1122,28 +1600,40 @@
 
     mainEl.innerHTML = `
       <div class="foxsa-admin-panel">
-        <div class="foxsa-admin-header">
-          <h2>
-            <i class="fa-solid fa-shield-halved" style="color:#F08D39;"></i>
-            Redaksi & Admin Panel FoxSA News
-          </h2>
-          <a href="#/" class="foxsa-btn foxsa-btn-outline" style="text-decoration:none;padding:7px 14px;font-size:12px;">
-            <i class="fa-solid fa-arrow-left"></i> Lihat Halaman Utama
-          </a>
+        <!-- Logged-In Staff Banner -->
+        <div class="foxsa-staff-logged-bar">
+          <div class="foxsa-staff-logged-info">
+            <img src="${escapeHtml(state.currentUser.avatar || DEFAULT_AVATAR)}" alt="${escapeHtml(state.currentUser.displayName)}" onerror="this.src='${DEFAULT_AVATAR}'" />
+            <div>
+              <div class="staff-logged-name">${escapeHtml(state.currentUser.displayName)}</div>
+              <div class="staff-logged-role">${escapeHtml(state.currentUser.role)}</div>
+            </div>
+          </div>
+          <div class="foxsa-staff-logged-actions">
+            <a href="#/" class="foxsa-btn foxsa-btn-outline" style="text-decoration:none;padding:7px 12px;font-size:12px;">
+              <i class="fa-solid fa-house"></i> Beranda
+            </a>
+            <button type="button" class="foxsa-btn foxsa-btn-danger" id="admin-logout-btn" style="padding:7px 14px;font-size:12px;">
+              <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+          </div>
         </div>
 
         <div class="foxsa-admin-tabs">
           <button type="button" class="foxsa-admin-tab ${state.adminTab === 'posts' ? 'active' : ''}" data-admin-tab="posts">
-            <i class="fa-regular fa-newspaper"></i> Daftar Berita (${totalPosts})
+            <i class="fa-regular fa-newspaper"></i> Berita (${totalPosts})
           </button>
           <button type="button" class="foxsa-admin-tab ${state.adminTab === 'editor' ? 'active' : ''}" data-admin-tab="editor">
             <i class="fa-solid fa-pen-nib"></i> ${state.editingPostId ? 'Edit Berita' : '+ Tambah Berita'}
           </button>
           <button type="button" class="foxsa-admin-tab ${state.adminTab === 'comments' ? 'active' : ''}" data-admin-tab="comments">
-            <i class="fa-regular fa-comments"></i> Kelola Komentar (${totalComments})
+            <i class="fa-regular fa-comments"></i> Komentar (${totalComments})
+          </button>
+          <button type="button" class="foxsa-admin-tab ${state.adminTab === 'staff' ? 'active' : ''}" data-admin-tab="staff">
+            <i class="fa-solid fa-users-gear"></i> Akun Staff (${totalStaff})
           </button>
           <button type="button" class="foxsa-admin-tab ${state.adminTab === 'storage' ? 'active' : ''}" data-admin-tab="storage">
-            <i class="fa-solid fa-cloud-arrow-up"></i> Simpan Data & Cloud Sync
+            <i class="fa-solid fa-cloud-arrow-up"></i> Cloud &amp; Backup
           </button>
         </div>
 
@@ -1156,17 +1646,69 @@
     bindAdminEvents();
   }
 
+  function updateEditorCategorySummaryUI() {
+    const summaryEl = document.getElementById('editor-selected-summary');
+    const hiddenInput = document.getElementById('post-labels-input');
+    const pillsWrap = document.getElementById('editor-category-pills');
+
+    if (hiddenInput) {
+      hiddenInput.value = state.selectedEditorLabels.join(', ');
+    }
+
+    if (pillsWrap) {
+      pillsWrap.querySelectorAll('[data-toggle-cat]').forEach(btn => {
+        const cat = btn.getAttribute('data-toggle-cat');
+        const isSel = state.selectedEditorLabels.some(s => s.toLowerCase() === cat.toLowerCase());
+        btn.classList.toggle('selected', isSel);
+        const icon = btn.querySelector('i');
+        if (icon) {
+          icon.className = isSel ? 'fa-solid fa-circle-check' : 'fa-solid fa-plus';
+        }
+      });
+    }
+
+    if (summaryEl) {
+      if (state.selectedEditorLabels.length === 0) {
+        summaryEl.innerHTML = `<span style="color:#dc2626;font-size:12px;"><i class="fa-solid fa-circle-exclamation"></i> Pilih minimal 1 kategori di atas (klik pada pil kategori).</span>`;
+      } else {
+        summaryEl.innerHTML = `
+          <span style="font-size:12px;color:#555;font-weight:600;margin-right:6px;">Kategori Terpilih (${state.selectedEditorLabels.length}):</span>
+          ${state.selectedEditorLabels.map(cat => `
+            <span class="foxsa-active-cat-chip">
+              #${escapeHtml(cat)}
+              <button type="button" data-remove-selected-cat="${escapeHtml(cat)}" title="Hapus kategori">&times;</button>
+            </span>
+          `).join('')}
+        `;
+        summaryEl.querySelectorAll('[data-remove-selected-cat]').forEach(remBtn => {
+          remBtn.addEventListener('click', () => {
+            const targetCat = remBtn.getAttribute('data-remove-selected-cat');
+            state.selectedEditorLabels = state.selectedEditorLabels.filter(c => c.toLowerCase() !== targetCat.toLowerCase());
+            updateEditorCategorySummaryUI();
+          });
+        });
+      }
+    }
+  }
+
   function bindAdminEvents() {
     const mainEl = document.getElementById('main');
     if (!mainEl) return;
+
+    // Logout button
+    const logoutBtn = document.getElementById('admin-logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        logoutStaff();
+        renderAdminView();
+      });
+    }
 
     // Tab switching
     mainEl.querySelectorAll('[data-admin-tab]').forEach(tabBtn => {
       tabBtn.addEventListener('click', () => {
         const target = tabBtn.getAttribute('data-admin-tab');
-        if (target === 'editor' && state.adminTab !== 'editor') {
-          // Keep editingPostId if set
-        } else if (target !== 'editor') {
+        if (target !== 'editor') {
           state.editingPostId = null;
         }
         state.adminTab = target;
@@ -1179,6 +1721,7 @@
     if (newPostBtn) {
       newPostBtn.addEventListener('click', () => {
         state.editingPostId = null;
+        state.selectedEditorLabels = ['Crime', 'LSPD'];
         state.adminTab = 'editor';
         renderAdminView();
       });
@@ -1226,6 +1769,83 @@
     // Editor Events
     const editorForm = document.getElementById('foxsa-post-editor-form');
     if (editorForm) {
+      updateEditorCategorySummaryUI();
+
+      // Multi-select category pill click
+      mainEl.querySelectorAll('[data-toggle-cat]').forEach(pillBtn => {
+        pillBtn.addEventListener('click', () => {
+          const cat = pillBtn.getAttribute('data-toggle-cat');
+          const exists = state.selectedEditorLabels.some(s => s.toLowerCase() === cat.toLowerCase());
+          if (exists) {
+            state.selectedEditorLabels = state.selectedEditorLabels.filter(s => s.toLowerCase() !== cat.toLowerCase());
+          } else {
+            state.selectedEditorLabels.push(cat);
+          }
+          updateEditorCategorySummaryUI();
+        });
+      });
+
+      // Dropdown quick category add
+      const catDropdown = document.getElementById('editor-category-dropdown');
+      if (catDropdown) {
+        catDropdown.addEventListener('change', () => {
+          const val = catDropdown.value;
+          if (val) {
+            if (!state.selectedEditorLabels.some(s => s.toLowerCase() === val.toLowerCase())) {
+              state.selectedEditorLabels.push(val);
+              updateEditorCategorySummaryUI();
+            }
+            catDropdown.value = '';
+          }
+        });
+      }
+
+      // Add custom new category button
+      const newCatInput = document.getElementById('editor-new-cat-input');
+      const addNewCatBtn = document.getElementById('editor-add-new-cat-btn');
+      if (addNewCatBtn && newCatInput) {
+        const addCustomCategory = () => {
+          const val = newCatInput.value.trim();
+          if (!val) return;
+          if (!state.selectedEditorLabels.some(s => s.toLowerCase() === val.toLowerCase())) {
+            state.selectedEditorLabels.push(val);
+          }
+          const pillsWrap = document.getElementById('editor-category-pills');
+          if (pillsWrap) {
+            const existingBtns = Array.from(pillsWrap.querySelectorAll('[data-toggle-cat]'));
+            const alreadyInDom = existingBtns.some(b => b.getAttribute('data-toggle-cat').toLowerCase() === val.toLowerCase());
+            if (!alreadyInDom) {
+              const newBtn = document.createElement('button');
+              newBtn.type = 'button';
+              newBtn.className = 'foxsa-selectable-pill selected';
+              newBtn.setAttribute('data-toggle-cat', val);
+              newBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${escapeHtml(val)}</span>`;
+              newBtn.addEventListener('click', () => {
+                const exists = state.selectedEditorLabels.some(s => s.toLowerCase() === val.toLowerCase());
+                if (exists) {
+                  state.selectedEditorLabels = state.selectedEditorLabels.filter(s => s.toLowerCase() !== val.toLowerCase());
+                } else {
+                  state.selectedEditorLabels.push(val);
+                }
+                updateEditorCategorySummaryUI();
+              });
+              pillsWrap.appendChild(newBtn);
+            }
+          }
+          newCatInput.value = '';
+          updateEditorCategorySummaryUI();
+          showToast(`Kategori "#${val}" ditambahkan!`);
+        };
+
+        addNewCatBtn.addEventListener('click', addCustomCategory);
+        newCatInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            addCustomCategory();
+          }
+        });
+      }
+
       const presetSelect = document.getElementById('post-author-preset');
       const authorInput = document.getElementById('post-author-input');
       const bioInput = document.getElementById('post-author-bio-input');
@@ -1248,20 +1868,7 @@
         });
       }
 
-      // Quick label chips
-      mainEl.querySelectorAll('[data-add-label]').forEach(chip => {
-        chip.addEventListener('click', () => {
-          const lbl = chip.getAttribute('data-add-label');
-          const input = document.getElementById('post-labels-input');
-          const current = input.value.split(',').map(s => s.trim()).filter(Boolean);
-          if (!current.includes(lbl)) {
-            current.push(lbl);
-            input.value = current.join(', ');
-          }
-        });
-      });
-
-      // Image File Upload (converts & compresses via Canvas to DataURL so it works offline & on Vercel)
+      // Image File Upload
       const fileInput = document.getElementById('post-image-file');
       if (fileInput) {
         fileInput.addEventListener('change', (e) => {
@@ -1343,17 +1950,13 @@
         const author = document.getElementById('post-author-input').value.trim() || 'FoxSA News';
         const authorBio = document.getElementById('post-author-bio-input').value.trim();
         const authorAvatar = document.getElementById('post-author-avatar-input').value.trim() || DEFAULT_AVATAR;
-        const labels = document.getElementById('post-labels-input').value
-          .split(',')
-          .map(s => s.trim())
-          .filter(Boolean);
+        const labels = state.selectedEditorLabels.length > 0 ? [...state.selectedEditorLabels] : ['News'];
         const dateRaw = document.getElementById('post-date-input').value;
         const publishedIso = dateRaw ? new Date(dateRaw).toISOString() : new Date().toISOString();
         const popular = document.getElementById('post-popular-input').checked;
         let featuredImage = document.getElementById('post-image-input').value.trim();
         let content = document.getElementById('post-content-input').value.trim();
 
-        // Save/update author profile
         state.data.authors[author] = {
           name: author,
           avatar: authorAvatar,
@@ -1361,11 +1964,9 @@
           profileUrl: `#/author/${author}`
         };
 
-        // If user provided a featuredImage and content doesn't have an <img> yet, prepend it nicely
         if (featuredImage && !/<img\b/i.test(content)) {
           content = `<div class="separator" style="clear: both; text-align: center;"><a href="${featuredImage}" target="_blank"><img border="0" src="${featuredImage}" width="640" /></a></div><br/>` + content;
         }
-        // Or if featuredImage is empty, extract first <img> from content
         if (!featuredImage) {
           const match = content.match(/<img[^>]+src=["']([^"']+)["']/i);
           featuredImage = match ? match[1] : state.data.siteInfo.aboutBanner;
@@ -1380,7 +1981,7 @@
             existing.author = author;
             existing.authorAvatar = authorAvatar;
             existing.authorBio = authorBio;
-            existing.labels = labels.length ? labels : ['News'];
+            existing.labels = labels;
             existing.published = publishedIso;
             existing.updated = new Date().toISOString();
             existing.featuredImage = featuredImage;
@@ -1405,7 +2006,7 @@
             author,
             authorAvatar,
             authorBio,
-            labels: labels.length ? labels : ['News'],
+            labels,
             featuredImage,
             snippet,
             content,
@@ -1437,13 +2038,94 @@
       });
     });
 
+    // Staff Management Tab Events
+    mainEl.querySelectorAll('[data-show-staff-pwd]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tr = btn.closest('tr');
+        const span = tr && tr.querySelector('.pwd-mask');
+        if (!span) return;
+        const realPwd = span.getAttribute('data-pwd');
+        if (span.textContent === '••••••••') {
+          span.textContent = realPwd;
+        } else {
+          span.textContent = '••••••••';
+        }
+      });
+    });
+
+    mainEl.querySelectorAll('[data-change-pwd]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const username = btn.getAttribute('data-change-pwd');
+        const acc = (state.data.staffAccounts || []).find(a => a.username === username);
+        if (!acc) return;
+        const newPwd = prompt(`Masukkan password baru untuk akun "${acc.displayName}" (${acc.username}):`, acc.password);
+        if (!newPwd || !newPwd.trim()) return;
+        acc.password = newPwd.trim();
+        saveDataToLocal(true);
+        renderAdminView();
+        showToast(`Password untuk ${acc.displayName} berhasil diperbarui!`);
+      });
+    });
+
+    mainEl.querySelectorAll('[data-del-staff]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const username = btn.getAttribute('data-del-staff');
+        if (username === 'admin') return;
+        if (!confirm(`Hapus akun staff "${username}"?`)) return;
+        state.data.staffAccounts = (state.data.staffAccounts || []).filter(a => a.username !== username);
+        saveDataToLocal(true);
+        renderAdminView();
+        showToast('Akun staff dihapus.');
+      });
+    });
+
+    const addStaffForm = document.getElementById('foxsa-add-staff-form');
+    if (addStaffForm) {
+      addStaffForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = document.getElementById('new-staff-username').value.trim().toLowerCase().replace(/\s+/g, '');
+        const password = document.getElementById('new-staff-password').value.trim();
+        const displayName = document.getElementById('new-staff-name').value.trim();
+        const role = document.getElementById('new-staff-role').value.trim() || 'FoxSA News Journalist';
+
+        if (!username || !password || !displayName) return;
+        if ((state.data.staffAccounts || []).some(a => a.username.toLowerCase() === username)) {
+          alert('Username tersebut sudah terdaftar! Gunakan username lain.');
+          return;
+        }
+
+        state.data.staffAccounts.push({
+          username,
+          password,
+          displayName,
+          authorName: displayName,
+          role,
+          isAdmin: false,
+          avatar: DEFAULT_AVATAR
+        });
+
+        if (!state.data.authors[displayName]) {
+          state.data.authors[displayName] = {
+            name: displayName,
+            avatar: DEFAULT_AVATAR,
+            bio: role,
+            profileUrl: `#/author/${displayName}`
+          };
+        }
+
+        saveDataToLocal(true);
+        renderAdminView();
+        showToast(`Akun staff ${displayName} (${username}) berhasil ditambahkan!`);
+      });
+    }
+
     // Storage Tab Events
     const btnExportDataJs = document.getElementById('btn-export-datajs');
     if (btnExportDataJs) {
       btnExportDataJs.addEventListener('click', () => {
         const content = '// Data bawaan FoxSA News (Otomatis di-load oleh website)\nwindow.FOXSA_INITIAL_DATA = ' + JSON.stringify(state.data, null, 2) + ';\n';
         downloadTextFile('data.js', content, 'application/javascript');
-        showToast('File data.js berhasil di-download! Timpa ke folder js/data.js');
+        showToast('File data.js berhasil di-download!');
       });
     }
 
@@ -1552,7 +2234,7 @@
   }
 
   // =========================================================================
-  // 7. RENDERING: SIDEBAR & FOOTER WIDGETS
+  // 7. RENDERING: SIDEBAR, HEADER MENU & FOOTER WIDGETS
   // =========================================================================
 
   function renderWidgets() {
@@ -1589,18 +2271,39 @@
     const popFooterEl = document.querySelector('#PopularPosts2 .widget-content');
     if (popFooterEl) popFooterEl.innerHTML = popularHtml;
 
-    // 2. Categories & Tags Count (#Label1 list & #Label2 cloud)
-    const labelCounts = {};
-    posts.forEach(p => {
-      (p.labels || []).forEach(l => {
-        labelCounts[l] = (labelCounts[l] || 0) + 1;
-      });
+    // 2. Categories & Tags Count (#Label1 list + dropdown & #Label2 cloud)
+    const labelCounts = getLabelCounts();
+    const sortedLabels = Object.keys(labelCounts).sort((a, b) => {
+      if (labelCounts[b] !== labelCounts[a]) return labelCounts[b] - labelCounts[a];
+      return a.localeCompare(b);
     });
-    const sortedLabels = Object.keys(labelCounts).sort((a, b) => a.localeCompare(b));
+
+    // Update top header dynamic category submenu
+    const navDynamicCats = document.getElementById('nav-dynamic-categories');
+    if (navDynamicCats) {
+      navDynamicCats.innerHTML = sortedLabels.map(l => `
+        <li><a href="#/label/${encodeURIComponent(l)}" role="menuitem">#${escapeHtml(l)} (${labelCounts[l]})</a></li>
+      `).join('');
+      rebuildMobileDrawerMenu();
+    }
+
+    const activeLabelLower = state.currentRoute.view === 'label' && state.currentRoute.param
+      ? state.currentRoute.param.trim().toLowerCase()
+      : '';
 
     const labelListEl = document.querySelector('#Label1 .widget-content');
     if (labelListEl) {
       labelListEl.innerHTML = `
+        <div style="margin-bottom:12px;">
+          <select id="sidebar-category-select" class="foxsa-cat-select" style="width:100%;" aria-label="Pilih Kategori Berita">
+            <option value="#/">-- Pilih Kategori Cepat (${sortedLabels.length}) --</option>
+            ${sortedLabels.map(l => `
+              <option value="#/label/${encodeURIComponent(l)}" ${activeLabelLower === l.toLowerCase() ? 'selected' : ''}>
+                #${escapeHtml(l)} (${labelCounts[l]} berita)
+              </option>
+            `).join('')}
+          </select>
+        </div>
         <ul class="list-label">
           ${sortedLabels.map(l => `
             <li>
@@ -1612,6 +2315,13 @@
           `).join('')}
         </ul>
       `;
+
+      const sideSelect = document.getElementById('sidebar-category-select');
+      if (sideSelect) {
+        sideSelect.addEventListener('change', () => {
+          if (sideSelect.value) window.location.hash = sideSelect.value;
+        });
+      }
     }
 
     const labelCloudEl = document.querySelector('#Label2 .widget-content');
@@ -1621,7 +2331,7 @@
           ${sortedLabels.map(l => `
             <li>
               <a class="label-name" href="#/label/${encodeURIComponent(l)}">
-                ${escapeHtml(l)}
+                #${escapeHtml(l)}
               </a>
             </li>
           `).join('')}
@@ -1671,11 +2381,40 @@
   }
 
   // =========================================================================
-  // 8. UI INTERACTIONS (SEARCH, MOBILE MENU, BACK TO TOP)
+  // 8. UI INTERACTIONS (SEARCH, ANDROID DRAWER MENU, BACK TO TOP)
   // =========================================================================
 
+  function rebuildMobileDrawerMenu() {
+    const mobileMenuContainer = document.querySelector('.mobile-menu');
+    const desktopMenuNav = document.getElementById('main-menu-nav');
+    if (!mobileMenuContainer || !desktopMenuNav) return;
+
+    mobileMenuContainer.innerHTML = '';
+    const clonedUl = desktopMenuNav.cloneNode(true);
+    clonedUl.removeAttribute('id');
+
+    clonedUl.querySelectorAll('li.has-sub').forEach(li => {
+      const toggleSpan = document.createElement('span');
+      toggleSpan.className = 'submenu-toggle';
+      li.appendChild(toggleSpan);
+
+      const topLink = li.querySelector(':scope > a');
+      const toggleFn = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        li.classList.toggle('show');
+      };
+      toggleSpan.addEventListener('click', toggleFn);
+      if (topLink && topLink.getAttribute('href') === 'javascript:void(0)') {
+        topLink.addEventListener('click', toggleFn);
+      }
+    });
+
+    mobileMenuContainer.appendChild(clonedUl);
+  }
+
   function initUIInteractions() {
-    // Search Toggle
+    // Desktop/Header Search Toggle
     const showSearchBtn = document.querySelector('.show-search');
     const hideSearchBtn = document.querySelector('.hide-search');
     const searchWrap = document.getElementById('nav-search');
@@ -1702,26 +2441,25 @@
       });
     }
 
-    // Mobile Menu Toggle & Slide Menu
-    const mobileToggles = document.querySelectorAll('.mobile-menu-toggle');
-    const overlay = document.querySelector('.overlay');
-    const mobileMenuContainer = document.querySelector('.mobile-menu');
-    const desktopMenuNav = document.getElementById('main-menu-nav');
-
-    if (mobileMenuContainer && desktopMenuNav && !mobileMenuContainer.querySelector('ul')) {
-      const clonedUl = desktopMenuNav.cloneNode(true);
-      clonedUl.removeAttribute('id');
-      clonedUl.querySelectorAll('li.has-sub').forEach(li => {
-        const toggleSpan = document.createElement('span');
-        toggleSpan.className = 'submenu-toggle';
-        li.appendChild(toggleSpan);
-        toggleSpan.addEventListener('click', (e) => {
-          e.stopPropagation();
-          li.classList.toggle('show');
-        });
+    // Mobile Drawer Search Form
+    const mobileSearchForm = document.getElementById('mobile-drawer-search-form');
+    if (mobileSearchForm) {
+      mobileSearchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const inp = mobileSearchForm.querySelector('input[name="q"]');
+        const q = inp ? inp.value.trim() : '';
+        document.body.classList.remove('nav-active');
+        window.location.hash = q ? `#/search/${encodeURIComponent(q)}` : '#/';
       });
-      mobileMenuContainer.appendChild(clonedUl);
     }
+
+    // Mobile Menu Toggle & Slide Drawer
+    const mobileToggles = document.querySelectorAll('.mobile-menu-toggle');
+    const closeDrawerBtn = document.getElementById('mobile-drawer-close');
+    const overlay = document.getElementById('mobile-drawer-overlay');
+    const mobileMenuContainer = document.querySelector('.mobile-menu');
+
+    rebuildMobileDrawerMenu();
 
     mobileToggles.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1729,16 +2467,22 @@
       });
     });
 
+    if (closeDrawerBtn) {
+      closeDrawerBtn.addEventListener('click', () => {
+        document.body.classList.remove('nav-active');
+      });
+    }
+
     if (overlay) {
       overlay.addEventListener('click', () => {
         document.body.classList.remove('nav-active');
       });
     }
 
-    // Close mobile menu when clicking a link inside it
     if (mobileMenuContainer) {
       mobileMenuContainer.addEventListener('click', (e) => {
-        if (e.target.tagName === 'A') {
+        const anchor = e.target.closest('a');
+        if (anchor && anchor.getAttribute('href') !== 'javascript:void(0)') {
           document.body.classList.remove('nav-active');
         }
       });
@@ -1774,4 +2518,3 @@
   });
 
 })();
-
