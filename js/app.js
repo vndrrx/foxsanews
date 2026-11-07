@@ -445,30 +445,28 @@
 
           return `
             <div class="blog-post hentry index-post post-${idx}">
-              <div class="index-post-inside-wrap">
-                <div class="post-image-wrap">
-                  <a class="post-image-link" href="${postHref}">
-                    <img alt="${escapeHtml(post.title)}" class="post-thumb" src="${escapeHtml(thumb)}" loading="lazy"/>
+              <div class="post-image-wrap">
+                <a class="post-image-link" href="${postHref}">
+                  <img alt="${escapeHtml(post.title)}" class="post-thumb lazy-yard" src="${escapeHtml(thumb)}" loading="lazy"/>
+                </a>
+              </div>
+              <div class="post-info">
+                <div class="post-meta">
+                  <a class="post-tag" href="#/label/${encodeURIComponent(primaryTag)}">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZ8ywHDFxR8Ve6lZmhowku3pgPCU-hcA-fO7LSE1kZcwLd6GrYvwegTY9qU92Pc5d3PqPFV9RtzYDB2k1sUM6sVLMvvZyBxtIo7xgbw64b3_S18fI3guFOUsaeZXGhZh7ThunBaeAkgs5OjJ7G8lN0myppggd5V4mmDirNri0Xkhxc2lW0tmi2kZRHd-_Y/s16000/Hash-tag.png" alt="#" />
+                    ${escapeHtml(primaryTag)}
                   </a>
                 </div>
-                <div class="post-info-wrap">
-                  <div class="post-info">
-                    <a class="post-tag" href="#/label/${encodeURIComponent(primaryTag)}">${escapeHtml(primaryTag)}</a>
-                    <h2 class="post-title">
-                      <a href="${postHref}">${escapeHtml(post.title)}</a>
-                    </h2>
+                <h2 class="post-title">
+                  <a href="${postHref}">${escapeHtml(post.title)}</a>
+                </h2>
+                <div class="index-post-footer">
+                  <div class="post-meta">
+                    <span class="post-author"><a href="#/author/${encodeURIComponent(post.author)}" title="${escapeHtml(post.author)}">${escapeHtml(post.author)}</a></span>
+                    <span class="post-date published" datetime="${escapeHtml(post.published)}">${escapeHtml(formatDateID(post.published))}</span>
+                    ${commentCount > 0 ? `<span style="float:left;margin-left:10px;color:#F08D39;font-weight:600;"><i class="fa-regular fa-comment"></i> ${commentCount}</span>` : ''}
                   </div>
-                  <div class="index-post-footer">
-                    <div class="post-meta">
-                      <span class="post-author"><a href="#/author/${encodeURIComponent(post.author)}" title="${escapeHtml(post.author)}">${escapeHtml(post.author)}</a></span>
-                      <span class="post-date published" datetime="${escapeHtml(post.published)}">${escapeHtml(formatDateID(post.published))}</span>
-                      ${commentCount > 0 ? `<span style="margin-left:8px;color:#F08D39;font-weight:600;"><i class="fa-regular fa-comment"></i> ${commentCount}</span>` : ''}
-                    </div>
-                    <p class="post-snippet">${escapeHtml(snippet)}</p>
-                    <div class="read-more-wrap">
-                      <a class="read-more" href="${postHref}">Read More</a>
-                    </div>
-                  </div>
+                  <p class="post-snippet">${escapeHtml(snippet)}</p>
                 </div>
               </div>
             </div>
@@ -489,11 +487,8 @@
 
     mainEl.innerHTML = `
       <div class="widget Blog" id="Blog1">
-        <div class="home-posts-headline title-wrap" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="home-posts-headline title-wrap">
           <h3 class="title">Recent Posts</h3>
-          <a href="#/admin" class="foxsa-btn" style="padding:6px 14px;font-size:12px;text-decoration:none;">
-            <i class="fa-solid fa-pen-to-square"></i> + Tambah / Kelola Berita
-          </a>
         </div>
         ${filterMessageHtml}
         <div class="blog-posts hfeed index-post-wrap">
@@ -1574,13 +1569,15 @@
 
     const popularHtml = popularPosts.map((p, idx) => `
       <div class="post item-${idx}">
-        <a class="post-image-link" href="${getPostHref(p)}">
-          <img alt="${escapeHtml(p.title)}" class="post-thumb" src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" loading="lazy"/>
-        </a>
-        <div class="post-info">
-          <h2 class="post-title"><a href="${getPostHref(p)}">${escapeHtml(p.title)}</a></h2>
-          <div class="post-meta">
-            <span class="post-date published" datetime="${escapeHtml(p.published)}">${escapeHtml(formatDateID(p.published))}</span>
+        <div class="post-content">
+          <a class="post-image-link" href="${getPostHref(p)}">
+            <img alt="${escapeHtml(p.title)}" class="post-thumb lazy-yard" src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" loading="lazy"/>
+          </a>
+          <div class="post-info">
+            <h2 class="post-title"><a href="${getPostHref(p)}">${escapeHtml(p.title)}</a></h2>
+            <div class="post-meta">
+              <span class="post-date published" datetime="${escapeHtml(p.published)}">${escapeHtml(formatDateID(p.published))}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1750,6 +1747,13 @@
     // Back to Top button
     const backTopBtn = document.querySelector('.back-top');
     if (backTopBtn) {
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 250) {
+          backTopBtn.style.display = 'block';
+        } else {
+          backTopBtn.style.display = 'none';
+        }
+      });
       backTopBtn.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
