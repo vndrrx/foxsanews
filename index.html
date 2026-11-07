@@ -2,7 +2,8 @@
 <html class="ltr" dir="ltr" lang="id" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8" />
-  <meta content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" name="viewport" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta name="theme-color" content="#090C1E" />
   <title>FoxSA News — Independent News Network</title>
   <meta name="description" content="FoxSA News is a modern news media platform delivering reliable and engaging coverage across politics, public opinion, and national events in San Andreas." />
   <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg8BFSDlMuk9oQMdt54bGJWdFRjLoRiTGicU3Tbo1g1ROZfwnbnGdEQ_XFe4LCNnan9EzICIdp6nE4pchL0FKgAfrgoxxEivmFrArKlg0yS94xAqXKLdT6pj6qOBvBqnTdBX5Hu1s0oNY64JRerTaU9hV0p6fNkH5bq0arILGTkG4mGS4Y/s200/FoxSA2.png" />
@@ -12,17 +13,39 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
 
-  <!-- Main Template Stylesheet (Extracted from FoxSA News Blogger XML) -->
+  <!-- Main Template Stylesheet -->
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body class="index home">
+  <div class="overlay" id="mobile-drawer-overlay"></div>
+
   <div id="outer-wrapper">
 
     <!-- ==================== HEADER ==================== -->
     <div id="header-wrap">
-      <div class="mobile-menu-wrap">
+      <!-- Mobile Drawer Menu -->
+      <div class="mobile-menu-wrap" id="mobile-menu-drawer">
+        <div class="foxsa-mobile-drawer-head">
+          <a href="#/" class="foxsa-drawer-logo">
+            <img alt="FoxSA News" src="https://blogger.googleusercontent.com/img/a/AVvXsEhv_ADWAS1S4vv_z_NoU2h_5vhIQ_SRh4OsG_6OT3fOsq8wRSvJbJk6WGn6W_a35WvDzWIz-r82OA9KFTVKl7XPnaHgDLI6w9nvBDnpZqLsZh6LOjkqepU7Fr3gQpOndO3J4xIwTU0zzqRu2sLdHnyWMdCnHDbu3ZdN6CiDEPTzD0xCboDe_PhNqtRDXL-_=s1600" />
+          </a>
+          <button type="button" class="foxsa-drawer-close" id="mobile-drawer-close" aria-label="Tutup Menu">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="foxsa-mobile-search-box">
+          <form class="foxsa-mobile-search-form" id="mobile-drawer-search-form">
+            <input type="search" name="q" placeholder="Cari berita San Andreas..." autocomplete="off" />
+            <button type="submit" aria-label="Cari"><i class="fa-solid fa-magnifying-glass"></i></button>
+          </form>
+        </div>
         <div class="mobile-menu"></div>
+        <div class="foxsa-mobile-drawer-foot">
+          <a href="https://discord.gg/KF6qETnr4j" target="_blank" rel="noopener" class="foxsa-drawer-discord">
+            <i class="fa-brands fa-discord"></i> Join Discord FoxSA News
+          </a>
+        </div>
       </div>
 
       <div class="container row">
@@ -46,24 +69,29 @@
               <ul id="main-menu-nav" role="menubar">
                 <li><a href="#/" role="menuitem">Home</a></li>
                 <li class="has-sub">
-                  <a href="javascript:void(0)" role="menuitem">Features</a>
+                  <a href="javascript:void(0)" role="menuitem">Profil &amp; Info</a>
                   <ul class="sub-menu m-sub">
                     <li><a href="#/post/2526320561083681754" role="menuitem">About FoxSA</a></li>
                     <li><a href="#/post/3689427128628530545" role="menuitem">Rencana &amp; Pembaruan</a></li>
                     <li><a href="#/post/4080555137325759950" role="menuitem">Open Recruitment</a></li>
-                    <li class="has-sub">
-                      <a href="javascript:void(0)" role="menuitem">Kategori Berita</a>
-                      <ul class="sub-menu2 m-sub">
-                        <li><a href="#/label/Crime" role="menuitem">Crime &amp; LSPD</a></li>
-                        <li><a href="#/label/Motorsport" role="menuitem">Motorsport</a></li>
-                        <li><a href="#/label/Government%20%26%20Emergency%20Services" role="menuitem">Government &amp; Emergency</a></li>
-                        <li><a href="#/label/Los%20Santos%20Event" role="menuitem">Los Santos Event</a></li>
-                      </ul>
-                    </li>
+                  </ul>
+                </li>
+                <li class="has-sub">
+                  <a href="javascript:void(0)" role="menuitem">Kategori Berita</a>
+                  <ul class="sub-menu m-sub" id="nav-dynamic-categories">
+                    <li><a href="#/label/Crime" role="menuitem">Crime</a></li>
+                    <li><a href="#/label/LSPD" role="menuitem">LSPD</a></li>
+                    <li><a href="#/label/Motorsport" role="menuitem">Motorsport</a></li>
+                    <li><a href="#/label/Government%20%26%20Emergency%20Services" role="menuitem">Government &amp; Emergency</a></li>
+                    <li><a href="#/label/Los%20Santos%20Event" role="menuitem">Los Santos Event</a></li>
                   </ul>
                 </li>
                 <li><a href="https://discord.gg/KF6qETnr4j" target="_blank" rel="noopener" role="menuitem">Contact FoxSA</a></li>
-                <li><a href="#/admin" role="menuitem" class="admin-nav-btn"><i class="fa-solid fa-user-shield"></i> Admin Panel</a></li>
+                <li>
+                  <a href="#/admin" role="menuitem" class="admin-nav-btn" id="header-staff-btn">
+                    <i class="fa-solid fa-user-shield"></i> <span class="staff-btn-label">Staff / Admin</span>
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -72,12 +100,12 @@
         <!-- Search Box -->
         <div id="nav-search">
           <form action="#/search" class="search-form" role="search">
-            <input autocomplete="off" class="search-input" name="q" placeholder="Cari berita San Andreas..." type="search" value="" />
-            <span class="hide-search"></span>
+            <input autocomplete="off" class="search-input" name="q" placeholder="Ketik kata kunci berita lalu tekan Enter..." type="search" value="" />
+            <span class="hide-search" title="Tutup Pencarian"></span>
           </form>
         </div>
-        <span class="show-search"></span>
-        <span class="mobile-menu-toggle"></span>
+        <span class="show-search" title="Cari Berita"></span>
+        <span class="mobile-menu-toggle" title="Buka Menu"></span>
       </div>
     </div>
 
@@ -97,7 +125,7 @@
         <!-- Sidebar -->
         <div id="sidebar-wrapper">
           <div class="sidebar common-widget section" id="sidebar1" name="Sidebar Right (A)">
-            <!-- About Us Widget (Exact match to XML HTML11) -->
+            <!-- About Us Widget -->
             <div class="widget HTML" id="HTML11">
               <div class="widget-title">
                 <h3 class="title">About Us</h3>
@@ -123,22 +151,22 @@
               </div>
             </div>
 
-            <!-- Tags Cloud Widget -->
-            <div class="widget Label" id="Label2">
+            <!-- Categories Dropdown & List Widget -->
+            <div class="widget Label" id="Label1">
               <div class="widget-title">
-                <h3 class="title">Tags</h3>
+                <h3 class="title">Kategori Berita</h3>
               </div>
-              <div class="widget-content cloud-label">
+              <div class="widget-content list-label">
                 <!-- Rendered dynamically by js/app.js -->
               </div>
             </div>
 
-            <!-- Categories List Widget -->
-            <div class="widget Label" id="Label1">
+            <!-- Tags Cloud Widget -->
+            <div class="widget Label" id="Label2">
               <div class="widget-title">
-                <h3 class="title">Categories</h3>
+                <h3 class="title">Tags Cepat</h3>
               </div>
-              <div class="widget-content list-label">
+              <div class="widget-content cloud-label">
                 <!-- Rendered dynamically by js/app.js -->
               </div>
             </div>
@@ -230,7 +258,7 @@
                   <li><a href="#/">Home</a></li>
                   <li><a href="#/post/2526320561083681754">About</a></li>
                   <li><a href="https://discord.gg/KF6qETnr4j" target="_blank" rel="noopener">Contact Us</a></li>
-                  <li><a href="#/admin">Admin Panel</a></li>
+                  <li><a href="#/admin">Staff Login</a></li>
                 </ul>
               </div>
             </div>
@@ -245,7 +273,7 @@
   </div>
 
   <!-- Back To Top Button -->
-  <div class="back-top" title="Back to Top"></div>
+  <div class="back-top" title="Kembali ke Atas"></div>
 
   <!-- Initial News & Comments Data + Application Logic -->
   <script src="js/data.js"></script>
