@@ -1,11 +1,14 @@
 /**
- * FoxSA News - Main Application Script (HTML/CSS/JS Static & Vercel Ready)
+ * FoxSA News - Main Application Script (Kreeti + AnimeNetwork Magazine Edition)
  * Features:
- * - Android-Friendly Responsive UI (Sticky Header, Slide Drawer, Category Bar)
- * - Smart Category System: Scrollable Pills + Dropdown Filter (Home) & Multi-Select Chips + Dropdown (Admin)
- * - Protected Staff/Admin Login System (Multi-Staff Accounts + Password Manager)
- * - Interactive Comments System & Full News CRUD
- * - Persistent Storage: LocalStorage + JSON/JS Export-Import + Optional GitHub/Vercel Cloud Sync
+ * - Kreeti + AnimeNetwork Hybrid Design:
+ *   * Live Date Topbar, Dark Brand Box Header, Inline Search, Popular Tags Strip
+ *   * Breaking News Ticker + 3-Column Hero Showcase (Editor's Picks, Main News, Trending Now)
+ *   * 4-Column Featured Posts Row
+ *   * AnimeNetwork-style Category Tabs + Grid/List View Switcher + Clean "Recent News" Cards
+ *   * Tabbed Sidebar (TERPOPULER / TERBARU) + FoxSA Spotlight Card
+ * - Super-Simple Visual Article Editor (Zero HTML code — type like Word/Google Docs + 1-click Photo Upload)
+ * - Protected Staff/Admin Login System & Interactive IC Comments
  */
 
 (function () {
@@ -13,16 +16,16 @@
 
   const STORAGE_KEY = 'foxsa_news_data_v1';
   const AUTH_SESSION_KEY = 'foxsa_auth_session_v1';
+  const VIEW_MODE_KEY = 'foxsa_news_view_mode_v1';
   const GITHUB_CONFIG_KEY = 'foxsa_github_sync_config';
   const DEFAULT_AVATAR = 'https://4.bp.blogspot.com/-uCjYgVFIh70/VuOLn-mL7PI/AAAAAAAADUs/Kcu9wJbv790hIo83rI_s7lLW3zkLY01EA/s100/avatar.png';
-  const HASHTAG_ICON = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZ8ywHDFxR8Ve6lZmhowku3pgPCU-hcA-fO7LSE1kZcwLd6GrYvwegTY9qU92Pc5d3PqPFV9RtzYDB2k1sUM6sVLMvvZyBxtIo7xgbw64b3_S18fI3guFOUsaeZXGhZh7ThunBaeAkgs5OjJ7G8lN0myppggd5V4mmDirNri0Xkhxc2lW0tmi2kZRHd-_Y/s16000/Hash-tag.png';
 
+  const DAYS_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const MONTHS_ID = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
   ];
 
-  // Official preset categories so staff never have to type manually
   const OFFICIAL_CATEGORIES = [
     'Crime',
     'LSPD',
@@ -37,7 +40,6 @@
     'Traffic Incident'
   ];
 
-  // Default Staff & Admin Accounts
   const DEFAULT_STAFF_ACCOUNTS = [
     {
       username: 'admin',
@@ -91,7 +93,11 @@
     data: null,
     currentUser: null,
     currentRoute: { view: 'home', param: null },
-    visiblePostsCount: 5,
+    visiblePostsCount: 6,
+    feedLayout: localStorage.getItem(VIEW_MODE_KEY) || 'list', // 'list' (AnimeNetwork) or 'grid' (Kreeti)
+    sidebarTab: 'popular', // 'popular' or 'latest'
+    tickerIndex: 0,
+    tickerTimer: null,
     adminTab: 'posts',
     editingPostId: null,
     selectedEditorLabels: [],
@@ -111,7 +117,6 @@
       cloned.staffAccounts = JSON.parse(JSON.stringify(DEFAULT_STAFF_ACCOUNTS));
     }
 
-    // Sync avatars from authors object into staffAccounts if available
     cloned.staffAccounts.forEach(acc => {
       const known = cloned.authors[acc.authorName];
       if (known && known.avatar && (!acc.avatar || acc.avatar === DEFAULT_AVATAR)) {
@@ -209,9 +214,11 @@
       const labelSpan = staffBtn.querySelector('.staff-btn-label');
       if (state.currentUser) {
         if (labelSpan) labelSpan.textContent = `Panel (${state.currentUser.displayName.split(' ')[0]})`;
+        staffBtn.classList.add('is-logged-in');
         staffBtn.title = `Login sebagai ${state.currentUser.displayName} (${state.currentUser.role})`;
       } else {
         if (labelSpan) labelSpan.textContent = 'Staff Login';
+        staffBtn.classList.remove('is-logged-in');
         staffBtn.title = 'Login khusus Redaksi & Staff FoxSA';
       }
     }
@@ -344,7 +351,7 @@
   }
 
   // =========================================================================
-  // 2. HELPER FUNCTIONS & CATEGORY UTILS
+  // 2. HELPER FUNCTIONS & READING TIME / CATEGORY UTILS
   // =========================================================================
 
   function escapeHtml(str) {
@@ -364,7 +371,17 @@
     const month = MONTHS_ID[d.getMonth()];
     const day = String(d.getDate()).padStart(2, '0');
     const year = d.getFullYear();
-    return `${month} ${day}, ${year}`;
+    return `${day} ${month} ${year}`;
+  }
+
+  function formatShortDate(isoDate) {
+    if (!isoDate) return '';
+    const d = new Date(isoDate);
+    if (isNaN(d.getTime())) return isoDate;
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
   }
 
   function formatDateTimeID(isoDate) {
@@ -377,6 +394,14 @@
     const hh = String(d.getHours()).padStart(2, '0');
     const mm = String(d.getMinutes()).padStart(2, '0');
     return `${day} ${month} ${year}, ${hh}:${mm}`;
+  }
+
+  function getReadingTime(html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html || '';
+    const words = (tmp.textContent || '').trim().split(/\s+/).filter(Boolean).length;
+    const mins = Math.max(1, Math.round(words / 160));
+    return `${mins} min read`;
   }
 
   function getArchiveKey(isoDate) {
@@ -396,7 +421,7 @@
     return ymKey;
   }
 
-  function stripHtmlToSnippet(html, maxLen = 135) {
+  function stripHtmlToSnippet(html, maxLen = 150) {
     const tmp = document.createElement('div');
     tmp.innerHTML = html || '';
     tmp.querySelectorAll('style, script').forEach(el => el.remove());
@@ -477,6 +502,46 @@
     });
   }
 
+  // Convert legacy messy Blogger HTML into clean, readable visual HTML for the Visual Editor
+  function cleanBloggerHtmlForVisualEditor(rawHtml) {
+    if (!rawHtml) return '<p>Los Santos, FoxSA News — Tulis isi berita di sini...</p>';
+    const temp = document.createElement('div');
+    temp.innerHTML = processPostContentHtml(rawHtml);
+
+    // Remove inline font-family/font-size clutter while keeping paragraphs, bold, italic, images, quotes, tables
+    temp.querySelectorAll('span').forEach(sp => {
+      sp.removeAttribute('style');
+    });
+
+    // Convert Blogger .separator image wrappers into clean visual figure blocks
+    temp.querySelectorAll('.separator').forEach(sep => {
+      const img = sep.querySelector('img');
+      if (img && img.getAttribute('src')) {
+        const src = img.getAttribute('src');
+        const fig = document.createElement('figure');
+        fig.className = 'foxsa-article-figure';
+        fig.innerHTML = `<img src="${src}" alt="Foto Berita" />`;
+        sep.replaceWith(fig);
+      }
+    });
+
+    return temp.innerHTML;
+  }
+
+  // Serialize Visual Editor content into clean, justified article HTML
+  function serializeVisualEditorToCleanHtml(editorEl) {
+    const clone = editorEl.cloneNode(true);
+    // Remove any editor-only delete buttons if present
+    clone.querySelectorAll('.foxsa-img-remove-btn').forEach(btn => btn.remove());
+    // Ensure paragraphs have clean justify alignment
+    clone.querySelectorAll('p').forEach(p => {
+      if (!p.style.textAlign) {
+        p.style.textAlign = 'justify';
+      }
+    });
+    return clone.innerHTML.trim();
+  }
+
   // =========================================================================
   // 3. ROUTING
   // =========================================================================
@@ -506,17 +571,248 @@
     state.currentRoute = parseHash();
 
     if (state.currentRoute.view !== prevView) {
-      state.visiblePostsCount = (state.data && state.data.siteInfo && state.data.siteInfo.postPerPage) || 5;
+      state.visiblePostsCount = 6;
     }
 
     document.body.classList.remove('nav-active');
+    renderHeroShowcase();
     renderMainView();
     renderWidgets();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   // =========================================================================
-  // 4. RENDERING: LIST VIEW + SMART CATEGORY BAR (PILLS + DROPDOWN)
+  // 4. HERO SHOWCASE (KREETI BREAKING NEWS + 3-COL GRID + 4-COL FEATURED)
+  // =========================================================================
+
+  function renderHeroShowcase() {
+    const heroSection = document.getElementById('foxsa-hero-showcase');
+    if (!heroSection) return;
+
+    // Show full Hero Showcase ONLY on main Home view
+    if (state.currentRoute.view !== 'home' || !state.data || !state.data.posts || state.data.posts.length === 0) {
+      heroSection.style.display = 'none';
+      clearInterval(state.tickerTimer);
+      return;
+    }
+
+    heroSection.style.display = 'block';
+    const posts = state.data.posts;
+
+    // 1. Main Headline (Newest news article, skip "All About FoxSA" overview if there's a newer or news post)
+    const newsPosts = posts.filter(p => p.id !== '2526320561083681754');
+    const mainPost = newsPosts[0] || posts[0];
+
+    // 2. Editor's Picks (Next 3 posts)
+    const editorPicks = posts.filter(p => p.id !== mainPost.id).slice(0, 3);
+    const topPick = editorPicks[0] || mainPost;
+    const subPicks = editorPicks.slice(1, 3);
+
+    // 3. Trending Now (Up to 5 popular/recent posts with numbered badges 1-5)
+    let trendingPosts = posts.filter(p => p.popular);
+    if (trendingPosts.length < 5) {
+      const others = posts.filter(p => !trendingPosts.includes(p));
+      trendingPosts = trendingPosts.concat(others);
+    }
+    trendingPosts = trendingPosts.slice(0, 5);
+
+    // 4. Featured Posts 4-Column Row (4 strong visual stories)
+    const featuredRowPosts = newsPosts.slice(1, 5).length === 4
+      ? newsPosts.slice(1, 5)
+      : posts.slice(0, 4);
+
+    // Breaking News Ticker items
+    const tickerPosts = posts.slice(0, 6);
+    if (state.tickerIndex >= tickerPosts.length) state.tickerIndex = 0;
+    const activeTickerPost = tickerPosts[state.tickerIndex] || mainPost;
+
+    const mainTag = (mainPost.labels && mainPost.labels[0]) || 'News';
+    const topPickTag = (topPick.labels && topPick.labels[0]) || 'News';
+
+    heroSection.innerHTML = `
+      <div class="container">
+        <!-- BREAKING NEWS BAR (KREETI STYLE) -->
+        <div class="kreeti-breaking-bar">
+          <div class="breaking-badge">
+            <span class="pulse-dot"></span>
+            <span>BREAKING NEWS</span>
+          </div>
+          <div class="breaking-ticker-content" id="foxsa-ticker-slot">
+            <a href="${getPostHref(activeTickerPost)}" class="ticker-item-link">
+              <img src="${escapeHtml(activeTickerPost.featuredImage || state.data.siteInfo.aboutBanner)}" alt="thumb" class="ticker-thumb" />
+              <span class="ticker-cat">[${escapeHtml((activeTickerPost.labels && activeTickerPost.labels[0]) || 'News')}]</span>
+              <span class="ticker-title">${escapeHtml(activeTickerPost.title)}</span>
+            </a>
+          </div>
+          <div class="breaking-controls">
+            <button type="button" id="ticker-prev-btn" aria-label="Sebelumnya"><i class="fa-solid fa-chevron-left"></i></button>
+            <button type="button" id="ticker-next-btn" aria-label="Berikutnya"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <!-- 3-COLUMN HERO MAGAZINE GRID (KREETI STYLE) -->
+        <div class="kreeti-hero-grid">
+          <!-- Left Column: Editor's Picks -->
+          <div class="kreeti-col kreeti-col-picks">
+            <div class="kreeti-sec-heading">
+              <span class="heading-line"></span>
+              <h3>Editor's Picks</h3>
+            </div>
+
+            <div class="kreeti-pick-featured">
+              <a href="${getPostHref(topPick)}" class="pick-featured-link">
+                <img src="${escapeHtml(topPick.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(topPick.title)}" loading="lazy" />
+                <div class="pick-featured-overlay">
+                  <div class="kreeti-badges">
+                    <span class="k-badge-time"><i class="fa-regular fa-clock"></i> ${getReadingTime(topPick.content)}</span>
+                    <span class="k-badge-cat">${escapeHtml(topPickTag)}</span>
+                  </div>
+                  <h4>${escapeHtml(topPick.title)}</h4>
+                </div>
+              </a>
+            </div>
+
+            <div class="kreeti-pick-list">
+              ${subPicks.map(sp => `
+                <div class="kreeti-pick-text-card">
+                  <div class="pick-meta-line">
+                    <span class="pick-read"><i class="fa-regular fa-clock"></i> ${getReadingTime(sp.content)}</span>
+                    <a href="#/label/${encodeURIComponent((sp.labels && sp.labels[0]) || 'News')}" class="pick-cat">${escapeHtml((sp.labels && sp.labels[0]) || 'News')}</a>
+                  </div>
+                  <h4><a href="${getPostHref(sp)}">${escapeHtml(sp.title)}</a></h4>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Center Column: Main News -->
+          <div class="kreeti-col kreeti-col-main">
+            <div class="kreeti-sec-heading">
+              <span class="heading-line"></span>
+              <h3>Headline Utama</h3>
+            </div>
+
+            <div class="kreeti-main-hero-card">
+              <a href="${getPostHref(mainPost)}" class="main-hero-link">
+                <img src="${escapeHtml(mainPost.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(mainPost.title)}" />
+                <div class="main-hero-overlay">
+                  <div class="kreeti-badges">
+                    <span class="k-badge-icon"><i class="fa-solid fa-bolt"></i></span>
+                    <span class="k-badge-time">${getReadingTime(mainPost.content)}</span>
+                    <span class="k-badge-cat">${escapeHtml(mainTag)}</span>
+                  </div>
+                  <h2>${escapeHtml(mainPost.title)}</h2>
+                  <p class="main-hero-excerpt">${escapeHtml(stripHtmlToSnippet(mainPost.content, 120))}</p>
+                  <div class="main-hero-meta">
+                    <span><i class="fa-regular fa-user"></i> ${escapeHtml(mainPost.author)}</span>
+                    <span>•</span>
+                    <span><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(mainPost.published))}</span>
+                    <span>•</span>
+                    <span><i class="fa-regular fa-comments"></i> ${(mainPost.comments || []).length} Komentar</span>
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Column: Trending Now -->
+          <div class="kreeti-col kreeti-col-trending">
+            <div class="kreeti-sec-heading">
+              <span class="heading-line"></span>
+              <h3>Trending Now</h3>
+            </div>
+
+            <div class="kreeti-trending-list">
+              ${trendingPosts.map((tp, idx) => `
+                <a href="${getPostHref(tp)}" class="kreeti-trending-item">
+                  <div class="trending-thumb-wrap">
+                    <img src="${escapeHtml(tp.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(tp.title)}" loading="lazy" />
+                    <span class="trending-rank-badge">${idx + 1}</span>
+                  </div>
+                  <div class="trending-item-info">
+                    <h4>${escapeHtml(tp.title)}</h4>
+                    <span class="trending-item-date">${escapeHtml(formatDateID(tp.published))}</span>
+                  </div>
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+
+        <!-- 4-COLUMN FEATURED POSTS ROW (KREETI STYLE) -->
+        <div class="kreeti-featured-row-wrap">
+          <div class="kreeti-sec-heading">
+            <span class="heading-line"></span>
+            <h3>Sorotan Pilihan Redaksi</h3>
+          </div>
+          <div class="kreeti-featured-4grid">
+            ${featuredRowPosts.map(fp => {
+              const cat = (fp.labels && fp.labels[0]) || 'News';
+              return `
+                <article class="kreeti-feat-card">
+                  <a href="${getPostHref(fp)}" class="feat-card-img">
+                    <img src="${escapeHtml(fp.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(fp.title)}" loading="lazy" />
+                    <span class="feat-read-badge"><i class="fa-regular fa-clock"></i> ${getReadingTime(fp.content)}</span>
+                  </a>
+                  <div class="feat-card-body">
+                    <a href="#/label/${encodeURIComponent(cat)}" class="feat-card-cat">${escapeHtml(cat)}</a>
+                    <h4><a href="${getPostHref(fp)}">${escapeHtml(fp.title)}</a></h4>
+                    <div class="feat-card-meta">
+                      <span>${escapeHtml(fp.author)}</span>
+                      <span>•</span>
+                      <span>${escapeHtml(formatShortDate(fp.published))}</span>
+                      <span>•</span>
+                      <span><i class="fa-regular fa-comment"></i> ${(fp.comments || []).length}</span>
+                    </div>
+                  </div>
+                </article>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Bind Breaking News Ticker Controls & Auto-Cycle
+    const updateTickerDOM = () => {
+      const slot = document.getElementById('foxsa-ticker-slot');
+      if (!slot) return;
+      const p = tickerPosts[state.tickerIndex] || mainPost;
+      slot.innerHTML = `
+        <a href="${getPostHref(p)}" class="ticker-item-link">
+          <img src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" alt="thumb" class="ticker-thumb" />
+          <span class="ticker-cat">[${escapeHtml((p.labels && p.labels[0]) || 'News')}]</span>
+          <span class="ticker-title">${escapeHtml(p.title)}</span>
+        </a>
+      `;
+    };
+
+    const prevBtn = document.getElementById('ticker-prev-btn');
+    const nextBtn = document.getElementById('ticker-next-btn');
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        state.tickerIndex = (state.tickerIndex - 1 + tickerPosts.length) % tickerPosts.length;
+        updateTickerDOM();
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        state.tickerIndex = (state.tickerIndex + 1) % tickerPosts.length;
+        updateTickerDOM();
+      });
+    }
+
+    clearInterval(state.tickerTimer);
+    state.tickerTimer = setInterval(() => {
+      if (state.currentRoute.view === 'home' && tickerPosts.length > 1) {
+        state.tickerIndex = (state.tickerIndex + 1) % tickerPosts.length;
+        updateTickerDOM();
+      }
+    }, 5500);
+  }
+
+  // =========================================================================
+  // 5. RENDERING: RECENT NEWS LIST / GRID + ANIMENETWORK CATEGORY TABS
   // =========================================================================
 
   function getFilteredPosts() {
@@ -551,7 +847,7 @@
     return posts;
   }
 
-  function buildCategoryFilterBarHtml() {
+  function buildAnimeNetworkCategoryToolbarHtml() {
     const { view, param } = state.currentRoute;
     const labelCounts = getLabelCounts();
     const sortedCategories = Object.keys(labelCounts).sort((a, b) => {
@@ -563,45 +859,40 @@
     const isPopular = view === 'popular';
     const activeLabelLower = view === 'label' && param ? param.trim().toLowerCase() : '';
 
-    const pillsHtml = [
-      `<a href="#/" class="foxsa-cat-pill ${isHome ? 'active' : ''}">
-         <i class="fa-solid fa-newspaper"></i> Semua <span class="pill-count">${state.data.posts.length}</span>
-       </a>`,
-      `<a href="#/popular" class="foxsa-cat-pill ${isPopular ? 'active' : ''}">
-         <i class="fa-solid fa-fire" style="color:${isPopular ? '#fff' : '#F08D39'};"></i> Terpopuler
-       </a>`,
-      ...sortedCategories.map(cat => {
-        const isActive = activeLabelLower === cat.toLowerCase();
-        return `
-          <a href="#/label/${encodeURIComponent(cat)}" class="foxsa-cat-pill ${isActive ? 'active' : ''}">
-            <i class="${getCategoryIcon(cat)}"></i> ${escapeHtml(cat)}
-            <span class="pill-count">${labelCounts[cat]}</span>
-          </a>
-        `;
-      })
-    ].join('');
+    // Top 5 categories as clean tabs (AnimeNetwork style) + Dropdown for all categories
+    const topTabCategories = sortedCategories.slice(0, 5);
 
     return `
-      <div class="foxsa-category-bar">
-        <div class="foxsa-category-bar-top">
-          <div class="foxsa-cat-bar-title">
-            <i class="fa-solid fa-layer-group"></i> Kategori Berita
-          </div>
-          <div class="foxsa-cat-dropdown-wrap">
-            <select id="foxsa-quick-category-select" class="foxsa-cat-select" aria-label="Pilih Kategori Berita">
-              <option value="#/" ${isHome ? 'selected' : ''}>📂 Semua Kategori (${state.data.posts.length} Berita)</option>
-              <option value="#/popular" ${isPopular ? 'selected' : ''}>🔥 Berita Terpopuler</option>
-              <optgroup label="Pilih Kategori Spesifik:">
-                ${sortedCategories.map(cat => {
-                  const isSelected = activeLabelLower === cat.toLowerCase();
-                  return `<option value="#/label/${encodeURIComponent(cat)}" ${isSelected ? 'selected' : ''}>#${escapeHtml(cat)} (${labelCounts[cat]} berita)</option>`;
-                }).join('')}
-              </optgroup>
-            </select>
-          </div>
+      <div class="an-filter-toolbar">
+        <div class="an-tabs-scroll" id="foxsa-cat-pills-scroll">
+          <a href="#/" class="an-tab-item ${isHome ? 'active' : ''}">Semua Berita</a>
+          <a href="#/popular" class="an-tab-item ${isPopular ? 'active' : ''}">🔥 Terpopuler</a>
+          ${topTabCategories.map(cat => {
+            const isActive = activeLabelLower === cat.toLowerCase();
+            return `<a href="#/label/${encodeURIComponent(cat)}" class="an-tab-item ${isActive ? 'active' : ''}">${escapeHtml(cat)}</a>`;
+          }).join('')}
         </div>
-        <div class="foxsa-cat-pills-scroll" id="foxsa-cat-pills-scroll">
-          ${pillsHtml}
+
+        <div class="an-toolbar-right">
+          <select id="foxsa-quick-category-select" class="foxsa-cat-select" aria-label="Pilih Kategori Berita">
+            <option value="#/" ${isHome ? 'selected' : ''}>📂 Semua Kategori (${state.data.posts.length})</option>
+            <option value="#/popular" ${isPopular ? 'selected' : ''}>🔥 Berita Terpopuler</option>
+            <optgroup label="Filter Kategori:">
+              ${sortedCategories.map(cat => {
+                const isSelected = activeLabelLower === cat.toLowerCase();
+                return `<option value="#/label/${encodeURIComponent(cat)}" ${isSelected ? 'selected' : ''}>#${escapeHtml(cat)} (${labelCounts[cat]})</option>`;
+              }).join('')}
+            </optgroup>
+          </select>
+
+          <div class="an-view-switcher" role="group" aria-label="Tampilan Berita">
+            <button type="button" class="an-view-btn ${state.feedLayout === 'grid' ? 'active' : ''}" data-set-layout="grid" title="Tampilan Grid (Kartu)">
+              <i class="fa-solid fa-border-all"></i>
+            </button>
+            <button type="button" class="an-view-btn ${state.feedLayout === 'list' ? 'active' : ''}" data-set-layout="list" title="Tampilan List (Daftar Rapi)">
+              <i class="fa-solid fa-list"></i>
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -666,47 +957,41 @@
            Tidak ada berita yang ditemukan pada filter ini.
            <div style="margin-top:12px;"><a href="#/" class="foxsa-btn" style="text-decoration:none;">Kembali ke Semua Berita</a></div>
          </div>`
-      : visiblePosts.map((post, idx) => {
+      : visiblePosts.map((post) => {
           const labels = Array.isArray(post.labels) && post.labels.length > 0 ? post.labels : ['News'];
           const primaryTag = labels[0];
-          const extraTagsCount = labels.length > 1 ? labels.length - 1 : 0;
           const commentCount = (post.comments || []).length;
           const postHref = getPostHref(post);
-          const snippet = post.snippet || stripHtmlToSnippet(post.content, 135);
+          const snippet = post.snippet || stripHtmlToSnippet(post.content, 165);
           const thumb = post.featuredImage || state.data.siteInfo.aboutBanner;
 
+          // AnimeNetwork Clean News Card (supports both 'list' and 'grid' modes via CSS)
           return `
-            <div class="blog-post hentry index-post post-${idx}">
-              <div class="post-image-wrap">
-                <a class="post-image-link" href="${postHref}">
-                  <img alt="${escapeHtml(post.title)}" class="post-thumb lazy-yard" src="${escapeHtml(thumb)}" loading="lazy"/>
+            <article class="an-news-card">
+              <div class="an-news-thumb-wrap">
+                <a href="${postHref}" class="an-news-thumb-link">
+                  <img src="${escapeHtml(thumb)}" alt="${escapeHtml(post.title)}" loading="lazy" />
+                  <span class="an-thumb-read"><i class="fa-regular fa-clock"></i> ${getReadingTime(post.content)}</span>
                 </a>
               </div>
-              <div class="post-info">
-                <div class="post-meta foxsa-card-tags">
-                  <a class="post-tag" href="#/label/${encodeURIComponent(primaryTag)}">
-                    <img src="${HASHTAG_ICON}" alt="#" />
-                    ${escapeHtml(primaryTag)}
-                  </a>
-                  ${extraTagsCount > 0
-                    ? labels.slice(1, 3).map(t => `
-                        <a class="foxsa-sub-tag" href="#/label/${encodeURIComponent(t)}">#${escapeHtml(t)}</a>
-                      `).join('')
-                    : ''}
+              <div class="an-news-body">
+                <div class="an-news-meta-top">
+                  <a href="#/label/${encodeURIComponent(primaryTag)}" class="an-news-cat">${escapeHtml(primaryTag)}</a>
+                  ${labels.slice(1, 3).map(t => `<a href="#/label/${encodeURIComponent(t)}" class="an-news-subcat">#${escapeHtml(t)}</a>`).join('')}
+                  <span class="an-news-date">Posted on ${escapeHtml(formatDateID(post.published))} • <a href="#/author/${encodeURIComponent(post.author)}">${escapeHtml(post.author)}</a></span>
                 </div>
-                <h2 class="post-title">
+                <h2 class="an-news-title">
                   <a href="${postHref}">${escapeHtml(post.title)}</a>
                 </h2>
-                <div class="index-post-footer">
-                  <div class="post-meta">
-                    <span class="post-author"><a href="#/author/${encodeURIComponent(post.author)}" title="${escapeHtml(post.author)}">${escapeHtml(post.author)}</a></span>
-                    <span class="post-date published" datetime="${escapeHtml(post.published)}">${escapeHtml(formatDateID(post.published))}</span>
-                    ${commentCount > 0 ? `<span class="foxsa-card-comment-count"><i class="fa-regular fa-comment"></i> ${commentCount}</span>` : ''}
-                  </div>
-                  <p class="post-snippet">${escapeHtml(snippet)}</p>
+                <p class="an-news-excerpt">${escapeHtml(snippet)}</p>
+                <div class="an-news-footer">
+                  <a href="${postHref}" class="an-continue-link">Baca selengkapnya...</a>
+                  <a href="${postHref}" class="an-comment-count">
+                    <i class="fa-solid fa-message"></i> ${commentCount} komentar
+                  </a>
                 </div>
               </div>
-            </div>
+            </article>
           `;
         }).join('');
 
@@ -724,13 +1009,18 @@
 
     mainEl.innerHTML = `
       <div class="widget Blog" id="Blog1">
-        ${buildCategoryFilterBarHtml()}
+        ${buildAnimeNetworkCategoryToolbarHtml()}
         ${filterMessageHtml}
-        <div class="blog-posts hfeed index-post-wrap">
-          <div class="grid-posts">
-            ${postsCardsHtml}
-          </div>
+
+        <div class="an-section-header">
+          <h3><span class="heading-line"></span> Berita Terkini (Recent News)</h3>
+          ${state.currentUser ? `<a href="#/admin" class="an-quick-add-link" id="home-quick-new-post"><i class="fa-solid fa-plus"></i> Tulis Berita Baru</a>` : `<span class="an-total-label">${filteredPosts.length} Artikel</span>`}
         </div>
+
+        <div class="an-news-feed layout-${state.feedLayout}">
+          ${postsCardsHtml}
+        </div>
+
         ${paginationHtml}
       </div>
     `;
@@ -745,26 +1035,39 @@
       });
     }
 
-    // Scroll active pill into view horizontally on mobile
-    const activePill = mainEl.querySelector('.foxsa-cat-pill.active');
-    const pillScrollContainer = document.getElementById('foxsa-cat-pills-scroll');
-    if (activePill && pillScrollContainer && activePill.offsetLeft > 80) {
-      pillScrollContainer.scrollLeft = activePill.offsetLeft - 24;
+    // Bind Grid / List View Switcher
+    mainEl.querySelectorAll('[data-set-layout]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mode = btn.getAttribute('data-set-layout');
+        state.feedLayout = mode;
+        localStorage.setItem(VIEW_MODE_KEY, mode);
+        renderListView();
+      });
+    });
+
+    // Quick "+ Tulis Berita Baru" if logged in
+    const quickNewBtn = document.getElementById('home-quick-new-post');
+    if (quickNewBtn) {
+      quickNewBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        state.editingPostId = null;
+        state.adminTab = 'editor';
+        window.location.hash = '#/admin';
+      });
     }
 
     const loadMoreBtn = document.getElementById('foxsa-load-more-btn');
     if (loadMoreBtn) {
       loadMoreBtn.addEventListener('click', function (e) {
         e.preventDefault();
-        const step = (state.data.siteInfo && state.data.siteInfo.postPerPage) || 5;
-        state.visiblePostsCount += step;
+        state.visiblePostsCount += 5;
         renderListView();
       });
     }
   }
 
   // =========================================================================
-  // 5. RENDERING: SINGLE ARTICLE VIEW + COMMENTS
+  // 6. RENDERING: SINGLE ARTICLE VIEW + COMMENTS
   // =========================================================================
 
   function findPostByParam(param) {
@@ -853,7 +1156,7 @@
     mainEl.innerHTML = `
       <div class="widget Blog" id="Blog1">
         <div class="blog-posts hfeed item-post-wrap">
-          <article class="blog-post hentry item-post">
+          <article class="blog-post hentry item-post foxsa-clean-article-card">
             <div class="post-item-inner">
               <div class="post-header">
                 <nav id="breadcrumb">
@@ -863,22 +1166,35 @@
                   <em class="delimiter"></em>
                   <span class="current">${escapeHtml(post.title)}</span>
                 </nav>
+
+                <div class="article-top-badges">
+                  ${(post.labels || ['News']).map(l => `<a href="#/label/${encodeURIComponent(l)}" class="article-cat-pill">${escapeHtml(l)}</a>`).join('')}
+                  <span class="article-read-time"><i class="fa-regular fa-clock"></i> ${getReadingTime(post.content)}</span>
+                </div>
+
                 <h1 class="post-title">${escapeHtml(post.title)}</h1>
-                <div class="post-meta" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-                  <div>
-                    <span class="post-author"><a href="#/author/${encodeURIComponent(post.author)}" title="${escapeHtml(post.author)}">${escapeHtml(post.author)}</a></span>
-                    <span class="post-date published" datetime="${escapeHtml(post.published)}">${escapeHtml(formatDateID(post.published))}</span>
-                    <span style="margin-left:10px;color:#F08D39;font-weight:600;"><i class="fa-regular fa-comments"></i> ${comments.length} Komentar</span>
+
+                <div class="article-byline-bar">
+                  <div class="byline-author-left">
+                    <img src="${escapeHtml(authorInfo.avatar || DEFAULT_AVATAR)}" alt="${escapeHtml(post.author)}" onerror="this.src='${DEFAULT_AVATAR}'" />
+                    <div>
+                      <a href="#/author/${encodeURIComponent(post.author)}" class="byline-author-name">${escapeHtml(post.author)}</a>
+                      <div class="byline-date-meta">
+                        <span>Dipublikasikan ${escapeHtml(formatDateID(post.published))}</span>
+                        <span>•</span>
+                        <span style="color:#F08D39;font-weight:700;"><i class="fa-regular fa-comments"></i> ${comments.length} Komentar</span>
+                      </div>
+                    </div>
                   </div>
                   ${isStaffLoggedIn
-                    ? `<button type="button" id="foxsa-quick-edit-post" class="foxsa-btn foxsa-btn-outline" style="padding:5px 12px;font-size:12px;">
-                         <i class="fa-solid fa-pen"></i> Edit Berita (Staff)
+                    ? `<button type="button" id="foxsa-quick-edit-post" class="foxsa-btn foxsa-btn-outline" style="padding:6px 12px;font-size:12px;">
+                         <i class="fa-solid fa-pen"></i> Edit Berita
                        </button>`
                     : ''}
                 </div>
               </div>
 
-              <div class="post-body post-content">
+              <div class="post-body post-content foxsa-clean-prose">
                 ${processPostContentHtml(post.content)}
               </div>
 
@@ -949,7 +1265,7 @@
                 <!-- Interactive Comments Section -->
                 <div class="foxsa-comments-wrap" id="comments-section">
                   <div class="foxsa-comments-header">
-                    <h3><i class="fa-regular fa-comments"></i> Komentar Pembaca</h3>
+                    <h3><i class="fa-regular fa-comments"></i> Tanggapan &amp; Komentar Pembaca</h3>
                     <span class="foxsa-badge">${comments.length} Komentar</span>
                   </div>
 
@@ -984,7 +1300,6 @@
       </div>
     `;
 
-    // Bind Quick Edit Post (Staff only)
     const quickEditBtn = document.getElementById('foxsa-quick-edit-post');
     if (quickEditBtn && isStaffLoggedIn) {
       quickEditBtn.addEventListener('click', () => {
@@ -994,7 +1309,6 @@
       });
     }
 
-    // Bind Copy Link
     const copyLinkBtn = document.getElementById('foxsa-copy-link-btn');
     if (copyLinkBtn) {
       copyLinkBtn.addEventListener('click', (e) => {
@@ -1005,7 +1319,6 @@
       });
     }
 
-    // Bind Add Comment
     const commentForm = document.getElementById('foxsa-add-comment-form');
     if (commentForm) {
       commentForm.addEventListener('submit', (e) => {
@@ -1036,7 +1349,6 @@
       });
     }
 
-    // Bind Delete Comment buttons (Staff only)
     if (isStaffLoggedIn) {
       mainEl.querySelectorAll('[data-del-comment]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1052,7 +1364,7 @@
   }
 
   // =========================================================================
-  // 6. RENDERING: STAFF LOGIN & PROTECTED ADMIN PANEL
+  // 7. STAFF LOGIN & SIMPLIFIED ZERO-HTML VISUAL ARTICLE EDITOR
   // =========================================================================
 
   function renderStaffLoginView() {
@@ -1069,7 +1381,7 @@
             <i class="fa-solid fa-user-shield"></i> PORTAL REDAKSI FOXSA NEWS
           </div>
           <h2>Login Khusus Staff &amp; Admin</h2>
-          <p>Halaman ini dikhususkan bagi Jurnalis, Editor, dan Staff Redaksi FoxSA News untuk menambah berita serta mengelola komentar.</p>
+          <p>Halaman ini dikhususkan bagi Jurnalis, Editor, dan Staff Redaksi FoxSA News untuk menulis berita serta mengelola komentar.</p>
         </div>
 
         <form id="foxsa-staff-login-form" class="foxsa-login-form">
@@ -1182,7 +1494,7 @@
             <strong>Total Berita Roleplay: ${totalPosts} Artikel</strong>
           </div>
           <button type="button" class="foxsa-btn" id="admin-new-post-btn">
-            <i class="fa-solid fa-plus"></i> Tambah Berita Baru
+            <i class="fa-solid fa-plus"></i> Tulis Berita Baru
           </button>
         </div>
         <div class="foxsa-table-responsive">
@@ -1233,7 +1545,7 @@
       `;
     }
 
-    // TAB 2: TAMBAH / EDIT BERITA (DENGAN MULTI-SELECT PIL KATEGORI + DROPDOWN)
+    // TAB 2: VISUAL STUDIO EDITOR (ZERO HTML CODE — SIMPLE & PROFESSIONAL)
     else if (state.adminTab === 'editor') {
       const editingPost = state.editingPostId
         ? state.data.posts.find(p => p.id === state.editingPostId)
@@ -1261,130 +1573,175 @@
       const dateVal = editingPost && editingPost.published
         ? new Date(editingPost.published).toISOString().slice(0, 16)
         : new Date().toISOString().slice(0, 16);
-      const contentVal = editingPost ? editingPost.content : `<p style="text-align: justify;">Los Santos, FoxSA News — Tulis paragraf pembuka berita di sini...</p>\n<p style="text-align: justify;">Tulis kronologi lengkap kejadian di sini...</p>`;
+
+      const initialVisualHtml = editingPost
+        ? cleanBloggerHtmlForVisualEditor(editingPost.content)
+        : `<p><strong>Los Santos, FoxSA News</strong> — Ketik paragraf pembuka berita di sini. Tekan Enter untuk membuat paragraf baru secara otomatis...</p><p>Tulis kronologi kejadian dan keterangan saksi atau pihak berwenang di sini...</p>`;
 
       const allCategories = getAllAvailableCategories();
 
       tabContentHtml = `
         <form id="foxsa-post-editor-form">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-            <h3 style="margin:0;color:#090C1E;">
-              ${editingPost ? `<i class="fa-solid fa-pen-to-square" style="color:#F08D39;"></i> Edit Berita` : `<i class="fa-solid fa-circle-plus" style="color:#F08D39;"></i> Tambah Berita Baru`}
-            </h3>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+            <div>
+              <h3 style="margin:0;color:#090C1E;">
+                ${editingPost ? `<i class="fa-solid fa-pen-to-square" style="color:#F08D39;"></i> Edit Artikel Berita` : `<i class="fa-solid fa-feather-pointed" style="color:#F08D39;"></i> Studio Penulisan Berita Baru`}
+              </h3>
+              <span style="font-size:12px;color:#666;">Ketik langsung seperti di Microsoft Word / Google Docs — tanpa perlu kode HTML!</span>
+            </div>
             ${editingPost ? `<button type="button" class="foxsa-btn foxsa-btn-outline" id="editor-cancel-btn" style="padding:6px 12px;font-size:12px;">Batal Edit</button>` : ''}
           </div>
 
-          <div class="foxsa-form-group">
-            <label>Judul Berita *</label>
-            <input type="text" id="post-title-input" class="foxsa-input" value="${escapeHtml(titleVal)}" placeholder="Contoh: Polisi Lakukan Pengejaran di Los Santos, Dua Pelaku Berhasil Diamankan" required />
-          </div>
+          <!-- LANGKAH 1: JUDUL & KATEGORI -->
+          <div class="foxsa-editor-step-card">
+            <div class="step-card-badge">1. Judul &amp; Kategori Berita</div>
+            <div class="foxsa-form-group">
+              <label>Judul Headline Berita *</label>
+              <input type="text" id="post-title-input" class="foxsa-input foxsa-title-big-input" value="${escapeHtml(titleVal)}" placeholder="Contoh: Polisi Lakukan Pengejaran di Los Santos, Dua Pelaku Berhasil Diamankan" required />
+            </div>
 
-          <!-- SMART CATEGORY SELECTOR (NO MANUAL COMMA TYPING NEEDED) -->
-          <div class="foxsa-form-group">
-            <label><i class="fa-solid fa-tags" style="color:#F08D39;"></i> Pilih Kategori Berita (Tinggal Klik / Tap, Bisa Pilih Lebih dari 1) *</label>
-            <div class="foxsa-smart-cat-box">
-              <div class="foxsa-smart-cat-pills" id="editor-category-pills">
-                ${allCategories.map(cat => {
-                  const isSelected = state.selectedEditorLabels.some(s => s.toLowerCase() === cat.toLowerCase());
-                  return `
-                    <button type="button" class="foxsa-selectable-pill ${isSelected ? 'selected' : ''}" data-toggle-cat="${escapeHtml(cat)}">
-                      <i class="fa-solid ${isSelected ? 'fa-circle-check' : 'fa-plus'}"></i>
-                      <span>${escapeHtml(cat)}</span>
+            <div class="foxsa-form-group" style="margin-bottom:0;">
+              <label><i class="fa-solid fa-tags" style="color:#F08D39;"></i> Pilih Kategori Berita (Tinggal Klik / Tap, Bisa Pilih Lebih dari 1) *</label>
+              <div class="foxsa-smart-cat-box">
+                <div class="foxsa-smart-cat-pills" id="editor-category-pills">
+                  ${allCategories.map(cat => {
+                    const isSelected = state.selectedEditorLabels.some(s => s.toLowerCase() === cat.toLowerCase());
+                    return `
+                      <button type="button" class="foxsa-selectable-pill ${isSelected ? 'selected' : ''}" data-toggle-cat="${escapeHtml(cat)}">
+                        <i class="fa-solid ${isSelected ? 'fa-circle-check' : 'fa-plus'}"></i>
+                        <span>${escapeHtml(cat)}</span>
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+
+                <div class="foxsa-smart-cat-controls">
+                  <div class="foxsa-smart-cat-dropdown-col">
+                    <select id="editor-category-dropdown" class="foxsa-select">
+                      <option value="">-- Atau Pilih Cepat dari Dropdown Kategori --</option>
+                      ${allCategories.map(cat => `<option value="${escapeHtml(cat)}">+ Pilih: ${escapeHtml(cat)}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div class="foxsa-smart-cat-custom-col">
+                    <input type="text" id="editor-new-cat-input" class="foxsa-input" placeholder="Ketik kategori baru..." />
+                    <button type="button" class="foxsa-btn foxsa-btn-secondary" id="editor-add-new-cat-btn" style="white-space:nowrap;">
+                      <i class="fa-solid fa-plus"></i> Buat
                     </button>
-                  `;
-                }).join('')}
-              </div>
-
-              <div class="foxsa-smart-cat-controls">
-                <div class="foxsa-smart-cat-dropdown-col">
-                  <select id="editor-category-dropdown" class="foxsa-select">
-                    <option value="">-- Atau Pilih Cepat dari Dropdown Kategori --</option>
-                    ${allCategories.map(cat => `<option value="${escapeHtml(cat)}">+ Pilih: ${escapeHtml(cat)}</option>`).join('')}
-                  </select>
+                  </div>
                 </div>
-                <div class="foxsa-smart-cat-custom-col">
-                  <input type="text" id="editor-new-cat-input" class="foxsa-input" placeholder="Buat kategori baru..." />
-                  <button type="button" class="foxsa-btn foxsa-btn-secondary" id="editor-add-new-cat-btn" style="white-space:nowrap;">
-                    <i class="fa-solid fa-plus"></i> Tambah
-                  </button>
-                </div>
+
+                <div class="foxsa-selected-cat-summary" id="editor-selected-summary"></div>
+                <input type="hidden" id="post-labels-input" value="${escapeHtml(state.selectedEditorLabels.join(', '))}" />
               </div>
+            </div>
+          </div>
 
-              <div class="foxsa-selected-cat-summary" id="editor-selected-summary">
-                <!-- Updated dynamically -->
+          <!-- LANGKAH 2: SAMPUL / FOTO UTAMA BERITA -->
+          <div class="foxsa-editor-step-card">
+            <div class="step-card-badge">2. Foto Sampul Utama (Thumbnail)</div>
+            <div class="foxsa-cover-upload-row">
+              <div class="foxsa-cover-preview" id="editor-cover-preview-box">
+                ${imageVal
+                  ? `<img src="${escapeHtml(imageVal)}" alt="Preview Sampul" />`
+                  : `<div class="cover-empty"><i class="fa-regular fa-image"></i><span>Belum ada foto sampul</span></div>`}
               </div>
-              <input type="hidden" id="post-labels-input" value="${escapeHtml(state.selectedEditorLabels.join(', '))}" />
-            </div>
-          </div>
-
-          <div class="foxsa-form-row">
-            <div class="foxsa-form-group">
-              <label>Pilih Jurnalis / Penulis Tersimpan</label>
-              <select id="post-author-preset" class="foxsa-select">
-                ${authorNames.map(name => `<option value="${escapeHtml(name)}" ${name === authorVal ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}
-                <option value="__custom__">+ Tulis Nama Jurnalis Baru...</option>
-              </select>
-            </div>
-            <div class="foxsa-form-group">
-              <label>Nama Penulis / Reporter *</label>
-              <input type="text" id="post-author-input" class="foxsa-input" value="${escapeHtml(authorVal)}" required />
-            </div>
-          </div>
-
-          <div class="foxsa-form-row">
-            <div class="foxsa-form-group">
-              <label>Jabatan / Bio Singkat Penulis</label>
-              <input type="text" id="post-author-bio-input" class="foxsa-input" value="${escapeHtml(authorBioVal)}" placeholder="Contoh: Senior Staff | Field Reporter" />
-            </div>
-            <div class="foxsa-form-group">
-              <label>URL Foto Profil Penulis</label>
-              <input type="text" id="post-author-avatar-input" class="foxsa-input" value="${escapeHtml(authorAvatarVal)}" placeholder="https://..." />
-            </div>
-          </div>
-
-          <div class="foxsa-form-row">
-            <div class="foxsa-form-group">
-              <label>Gambar Utama Berita (URL Gambar atau Upload dari HP/Komputer)</label>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <input type="text" id="post-image-input" class="foxsa-input" style="flex:1;min-width:180px;" value="${escapeHtml(imageVal)}" placeholder="Paste link gambar (https://...) atau klik Upload" />
-                <label class="foxsa-btn foxsa-btn-secondary" style="cursor:pointer;margin:0;">
-                  <i class="fa-solid fa-upload"></i> Upload Gambar
+              <div class="foxsa-cover-inputs">
+                <label class="foxsa-btn" style="cursor:pointer;margin-bottom:8px;width:fit-content;">
+                  <i class="fa-solid fa-camera"></i> Upload Foto Sampul dari HP / PC
                   <input type="file" id="post-image-file" accept="image/*" style="display:none;" />
+                </label>
+                <div style="font-size:12px;color:#666;margin-bottom:6px;">Atau tempel (paste) link URL gambar di bawah:</div>
+                <input type="text" id="post-image-input" class="foxsa-input" value="${escapeHtml(imageVal)}" placeholder="https://..." />
+              </div>
+            </div>
+          </div>
+
+          <!-- LANGKAH 3: ISI ARTIKEL BERITA (VISUAL EDITOR TANPA KODE HTML) -->
+          <div class="foxsa-editor-step-card">
+            <div class="step-card-badge">3. Tulis Isi Artikel Berita (Visual Editor — Tanpa Koding!)</div>
+
+            <div class="foxsa-visual-editor-wrap">
+              <!-- Simple Word-like Toolbar -->
+              <div class="foxsa-visual-toolbar">
+                <button type="button" class="vtool-btn" data-vcmd="bold" title="Tebalkan Teks (Bold)">
+                  <i class="fa-solid fa-bold"></i> <span>Tebal</span>
+                </button>
+                <button type="button" class="vtool-btn" data-vcmd="italic" title="Miringkan Teks (Italic)">
+                  <i class="fa-solid fa-italic"></i> <span>Miring</span>
+                </button>
+                <button type="button" class="vtool-btn" id="vtool-add-Location" title="Sisipkan Awalan Kota (Los Santos, FoxSA News —)">
+                  <i class="fa-solid fa-location-dot" style="color:#F08D39;"></i> <span>+ Lokasi Kota</span>
+                </button>
+                <button type="button" class="vtool-btn" id="vtool-add-heading" title="Tambah Sub-Judul Bagian">
+                  <i class="fa-solid fa-heading"></i> <span>+ Sub-Judul</span>
+                </button>
+                <button type="button" class="vtool-btn" id="vtool-add-quote" title="Tambah Kotak Kutipan Narasumber">
+                  <i class="fa-solid fa-quote-left" style="color:#F08D39;"></i> <span>+ Kutipan</span>
+                </button>
+
+                <div class="vtool-divider"></div>
+
+                <!-- Insert Image directly from Device or URL into the visual editor -->
+                <label class="vtool-btn vtool-btn-accent" style="cursor:pointer;margin:0;" title="Upload Foto dari HP/PC ke dalam Isi Berita">
+                  <i class="fa-solid fa-image"></i> <span>+ Upload Foto ke Artikel</span>
+                  <input type="file" id="vtool-inline-img-file" accept="image/*" style="display:none;" />
+                </label>
+                <button type="button" class="vtool-btn" id="vtool-insert-img-url" title="Sisipkan Foto via Link URL">
+                  <i class="fa-solid fa-link"></i> <span>+ Foto via Link</span>
+                </button>
+              </div>
+
+              <!-- WYSIWYG Visual Writing Canvas -->
+              <div id="foxsa-visual-canvas" class="foxsa-visual-canvas post-body foxsa-clean-prose" contenteditable="true" spellcheck="false">${initialVisualHtml}</div>
+
+              <div class="foxsa-visual-footer-hint">
+                <span><i class="fa-regular fa-lightbulb" style="color:#F08D39;"></i> <strong>Tips:</strong> Langsung ketik cerita berita di kotak putih di atas. Tekan <strong>Enter</strong> untuk paragraf baru. Klik <strong>+ Upload Foto ke Artikel</strong> jika ingin menaruh foto dokumentasi di tengah berita.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- LANGKAH 4: IDENTITAS JURNALIS & WAKTU PUBLIKASI -->
+          <div class="foxsa-editor-step-card">
+            <div class="step-card-badge">4. Identitas Jurnalis &amp; Publikasi</div>
+            <div class="foxsa-form-row">
+              <div class="foxsa-form-group">
+                <label>Pilih Jurnalis / Penulis Tersimpan</label>
+                <select id="post-author-preset" class="foxsa-select">
+                  ${authorNames.map(name => `<option value="${escapeHtml(name)}" ${name === authorVal ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}
+                  <option value="__custom__">+ Tulis Nama Jurnalis Baru...</option>
+                </select>
+              </div>
+              <div class="foxsa-form-group">
+                <label>Nama Penulis / Reporter *</label>
+                <input type="text" id="post-author-input" class="foxsa-input" value="${escapeHtml(authorVal)}" required />
+              </div>
+              <div class="foxsa-form-group">
+                <label>Tanggal &amp; Waktu Publikasi</label>
+                <input type="datetime-local" id="post-date-input" class="foxsa-input" value="${escapeHtml(dateVal)}" />
+              </div>
+            </div>
+
+            <div class="foxsa-form-row" style="margin-bottom:0;">
+              <div class="foxsa-form-group">
+                <label>Jabatan / Bio Singkat Penulis</label>
+                <input type="text" id="post-author-bio-input" class="foxsa-input" value="${escapeHtml(authorBioVal)}" placeholder="Contoh: Senior Staff | Field Reporter" />
+              </div>
+              <div class="foxsa-form-group">
+                <label>URL Foto Profil Penulis</label>
+                <input type="text" id="post-author-avatar-input" class="foxsa-input" value="${escapeHtml(authorAvatarVal)}" placeholder="https://..." />
+              </div>
+              <div class="foxsa-form-group" style="justify-content:center;">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:18px;font-size:13px;">
+                  <input type="checkbox" id="post-popular-input" ${popularChecked ? 'checked' : ''} style="width:16px;height:16px;" />
+                  <span>🔥 Tampilkan di Berita Terpopuler</span>
                 </label>
               </div>
             </div>
-            <div class="foxsa-form-group" style="max-width:260px;">
-              <label>Tanggal &amp; Waktu Publikasi</label>
-              <input type="datetime-local" id="post-date-input" class="foxsa-input" value="${escapeHtml(dateVal)}" />
-              <label style="display:flex;align-items:center;gap:6px;margin-top:8px;cursor:pointer;">
-                <input type="checkbox" id="post-popular-input" ${popularChecked ? 'checked' : ''} />
-                <span>Tampilkan di Most Popular</span>
-              </label>
-            </div>
           </div>
 
-          <div class="foxsa-form-group">
-            <label>Isi Artikel Berita (Mendukung Teks &amp; HTML)</label>
-            <div class="foxsa-editor-toolbar">
-              <button type="button" class="foxsa-editor-btn" data-insert-tag="p"><i class="fa-solid fa-paragraph"></i> Paragraf</button>
-              <button type="button" class="foxsa-editor-btn" data-insert-tag="b"><i class="fa-solid fa-bold"></i> Bold</button>
-              <button type="button" class="foxsa-editor-btn" data-insert-tag="i"><i class="fa-solid fa-italic"></i> Italic</button>
-              <button type="button" class="foxsa-editor-btn" data-insert-tag="h2"><i class="fa-solid fa-heading"></i> Subjudul H2</button>
-              <button type="button" class="foxsa-editor-btn" data-insert-tag="blockquote"><i class="fa-solid fa-quote-left"></i> Kutipan</button>
-              <button type="button" class="foxsa-editor-btn" id="editor-insert-img-url"><i class="fa-regular fa-image"></i> + Gambar Link</button>
-              <button type="button" class="foxsa-editor-btn" id="editor-toggle-preview" style="margin-left:auto;"><i class="fa-solid fa-eye"></i> Preview</button>
-            </div>
-            <textarea id="post-content-input" class="foxsa-textarea" rows="12" style="border-radius:0 0 8px 8px;font-family:monospace;font-size:13px;" required>${escapeHtml(contentVal)}</textarea>
-          </div>
-
-          <div id="editor-live-preview" style="display:none;padding:20px;border:1px dashed #F08D39;border-radius:12px;margin-bottom:16px;background:#fff;">
-            <h4 style="margin-top:0;color:#F08D39;">Preview Isi Berita:</h4>
-            <div class="post-body" id="editor-preview-body"></div>
-          </div>
-
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            <button type="submit" class="foxsa-btn">
-              <i class="fa-solid fa-floppy-disk"></i> ${editingPost ? 'Simpan Perubahan Berita' : 'Publikasikan Berita Sekarang'}
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:18px;">
+            <button type="submit" class="foxsa-btn" style="padding:13px 26px;font-size:14px;">
+              <i class="fa-solid fa-paper-plane"></i> ${editingPost ? 'Simpan Perubahan Berita' : 'Publikasikan Berita Sekarang'}
             </button>
             <button type="button" class="foxsa-btn foxsa-btn-outline" id="editor-back-list-btn">
               Kembali ke Daftar Berita
@@ -1528,7 +1885,7 @@
       `;
     }
 
-    // TAB 5: PENYIMPANAN & CLOUD SYNC (GITHUB / VERCEL)
+    // TAB 5: PENYIMPANAN & CLOUD SYNC
     else if (state.adminTab === 'storage') {
       const cfg = getGitHubConfig();
       tabContentHtml = `
@@ -1624,7 +1981,7 @@
             <i class="fa-regular fa-newspaper"></i> Berita (${totalPosts})
           </button>
           <button type="button" class="foxsa-admin-tab ${state.adminTab === 'editor' ? 'active' : ''}" data-admin-tab="editor">
-            <i class="fa-solid fa-pen-nib"></i> ${state.editingPostId ? 'Edit Berita' : '+ Tambah Berita'}
+            <i class="fa-solid fa-feather-pointed"></i> ${state.editingPostId ? 'Edit Berita' : '+ Tulis Berita'}
           </button>
           <button type="button" class="foxsa-admin-tab ${state.adminTab === 'comments' ? 'active' : ''}" data-admin-tab="comments">
             <i class="fa-regular fa-comments"></i> Komentar (${totalComments})
@@ -1691,11 +2048,36 @@
     }
   }
 
+  function insertHtmlIntoVisualCanvas(canvasEl, htmlSnippet) {
+    if (!canvasEl) return;
+    canvasEl.focus();
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && canvasEl.contains(sel.anchorNode)) {
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      const temp = document.createElement('div');
+      temp.innerHTML = htmlSnippet;
+      const frag = document.createDocumentFragment();
+      let lastNode = null;
+      while (temp.firstChild) {
+        lastNode = frag.appendChild(temp.firstChild);
+      }
+      range.insertNode(frag);
+      if (lastNode) {
+        range.setStartAfter(lastNode);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    } else {
+      canvasEl.insertAdjacentHTML('beforeend', htmlSnippet);
+    }
+  }
+
   function bindAdminEvents() {
     const mainEl = document.getElementById('main');
     if (!mainEl) return;
 
-    // Logout button
     const logoutBtn = document.getElementById('admin-logout-btn');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
@@ -1704,7 +2086,6 @@
       });
     }
 
-    // Tab switching
     mainEl.querySelectorAll('[data-admin-tab]').forEach(tabBtn => {
       tabBtn.addEventListener('click', () => {
         const target = tabBtn.getAttribute('data-admin-tab');
@@ -1716,7 +2097,6 @@
       });
     });
 
-    // "+ Tambah Berita Baru" button
     const newPostBtn = document.getElementById('admin-new-post-btn');
     if (newPostBtn) {
       newPostBtn.addEventListener('click', () => {
@@ -1727,7 +2107,6 @@
       });
     }
 
-    // Popular Star Toggle
     mainEl.querySelectorAll('[data-toggle-pop]').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-toggle-pop');
@@ -1742,7 +2121,6 @@
       });
     });
 
-    // Edit Post button
     mainEl.querySelectorAll('[data-edit-post]').forEach(btn => {
       btn.addEventListener('click', () => {
         state.editingPostId = btn.getAttribute('data-edit-post');
@@ -1751,7 +2129,6 @@
       });
     });
 
-    // Delete Post button
     mainEl.querySelectorAll('[data-delete-post]').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-delete-post');
@@ -1766,10 +2143,11 @@
       });
     });
 
-    // Editor Events
+    // VISUAL EDITOR EVENTS
     const editorForm = document.getElementById('foxsa-post-editor-form');
     if (editorForm) {
       updateEditorCategorySummaryUI();
+      const visualCanvas = document.getElementById('foxsa-visual-canvas');
 
       // Multi-select category pill click
       mainEl.querySelectorAll('[data-toggle-cat]').forEach(pillBtn => {
@@ -1785,7 +2163,6 @@
         });
       });
 
-      // Dropdown quick category add
       const catDropdown = document.getElementById('editor-category-dropdown');
       if (catDropdown) {
         catDropdown.addEventListener('change', () => {
@@ -1800,7 +2177,6 @@
         });
       }
 
-      // Add custom new category button
       const newCatInput = document.getElementById('editor-new-cat-input');
       const addNewCatBtn = document.getElementById('editor-add-new-cat-btn');
       if (addNewCatBtn && newCatInput) {
@@ -1846,6 +2222,141 @@
         });
       }
 
+      // Cover Thumbnail Upload & URL Preview
+      const coverPreviewBox = document.getElementById('editor-cover-preview-box');
+      const coverUrlInput = document.getElementById('post-image-input');
+      const coverFileInput = document.getElementById('post-image-file');
+
+      const updateCoverPreview = (url) => {
+        if (!coverPreviewBox) return;
+        if (url) {
+          coverPreviewBox.innerHTML = `<img src="${escapeHtml(url)}" alt="Preview Sampul" />`;
+        } else {
+          coverPreviewBox.innerHTML = `<div class="cover-empty"><i class="fa-regular fa-image"></i><span>Belum ada foto sampul</span></div>`;
+        }
+      };
+
+      if (coverUrlInput) {
+        coverUrlInput.addEventListener('input', () => updateCoverPreview(coverUrlInput.value.trim()));
+      }
+      if (coverFileInput) {
+        coverFileInput.addEventListener('change', (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          compressImageFile(file, 960, 0.82, (dataUrl) => {
+            coverUrlInput.value = dataUrl;
+            updateCoverPreview(dataUrl);
+            showToast('Foto sampul berhasil dipasang!');
+          });
+        });
+      }
+
+      // Visual Editor Toolbar Commands (Bold, Italic)
+      mainEl.querySelectorAll('[data-vcmd]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cmd = btn.getAttribute('data-vcmd');
+          document.execCommand(cmd, false, null);
+          if (visualCanvas) visualCanvas.focus();
+        });
+      });
+
+      // + Lokasi Kota ("Los Santos, FoxSA News — ")
+      const locBtn = document.getElementById('vtool-add-Location');
+      if (locBtn && visualCanvas) {
+        locBtn.addEventListener('click', () => {
+          const city = prompt('Masukkan nama kota / lokasi kejadian:', 'Los Santos');
+          if (!city) return;
+          insertHtmlIntoVisualCanvas(visualCanvas, `<p><strong>${escapeHtml(city.trim())}, FoxSA News</strong> — </p>`);
+        });
+      }
+
+      // + Sub-Judul
+      const headingBtn = document.getElementById('vtool-add-heading');
+      if (headingBtn && visualCanvas) {
+        headingBtn.addEventListener('click', () => {
+          const text = prompt('Masukkan teks Sub-Judul Bagian:', 'Kronologi Kejadian');
+          if (!text) return;
+          insertHtmlIntoVisualCanvas(visualCanvas, `<h3>${escapeHtml(text.trim())}</h3><p>Lanjutkan menulis paragraf di sini...</p>`);
+        });
+      }
+
+      // + Kutipan Narasumber
+      const quoteBtn = document.getElementById('vtool-add-quote');
+      if (quoteBtn && visualCanvas) {
+        quoteBtn.addEventListener('click', () => {
+          const quoteText = prompt('Masukkan kalimat kutipan wawancara / narasumber:');
+          if (!quoteText) return;
+          const speaker = prompt('Siapa yang menyampaikan kutipan tersebut? (Opsional, contoh: ujar Officer LSPD)', '');
+          const fullQuote = speaker ? `"${quoteText.trim()}," ${speaker.trim()}.` : `"${quoteText.trim()}"`;
+          insertHtmlIntoVisualCanvas(visualCanvas, `<blockquote>${escapeHtml(fullQuote)}</blockquote><p></p>`);
+        });
+      }
+
+      // + Upload Foto langsung ke dalam Artikel
+      const inlineImgFile = document.getElementById('vtool-inline-img-file');
+      if (inlineImgFile && visualCanvas) {
+        inlineImgFile.addEventListener('change', (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const caption = prompt('Tulis keterangan / kredit foto (Opsional):', 'Picture : FoxSA News');
+          compressImageFile(file, 920, 0.82, (dataUrl) => {
+            const figHtml = `
+              <figure class="foxsa-article-figure">
+                <img src="${dataUrl}" alt="Dokumentasi FoxSA News" />
+                ${caption ? `<figcaption>${escapeHtml(caption)}</figcaption>` : ''}
+              </figure>
+              <p>Lanjutkan menulis paragraf berita di sini...</p>
+            `;
+            insertHtmlIntoVisualCanvas(visualCanvas, figHtml);
+            if (!coverUrlInput.value.trim()) {
+              coverUrlInput.value = dataUrl;
+              updateCoverPreview(dataUrl);
+            }
+            showToast('Foto berhasil dimasukkan ke dalam artikel!');
+          });
+          inlineImgFile.value = '';
+        });
+      }
+
+      // + Foto via Link URL ke dalam Artikel
+      const insertImgUrlBtn = document.getElementById('vtool-insert-img-url');
+      if (insertImgUrlBtn && visualCanvas) {
+        insertImgUrlBtn.addEventListener('click', () => {
+          const url = prompt('Paste link URL Gambar (https://...):');
+          if (!url || !url.trim()) return;
+          const caption = prompt('Tulis keterangan / kredit foto (Opsional):', 'Picture : FoxSA News');
+          const figHtml = `
+            <figure class="foxsa-article-figure">
+              <img src="${escapeHtml(url.trim())}" alt="Dokumentasi FoxSA News" />
+              ${caption ? `<figcaption>${escapeHtml(caption)}</figcaption>` : ''}
+            </figure>
+            <p>Lanjutkan menulis paragraf berita di sini...</p>
+          `;
+          insertHtmlIntoVisualCanvas(visualCanvas, figHtml);
+          if (!coverUrlInput.value.trim()) {
+            coverUrlInput.value = url.trim();
+            updateCoverPreview(url.trim());
+          }
+        });
+      }
+
+      // Clean plain-text paste inside Visual Canvas so external styles don't break article look
+      if (visualCanvas) {
+        visualCanvas.addEventListener('paste', (e) => {
+          const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+          if (text) {
+            e.preventDefault();
+            const paragraphs = text
+              .split(/\r?\n\r?\n|\r?\n/)
+              .map(line => line.trim())
+              .filter(Boolean)
+              .map(line => `<p>${escapeHtml(line)}</p>`)
+              .join('');
+            insertHtmlIntoVisualCanvas(visualCanvas, paragraphs || escapeHtml(text));
+          }
+        });
+      }
+
       const presetSelect = document.getElementById('post-author-preset');
       const authorInput = document.getElementById('post-author-input');
       const bioInput = document.getElementById('post-author-bio-input');
@@ -1864,63 +2375,6 @@
             bioInput.value = 'FoxSA News Journalist';
             avatarInput.value = DEFAULT_AVATAR;
             authorInput.focus();
-          }
-        });
-      }
-
-      // Image File Upload
-      const fileInput = document.getElementById('post-image-file');
-      if (fileInput) {
-        fileInput.addEventListener('change', (e) => {
-          const file = e.target.files && e.target.files[0];
-          if (!file) return;
-          compressImageFile(file, 960, 0.82, (dataUrl) => {
-            document.getElementById('post-image-input').value = dataUrl;
-            showToast('Gambar berhasil di-load!');
-          });
-        });
-      }
-
-      // Formatting toolbar buttons
-      const contentArea = document.getElementById('post-content-input');
-      mainEl.querySelectorAll('[data-insert-tag]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const tag = btn.getAttribute('data-insert-tag');
-          const start = contentArea.selectionStart;
-          const end = contentArea.selectionEnd;
-          const selected = contentArea.value.substring(start, end) || 'Teks di sini';
-          let replacement = `<${tag}>${selected}</${tag}>`;
-          if (tag === 'p') {
-            replacement = `<p style="text-align: justify;">${selected}</p>\n`;
-          } else if (tag === 'blockquote') {
-            replacement = `<blockquote style="text-align: justify;">"${selected}"</blockquote>\n`;
-          }
-          contentArea.value = contentArea.value.substring(0, start) + replacement + contentArea.value.substring(end);
-          contentArea.focus();
-        });
-      });
-
-      const insertImgBtn = document.getElementById('editor-insert-img-url');
-      if (insertImgBtn) {
-        insertImgBtn.addEventListener('click', () => {
-          const url = prompt('Masukkan URL Gambar yang ingin ditambahkan ke dalam isi berita:');
-          if (!url) return;
-          const caption = prompt('Masukkan Keterangan Gambar / Kredit Foto (Opsional):', 'Picture : FoxSA News');
-          const imgHtml = `\n<div class="separator" style="clear: both; text-align: center;"><a href="${url}" target="_blank"><img border="0" src="${url}" width="640" /></a></div>\n${caption ? `<p style="text-align: center;"><i>${caption}</i></p>\n` : ''}`;
-          contentArea.value += imgHtml;
-        });
-      }
-
-      const previewBtn = document.getElementById('editor-toggle-preview');
-      if (previewBtn) {
-        previewBtn.addEventListener('click', () => {
-          const box = document.getElementById('editor-live-preview');
-          const body = document.getElementById('editor-preview-body');
-          if (box.style.display === 'none') {
-            body.innerHTML = contentArea.value;
-            box.style.display = 'block';
-          } else {
-            box.style.display = 'none';
           }
         });
       }
@@ -1955,7 +2409,7 @@
         const publishedIso = dateRaw ? new Date(dateRaw).toISOString() : new Date().toISOString();
         const popular = document.getElementById('post-popular-input').checked;
         let featuredImage = document.getElementById('post-image-input').value.trim();
-        let content = document.getElementById('post-content-input').value.trim();
+        let content = serializeVisualEditorToCleanHtml(visualCanvas);
 
         state.data.authors[author] = {
           name: author,
@@ -1964,15 +2418,16 @@
           profileUrl: `#/author/${author}`
         };
 
+        // If user provided a featuredImage and content doesn't have an <img> yet, prepend it cleanly
         if (featuredImage && !/<img\b/i.test(content)) {
-          content = `<div class="separator" style="clear: both; text-align: center;"><a href="${featuredImage}" target="_blank"><img border="0" src="${featuredImage}" width="640" /></a></div><br/>` + content;
+          content = `<figure class="foxsa-article-figure"><img src="${featuredImage}" alt="${escapeHtml(title)}" /><figcaption>Picture : FoxSA News</figcaption></figure>` + content;
         }
         if (!featuredImage) {
           const match = content.match(/<img[^>]+src=["']([^"']+)["']/i);
           featuredImage = match ? match[1] : state.data.siteInfo.aboutBanner;
         }
 
-        const snippet = stripHtmlToSnippet(content, 135);
+        const snippet = stripHtmlToSnippet(content, 155);
 
         if (state.editingPostId) {
           const existing = state.data.posts.find(p => p.id === state.editingPostId);
@@ -2234,51 +2689,89 @@
   }
 
   // =========================================================================
-  // 7. RENDERING: SIDEBAR, HEADER MENU & FOOTER WIDGETS
+  // 8. RENDERING: SIDEBAR, POPULAR TAGS STRIP & FOOTER WIDGETS
   // =========================================================================
+
+  function renderSidebarTabbedList() {
+    const container = document.getElementById('sidebar-tabbed-posts');
+    if (!container || !state.data || !state.data.posts) return;
+
+    const posts = state.data.posts;
+    let list = [];
+    if (state.sidebarTab === 'popular') {
+      list = posts.filter(p => p.popular);
+      if (list.length < 5) {
+        list = list.concat(posts.filter(p => !list.includes(p)));
+      }
+      list = list.slice(0, 5);
+    } else {
+      list = posts.slice(0, 5);
+    }
+
+    container.innerHTML = `
+      <div class="an-side-post-list">
+        ${list.map(p => {
+          const cat = (p.labels && p.labels[0]) || 'News';
+          return `
+            <a href="${getPostHref(p)}" class="an-side-post-item">
+              <img src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(p.title)}" loading="lazy" />
+              <div class="an-side-post-info">
+                <h4>${escapeHtml(p.title)}</h4>
+                <span class="an-side-post-sub">${escapeHtml(cat)} • ${escapeHtml(formatShortDate(p.published))}</span>
+                <span class="an-side-post-stat"><i class="fa-regular fa-comment"></i> ${(p.comments || []).length} komentar</span>
+              </div>
+            </a>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
 
   function renderWidgets() {
     if (!state.data || !state.data.posts) return;
     const posts = state.data.posts;
 
-    // 1. Popular Posts (Sidebar #PopularPosts1 & Footer #PopularPosts2)
+    // Update Spotlight stats
+    const statPosts = document.getElementById('side-stat-posts');
+    const statAuthors = document.getElementById('side-stat-authors');
+    if (statPosts) statPosts.textContent = posts.length;
+    if (statAuthors) statAuthors.textContent = Object.keys(state.data.authors || {}).length;
+
+    // 1. Sidebar Tabbed Posts (TERPOPULER / TERBARU)
+    renderSidebarTabbedList();
+
+    // 2. Footer Popular Posts
     let popularPosts = posts.filter(p => p.popular);
-    if (popularPosts.length < 3) {
-      popularPosts = posts.slice(0, 3);
-    } else {
-      popularPosts = popularPosts.slice(0, 3);
-    }
-
-    const popularHtml = popularPosts.map((p, idx) => `
-      <div class="post item-${idx}">
-        <div class="post-content">
-          <a class="post-image-link" href="${getPostHref(p)}">
-            <img alt="${escapeHtml(p.title)}" class="post-thumb lazy-yard" src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" loading="lazy"/>
-          </a>
-          <div class="post-info">
-            <h2 class="post-title"><a href="${getPostHref(p)}">${escapeHtml(p.title)}</a></h2>
-            <div class="post-meta">
-              <span class="post-date published" datetime="${escapeHtml(p.published)}">${escapeHtml(formatDateID(p.published))}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    `).join('');
-
-    const popSidebarEl = document.querySelector('#PopularPosts1 .widget-content');
-    if (popSidebarEl) popSidebarEl.innerHTML = popularHtml;
+    if (popularPosts.length < 3) popularPosts = posts.slice(0, 3);
+    else popularPosts = popularPosts.slice(0, 3);
 
     const popFooterEl = document.querySelector('#PopularPosts2 .widget-content');
-    if (popFooterEl) popFooterEl.innerHTML = popularHtml;
+    if (popFooterEl) {
+      popFooterEl.innerHTML = popularPosts.map(p => `
+        <a href="${getPostHref(p)}" class="footer-pop-item">
+          <img src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(p.title)}" loading="lazy" />
+          <div>
+            <h5>${escapeHtml(p.title)}</h5>
+            <span>${escapeHtml(formatDateID(p.published))}</span>
+          </div>
+        </a>
+      `).join('');
+    }
 
-    // 2. Categories & Tags Count (#Label1 list + dropdown & #Label2 cloud)
+    // 3. Popular Tags Strip under Header (Kreeti style) & Nav Categories
     const labelCounts = getLabelCounts();
     const sortedLabels = Object.keys(labelCounts).sort((a, b) => {
       if (labelCounts[b] !== labelCounts[a]) return labelCounts[b] - labelCounts[a];
       return a.localeCompare(b);
     });
 
-    // Update top header dynamic category submenu
+    const ptagsList = document.getElementById('header-popular-tags-list');
+    if (ptagsList) {
+      ptagsList.innerHTML = sortedLabels.map(l => `
+        <a href="#/label/${encodeURIComponent(l)}" class="ptag-chip">#${escapeHtml(l)}</a>
+      `).join('');
+    }
+
     const navDynamicCats = document.getElementById('nav-dynamic-categories');
     if (navDynamicCats) {
       navDynamicCats.innerHTML = sortedLabels.map(l => `
@@ -2324,22 +2817,7 @@
       }
     }
 
-    const labelCloudEl = document.querySelector('#Label2 .widget-content');
-    if (labelCloudEl) {
-      labelCloudEl.innerHTML = `
-        <ul class="cloud-label">
-          ${sortedLabels.map(l => `
-            <li>
-              <a class="label-name" href="#/label/${encodeURIComponent(l)}">
-                #${escapeHtml(l)}
-              </a>
-            </li>
-          `).join('')}
-        </ul>
-      `;
-    }
-
-    // 3. Blog Archive (#BlogArchive1)
+    // 4. Blog Archive (#BlogArchive1)
     const archiveCounts = {};
     posts.forEach(p => {
       const key = getArchiveKey(p.published);
@@ -2376,12 +2854,13 @@
   }
 
   function renderAll() {
+    renderHeroShowcase();
     renderMainView();
     renderWidgets();
   }
 
   // =========================================================================
-  // 8. UI INTERACTIONS (SEARCH, ANDROID DRAWER MENU, BACK TO TOP)
+  // 9. UI INTERACTIONS (TOPBAR DATE, INLINE SEARCH, SIDEBAR TABS, DRAWER)
   // =========================================================================
 
   function rebuildMobileDrawerMenu() {
@@ -2410,11 +2889,38 @@
       }
     });
 
+    // Add Staff Portal link at the bottom of mobile menu
+    const staffLi = document.createElement('li');
+    staffLi.innerHTML = `<a href="#/admin" class="admin-nav-btn"><i class="fa-solid fa-user-shield"></i> ${state.currentUser ? `Panel (${escapeHtml(state.currentUser.displayName.split(' ')[0])})` : 'Staff Login'}</a>`;
+    clonedUl.appendChild(staffLi);
+
     mobileMenuContainer.appendChild(clonedUl);
   }
 
   function initUIInteractions() {
-    // Desktop/Header Search Toggle
+    // Live Date in Top Bar
+    const liveDateEl = document.getElementById('foxsa-live-date');
+    if (liveDateEl) {
+      const now = new Date();
+      const dayName = DAYS_ID[now.getDay()];
+      const dayNum = String(now.getDate()).padStart(2, '0');
+      const monthName = MONTHS_ID[now.getMonth()];
+      const year = now.getFullYear();
+      liveDateEl.innerHTML = `<i class="fa-regular fa-calendar"></i> ${dayName}, ${dayNum} ${monthName} ${year}`;
+    }
+
+    // Inline Header Search (AnimeNetwork style)
+    const inlineSearchForm = document.getElementById('header-inline-search-form');
+    const inlineSearchInput = document.getElementById('header-inline-search-input');
+    if (inlineSearchForm) {
+      inlineSearchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const q = inlineSearchInput ? inlineSearchInput.value.trim() : '';
+        window.location.hash = q ? `#/search/${encodeURIComponent(q)}` : '#/';
+      });
+    }
+
+    // Mobile Search Overlay Toggle
     const showSearchBtn = document.querySelector('.show-search');
     const hideSearchBtn = document.querySelector('.hide-search');
     const searchWrap = document.getElementById('nav-search');
@@ -2452,6 +2958,16 @@
         window.location.hash = q ? `#/search/${encodeURIComponent(q)}` : '#/';
       });
     }
+
+    // Sidebar Tabs (TERPOPULER / TERBARU)
+    document.querySelectorAll('[data-side-tab]').forEach(tabBtn => {
+      tabBtn.addEventListener('click', () => {
+        document.querySelectorAll('[data-side-tab]').forEach(b => b.classList.remove('active'));
+        tabBtn.classList.add('active');
+        state.sidebarTab = tabBtn.getAttribute('data-side-tab');
+        renderSidebarTabbedList();
+      });
+    });
 
     // Mobile Menu Toggle & Slide Drawer
     const mobileToggles = document.querySelectorAll('.mobile-menu-toggle');
@@ -2505,7 +3021,7 @@
   }
 
   // =========================================================================
-  // 9. BOOTSTRAP
+  // 10. BOOTSTRAP
   // =========================================================================
 
   document.addEventListener('DOMContentLoaded', () => {
