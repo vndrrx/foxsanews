@@ -9,11 +9,13 @@ Website resmi **FoxSA News** (Roleplay San Andreas) berbasis **HTML, CSS, dan Ja
 
 ```text
 web/
-├── index.html          # Halaman utama website (Beranda, Baca Berita, Kategori, Arsip, Portal Staff)
-├── style.css           # Stylesheet template FoxSA News + UI Android-Friendly, Kategori, & Admin Panel
+├── index.html          # Halaman utama website (Beranda, Baca Berita, Profil Perusahaan, Kategori, Arsip, Portal Staff)
+├── style.css           # Stylesheet FoxSA News + UI Android-Friendly, Profil Perusahaan, Kategori, & Admin Panel
+├── assets/
+│   └── logo/           # Logo resmi FoxSA News, Sub-Brand (Channel, Media, Audio), & Bagan Struktur Organisasi
 ├── js/
-│   ├── data.js         # Data bawaan 10 berita Roleplay FoxSA News, profil jurnalis, & komentar
-│   └── app.js          # Logika utama (Routing, Filter Kategori, Komentar, Login Staff, Admin, Cloud Sync)
+│   ├── data.js         # Data bawaan 7 berita Roleplay FoxSA News, profil jurnalis, & komentar
+│   └── app.js          # Logika utama (Routing, Halaman Profil Perusahaan, Filter Kategori, Komentar, Login Staff, Cloud Sync)
 ├── data/
 │   └── posts.json      # Database JSON berita & komentar
 ├── api/
