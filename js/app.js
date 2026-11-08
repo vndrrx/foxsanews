@@ -2903,6 +2903,21 @@
 
   const FOXSA_TEAM_MEMBERS = [
     {
+      id: 'reinhardt',
+      name: 'Reinhardt Harrison',
+      role: 'Board of Commissioners',
+      badge: 'Board of Commissioners',
+      dept: 'boc',
+      featured: true,
+      bio: 'Dewan Komisaris FoxSA News Agency yang mengawasi tata kelola perusahaan, memberikan nasihat strategis tingkat tinggi kepada Dewan Direksi, serta menjaga marwah dan independensi jaringan media di San Andreas.',
+      experienceIntro: 'Berperan sebagai pengawas tertinggi yang memastikan seluruh kebijakan strategis dan operasional FoxSA News berjalan sesuai visi utama perusahaan.',
+      highlights: [
+        'Mengawasi jalannya kebijakan strategis & tata kelola Dewan Direksi FoxSA News',
+        'Memberikan arahan & pertimbangan utama dalam pengembangan jangka panjang perusahaan',
+        'Menjaga standar kehormatan, integritas, dan independensi FoxSA News Agency'
+      ]
+    },
+    {
       id: 'catherine',
       name: 'Catherine Cecillie',
       role: 'CEO & Founder Lead',
@@ -3093,13 +3108,13 @@
 
     // TAB 1: OVERVIEW & "MEET OUR TEAM" INTERACTIVE SLIDER SHOWCASE
     if (activeTab === 'overview') {
+      const commissioner = FOXSA_TEAM_MEMBERS.find(m => m.dept === 'boc');
       const featuredExecs = FOXSA_TEAM_MEMBERS.filter(m => m.dept === 'bod');
       const activeExecIndex = typeof state.profileExecIndex === 'number'
         ? ((state.profileExecIndex % featuredExecs.length) + featuredExecs.length) % featuredExecs.length
         : 0;
       const exec = featuredExecs[activeExecIndex] || featuredExecs[0];
-      const bodDirectors = featuredExecs.slice(1);
-      const crewMembers = FOXSA_TEAM_MEMBERS.filter(m => m.dept !== 'bod');
+      const crewMembers = FOXSA_TEAM_MEMBERS.filter(m => m.dept !== 'bod' && m.dept !== 'boc');
 
       bodyHtml = `
         <div class="foxsa-profile-section">
@@ -3134,6 +3149,7 @@
               <ul class="profile-quick-facts">
                 <li><span>Tanggal Berdiri</span><strong>17 November 2025</strong></li>
                 <li><span>Pendiri Pertama</span><strong>Messiah Dillard</strong></li>
+                <li><span>Board of Commissioners</span><strong>Reinhardt Harrison</strong></li>
                 <li><span>CEO Saat Ini</span><strong>Catherine Cecillie</strong></li>
                 <li><span>Vice CEO</span><strong>Boniface Ernest</strong></li>
                 <li><span>Secretary Chief</span><strong>Arthur Redfields</strong></li>
@@ -3148,10 +3164,45 @@
           <div class="foxsa-meet-team-wrap" id="foxsa-meet-team-section">
             <div class="meet-team-top-heading">
               <h2>Meet Our <span class="team-underline">Team</span></h2>
-              <p>Mengenal lebih dekat jajaran pimpinan eksekutif (CEO &amp; Board of Directors), manajemen operasional, supervisor, dan kru redaksi FoxSA News Agency.</p>
+              <p>Mengenal lebih dekat jajaran Dewan Komisaris, Dewan Direksi (CEO &amp; Board of Directors), manajemen operasional, supervisor, dan kru redaksi FoxSA News Agency.</p>
             </div>
 
-            <!-- 1. CEO & Board of Directors Spotlight (With 1/4 Switcher + Quick Director Tabs) -->
+            ${commissioner ? `
+            <!-- 1. Board of Commissioners (Dedicated Spotlight Card for Reinhardt Harrison) -->
+            <div class="meet-team-featured-card">
+              <div class="meet-featured-portrait-wrap">
+                <span class="meet-floating-role-pill">${escapeHtml(commissioner.role)}</span>
+                <img src="${getDefaultTeamAvatarSvg(4)}" alt="${escapeHtml(commissioner.name)}" class="meet-featured-portrait-img" />
+              </div>
+
+              <div class="meet-featured-details">
+                <div class="meet-featured-header-row">
+                  <div>
+                    <span class="meet-exec-kicker">${escapeHtml(commissioner.badge)}</span>
+                    <h3 class="meet-exec-name">${escapeHtml(commissioner.name)}</h3>
+                  </div>
+                </div>
+
+                <p class="meet-exec-bio">${escapeHtml(commissioner.bio)}</p>
+
+                <div class="meet-exec-divider"></div>
+
+                <h4 class="meet-exec-exp-title">${escapeHtml(commissioner.name)} Experience</h4>
+                <p class="meet-exec-exp-desc">${escapeHtml(commissioner.experienceIntro)}</p>
+
+                <ul class="meet-exec-check-list">
+                  ${commissioner.highlights.map(item => `
+                    <li>
+                      <span class="check-circle-dark"><i class="fa-solid fa-check"></i></span>
+                      <span>${escapeHtml(item)}</span>
+                    </li>
+                  `).join('')}
+                </ul>
+              </div>
+            </div>
+            ` : ''}
+
+            <!-- 2. CEO & Board of Directors Spotlight (With 1/4 Switcher + Quick Director Tabs) -->
             <div class="meet-team-featured-card">
               <div class="meet-featured-portrait-wrap">
                 <span class="meet-floating-role-pill">${escapeHtml(exec.role)}</span>
@@ -3203,34 +3254,6 @@
               </div>
             </div>
 
-            <!-- 2. Dedicated Board of Directors 3-Column Section (Separated from Regular Staff) -->
-            <div class="meet-bod-dedicated-section">
-              <div class="meet-board-header">
-                <div class="meet-board-title-col">
-                  <h3>Board of <span class="team-underline">Directors</span></h3>
-                </div>
-                <div class="meet-board-desc-col">
-                  <p>Jajaran Dewan Direksi yang mendampingi CEO dalam merumuskan kebijakan strategis dan tata kelola utama FoxSA News Agency.</p>
-                </div>
-              </div>
-
-              <div class="meet-bod-3grid">
-                ${bodDirectors.map((member, idx) => `
-                  <div class="meet-member-card bod-static-card" data-select-exec="${idx + 1}" title="Klik untuk melihat detail profil ${escapeHtml(member.name)}">
-                    <div class="meet-member-photo-box">
-                      <span class="meet-floating-role-pill">${escapeHtml(member.role)}</span>
-                      <img src="${getDefaultTeamAvatarSvg(idx + 1)}" alt="${escapeHtml(member.name)}" loading="lazy" />
-                    </div>
-                    <div class="meet-member-info-box">
-                      <span class="meet-member-dept-tag">${escapeHtml(member.badge)}</span>
-                      <h4>${escapeHtml(member.name)}</h4>
-                      <p>${escapeHtml(member.bio)}</p>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-
             <!-- 3. Operational Management, Supervisor Team & Operational Staff Carousel (Slide Right & Left) -->
             <div class="meet-board-slider-section">
               <div class="meet-board-header">
@@ -3257,7 +3280,7 @@
                     <div class="meet-member-card" data-member-id="${escapeHtml(member.id)}">
                       <div class="meet-member-photo-box">
                         <span class="meet-floating-role-pill">${escapeHtml(member.role)}</span>
-                        <img src="${getDefaultTeamAvatarSvg(idx + 4)}" alt="${escapeHtml(member.name)}" loading="lazy" />
+                        <img src="${getDefaultTeamAvatarSvg(idx + 1)}" alt="${escapeHtml(member.name)}" loading="lazy" />
                       </div>
                       <div class="meet-member-info-box">
                         <span class="meet-member-dept-tag">${escapeHtml(member.badge)}</span>
