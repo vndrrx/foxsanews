@@ -9031,9 +9031,121 @@ body.nav-active #header-wrap .mobile-menu-wrap {
   color: #F08D39 !important;
 }
 
+html,
+body,
+#outer-wrapper {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Category Bar Left/Right Scroll Buttons & Drag State on PC */
+.an-filter-toolbar {
+  gap: 8px !important;
+  padding: 0 12px !important;
+}
+.an-tabs-scroll {
+  flex: 1;
+  min-width: 0;
+  scroll-behavior: smooth;
+  cursor: grab;
+  user-select: none;
+}
+.an-tabs-scroll.is-dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
+}
+.an-cat-scroll-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #090C1E;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.18s ease;
+}
+.an-cat-scroll-btn:hover {
+  background: #F08D39;
+  border-color: #F08D39;
+  color: #ffffff;
+}
+
+/* Dedicated Board of Directors Section & Quick Selector Pills */
+.meet-bod-quick-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.meet-bod-pill {
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 6px 12px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  transition: all 0.18s ease;
+}
+.meet-bod-pill strong {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #090C1E;
+}
+.meet-bod-pill span {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #64748b;
+}
+.meet-bod-pill:hover {
+  border-color: #F08D39;
+}
+.meet-bod-pill.active {
+  background: #090C1E;
+  border-color: #090C1E;
+  box-shadow: 0 4px 12px rgba(9, 12, 30, 0.14);
+}
+.meet-bod-pill.active strong {
+  color: #ffffff;
+}
+.meet-bod-pill.active span {
+  color: #F08D39;
+}
+
+.meet-bod-dedicated-section {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 26px 24px;
+}
+.meet-bod-3grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.meet-bod-3grid .meet-member-card.bod-static-card {
+  flex: none !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  width: 100% !important;
+  cursor: pointer;
+}
+
 @media screen and (max-width: 980px) {
-  #header-wrap.foxsa-modern-header {
+  #header-wrap.foxsa-modern-header,
+  #header-wrap.foxsa-modern-header > .container,
+  #header-wrap.foxsa-modern-header .foxsa-header-flex {
     background: #090C1E !important;
+  }
+  #header-wrap.foxsa-modern-header {
     border-bottom: 3px solid #F08D39 !important;
   }
   #header-wrap.foxsa-modern-header .foxsa-header-flex {
@@ -9043,7 +9155,9 @@ body.nav-active #header-wrap .mobile-menu-wrap {
     justify-content: space-between !important;
     gap: 10px !important;
   }
+  #header-wrap .header-menu.foxsa-nav-center,
   #header-wrap .foxsa-nav-center,
+  #header-wrap #main-menu,
   #header-wrap .foxsa-inline-search {
     display: none !important;
   }
@@ -9052,8 +9166,8 @@ body.nav-active #header-wrap .mobile-menu-wrap {
     width: 38px !important;
     height: 38px !important;
     line-height: 38px !important;
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
     color: #ffffff !important;
     border-radius: 9px !important;
     margin: 0 !important;
@@ -9067,6 +9181,12 @@ body.nav-active #header-wrap .mobile-menu-wrap {
     background: transparent !important;
     border: none !important;
     border-radius: 0 !important;
+  }
+  #header-wrap .foxsa-brand-text .brand-foxsa {
+    color: #ffffff !important;
+  }
+  #header-wrap .foxsa-brand-text .brand-news {
+    color: #F08D39 !important;
   }
   #header-wrap .foxsa-staff-pill-btn {
     background: #F08D39 !important;
@@ -9092,6 +9212,9 @@ body.nav-active #header-wrap .mobile-menu-wrap {
   .meet-board-header,
   .foxsa-rec-showcase-grid {
     grid-template-columns: 1fr;
+  }
+  .meet-bod-3grid {
+    grid-template-columns: repeat(2, 1fr);
   }
   .meet-member-card {
     flex: 0 0 calc((100% - 20px) / 2);
@@ -9142,7 +9265,7 @@ body.nav-active #header-wrap .mobile-menu-wrap {
   }
   #header-wrap .foxsa-brand-box .foxsa-brand-text .brand-sub {
     font-size: 7.5px !important;
-    letter-spacing: 1px !important;
+    letter-spacing: 0.8px !important;
   }
   .foxsa-staff-pill-btn {
     padding: 6px 11px !important;
@@ -9197,8 +9320,13 @@ body.nav-active #header-wrap .mobile-menu-wrap {
   .an-filter-toolbar {
     flex-direction: row !important;
     align-items: center !important;
-    padding: 8px 10px !important;
-    gap: 8px !important;
+    padding: 6px 8px !important;
+    gap: 6px !important;
+  }
+  .an-cat-scroll-btn {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 10px !important;
   }
   .an-tabs-scroll {
     flex: 1 !important;
@@ -9206,7 +9334,8 @@ body.nav-active #header-wrap .mobile-menu-wrap {
   }
   .an-tab-item {
     font-size: 11.5px !important;
-    padding: 6px 11px !important;
+    padding: 6px 10px !important;
+    height: 42px !important;
   }
   .an-toolbar-right {
     width: auto !important;
@@ -9229,7 +9358,21 @@ body.nav-active #header-wrap .mobile-menu-wrap {
     margin-bottom: 10px !important;
   }
 
-  /* Single Article View on Android (Fix legacy Blogger separator image margin & 2-col post-nav) */
+  /* Staff Login & Admin Panel on Android */
+  .foxsa-login-wrap {
+    padding: 4px 0 20px !important;
+  }
+  .foxsa-login-card {
+    padding: 20px 16px !important;
+    border-radius: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .foxsa-login-header h2 {
+    font-size: 19px !important;
+  }
+
+  /* Single Article View on Android */
   .item-post h1.post-title {
     font-size: 19px !important;
     line-height: 1.32 !important;
@@ -9338,9 +9481,19 @@ body.nav-active #header-wrap .mobile-menu-wrap {
   .meet-exec-name {
     font-size: 19px;
   }
+  .meet-bod-quick-pills {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .meet-bod-dedicated-section,
   .meet-board-slider-section {
     padding: 16px 12px;
     border-radius: 12px;
+  }
+  .meet-bod-3grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
   .meet-board-header {
     gap: 10px;

@@ -819,6 +819,10 @@
 
     return `
       <div class="an-filter-toolbar">
+        <button type="button" class="an-cat-scroll-btn" id="cat-scroll-left" aria-label="Geser Kategori Kiri" title="Geser Kategori Kiri">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
         <div class="an-tabs-scroll" id="foxsa-cat-pills-scroll">
           <a href="#/" class="an-tab-item ${isHome ? 'active' : ''}">Semua Berita</a>
           <a href="#/popular" class="an-tab-item ${isPopular ? 'active' : ''}">🔥 Terpopuler</a>
@@ -827,6 +831,10 @@
             return `<a href="#/label/${encodeURIComponent(cat)}" class="an-tab-item ${isActive ? 'active' : ''}">${escapeHtml(cat)}</a>`;
           }).join('')}
         </div>
+
+        <button type="button" class="an-cat-scroll-btn" id="cat-scroll-right" aria-label="Geser Kategori Kanan" title="Geser Kategori Kanan">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
 
         <div class="an-toolbar-right">
           <div class="an-view-switcher" role="group" aria-label="Tampilan Berita">
@@ -969,14 +977,64 @@
       </div>
     `;
 
-    // Bind Category Dropdown Filter
-    const quickCatSelect = document.getElementById('foxsa-quick-category-select');
-    if (quickCatSelect) {
-      quickCatSelect.addEventListener('change', () => {
-        if (quickCatSelect.value) {
-          window.location.hash = quickCatSelect.value;
+    // Bind Category Bar Horizontal Scroll on PC (Left/Right Buttons + Mouse Wheel + Drag)
+    const catScroll = document.getElementById('foxsa-cat-pills-scroll');
+    const catLeftBtn = document.getElementById('cat-scroll-left');
+    const catRightBtn = document.getElementById('cat-scroll-right');
+    if (catScroll) {
+      if (catLeftBtn) {
+        catLeftBtn.addEventListener('click', () => {
+          catScroll.scrollBy({ left: -240, behavior: 'smooth' });
+        });
+      }
+      if (catRightBtn) {
+        catRightBtn.addEventListener('click', () => {
+          catScroll.scrollBy({ left: 240, behavior: 'smooth' });
+        });
+      }
+      catScroll.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+          e.preventDefault();
+          catScroll.scrollLeft += e.deltaY * 1.4;
+        }
+      }, { passive: false });
+
+      let isCatDown = false;
+      let catStartX = 0;
+      let catScrollStart = 0;
+      let catDragged = false;
+      catScroll.addEventListener('mousedown', (e) => {
+        isCatDown = true;
+        catDragged = false;
+        catScroll.classList.add('is-dragging');
+        catStartX = e.pageX - catScroll.offsetLeft;
+        catScrollStart = catScroll.scrollLeft;
+      });
+      catScroll.addEventListener('mouseleave', () => {
+        isCatDown = false;
+        catScroll.classList.remove('is-dragging');
+      });
+      catScroll.addEventListener('mouseup', () => {
+        isCatDown = false;
+        catScroll.classList.remove('is-dragging');
+      });
+      catScroll.addEventListener('mousemove', (e) => {
+        if (!isCatDown) return;
+        const x = e.pageX - catScroll.offsetLeft;
+        const walk = (x - catStartX) * 1.3;
+        if (Math.abs(walk) > 6) {
+          catDragged = true;
+          e.preventDefault();
+          catScroll.scrollLeft = catScrollStart - walk;
         }
       });
+      catScroll.addEventListener('click', (e) => {
+        if (catDragged) {
+          e.preventDefault();
+          e.stopPropagation();
+          catDragged = false;
+        }
+      }, true);
     }
 
     // Bind Grid / List View Switcher
@@ -3035,8 +3093,13 @@
 
     // TAB 1: OVERVIEW & "MEET OUR TEAM" INTERACTIVE SLIDER SHOWCASE
     if (activeTab === 'overview') {
-      const exec = FOXSA_TEAM_MEMBERS[0];
-      const sliderMembers = FOXSA_TEAM_MEMBERS.slice(1);
+      const featuredExecs = FOXSA_TEAM_MEMBERS.filter(m => m.dept === 'bod');
+      const activeExecIndex = typeof state.profileExecIndex === 'number'
+        ? ((state.profileExecIndex % featuredExecs.length) + featuredExecs.length) % featuredExecs.length
+        : 0;
+      const exec = featuredExecs[activeExecIndex] || featuredExecs[0];
+      const bodDirectors = featuredExecs.slice(1);
+      const crewMembers = FOXSA_TEAM_MEMBERS.filter(m => m.dept !== 'bod');
 
       bodyHtml = `
         <div class="foxsa-profile-section">
@@ -3085,14 +3148,14 @@
           <div class="foxsa-meet-team-wrap" id="foxsa-meet-team-section">
             <div class="meet-team-top-heading">
               <h2>Meet Our <span class="team-underline">Team</span></h2>
-              <p>Mengenal lebih dekat jajaran pimpinan eksekutif, manajemen operasional, supervisor, dan kru redaksi yang menggerakkan FoxSA News Agency setiap hari.</p>
+              <p>Mengenal lebih dekat jajaran pimpinan eksekutif (CEO &amp; Board of Directors), manajemen operasional, supervisor, dan kru redaksi FoxSA News Agency.</p>
             </div>
 
-            <!-- Featured Executive Spotlight (Top Row like "Darwin Luiz - CEO & Founder") -->
+            <!-- 1. CEO & Board of Directors Spotlight (With 1/4 Switcher + Quick Director Tabs) -->
             <div class="meet-team-featured-card">
               <div class="meet-featured-portrait-wrap">
                 <span class="meet-floating-role-pill">${escapeHtml(exec.role)}</span>
-                <img src="${getDefaultTeamAvatarSvg(0)}" alt="${escapeHtml(exec.name)}" class="meet-featured-portrait-img" />
+                <img src="${getDefaultTeamAvatarSvg(activeExecIndex)}" alt="${escapeHtml(exec.name)}" class="meet-featured-portrait-img" />
               </div>
 
               <div class="meet-featured-details">
@@ -3101,6 +3164,25 @@
                     <span class="meet-exec-kicker">${escapeHtml(exec.badge)}</span>
                     <h3 class="meet-exec-name">${escapeHtml(exec.name)}</h3>
                   </div>
+                  <div class="meet-exec-slider-controls" title="Geser CEO &amp; Board of Directors">
+                    <button type="button" class="meet-slide-arrow" id="exec-prev-btn" aria-label="Sebelumnya">
+                      <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <span class="meet-exec-counter">${activeExecIndex + 1} / ${featuredExecs.length}</span>
+                    <button type="button" class="meet-slide-arrow" id="exec-next-btn" aria-label="Selanjutnya">
+                      <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Quick Select Pills for CEO & Board of Directors -->
+                <div class="meet-bod-quick-pills">
+                  ${featuredExecs.map((b, i) => `
+                    <button type="button" class="meet-bod-pill ${i === activeExecIndex ? 'active' : ''}" data-select-exec="${i}">
+                      <strong>${escapeHtml(b.name)}</strong>
+                      <span>${escapeHtml(b.role)}</span>
+                    </button>
+                  `).join('')}
                 </div>
 
                 <p class="meet-exec-bio">${escapeHtml(exec.bio)}</p>
@@ -3121,14 +3203,42 @@
               </div>
             </div>
 
-            <!-- Board of Directors & Staff Carousel Section (Slide Right & Left) -->
+            <!-- 2. Dedicated Board of Directors 3-Column Section (Separated from Regular Staff) -->
+            <div class="meet-bod-dedicated-section">
+              <div class="meet-board-header">
+                <div class="meet-board-title-col">
+                  <h3>Board of <span class="team-underline">Directors</span></h3>
+                </div>
+                <div class="meet-board-desc-col">
+                  <p>Jajaran Dewan Direksi yang mendampingi CEO dalam merumuskan kebijakan strategis dan tata kelola utama FoxSA News Agency.</p>
+                </div>
+              </div>
+
+              <div class="meet-bod-3grid">
+                ${bodDirectors.map((member, idx) => `
+                  <div class="meet-member-card bod-static-card" data-select-exec="${idx + 1}" title="Klik untuk melihat detail profil ${escapeHtml(member.name)}">
+                    <div class="meet-member-photo-box">
+                      <span class="meet-floating-role-pill">${escapeHtml(member.role)}</span>
+                      <img src="${getDefaultTeamAvatarSvg(idx + 1)}" alt="${escapeHtml(member.name)}" loading="lazy" />
+                    </div>
+                    <div class="meet-member-info-box">
+                      <span class="meet-member-dept-tag">${escapeHtml(member.badge)}</span>
+                      <h4>${escapeHtml(member.name)}</h4>
+                      <p>${escapeHtml(member.bio)}</p>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- 3. Operational Management, Supervisor Team & Operational Staff Carousel (Slide Right & Left) -->
             <div class="meet-board-slider-section">
               <div class="meet-board-header">
                 <div class="meet-board-title-col">
-                  <h3>Board of <span class="team-underline">Directors</span> &amp; Crew</h3>
+                  <h3>Management, <span class="team-underline">Supervisor</span> &amp; Staff</h3>
                 </div>
                 <div class="meet-board-desc-col">
-                  <p>Geser ke kanan atau kiri untuk melihat jajaran lengkap Board of Directors, Operational Management, Supervisor Team, dan Operational Staff FoxSA News.</p>
+                  <p>Geser ke kanan atau kiri untuk melihat jajaran Operational Management, Supervisor Team, dan Operational Staff FoxSA News.</p>
                   <div class="meet-carousel-nav-btns">
                     <button type="button" class="meet-carousel-btn" id="team-slider-prev" aria-label="Geser Kiri">
                       <i class="fa-solid fa-arrow-left"></i>
@@ -3143,11 +3253,11 @@
               <!-- Horizontal Slidable Cards Track -->
               <div class="meet-team-slider-viewport" id="team-slider-viewport">
                 <div class="meet-team-slider-track" id="team-slider-track">
-                  ${sliderMembers.map((member, idx) => `
+                  ${crewMembers.map((member, idx) => `
                     <div class="meet-member-card" data-member-id="${escapeHtml(member.id)}">
                       <div class="meet-member-photo-box">
                         <span class="meet-floating-role-pill">${escapeHtml(member.role)}</span>
-                        <img src="${getDefaultTeamAvatarSvg(idx + 1)}" alt="${escapeHtml(member.name)}" loading="lazy" />
+                        <img src="${getDefaultTeamAvatarSvg(idx + 4)}" alt="${escapeHtml(member.name)}" loading="lazy" />
                       </div>
                       <div class="meet-member-info-box">
                         <span class="meet-member-dept-tag">${escapeHtml(member.badge)}</span>
@@ -3475,8 +3585,37 @@
       </div>
     `;
 
-    // Bind Horizontal Carousel Left/Right Buttons & Drag-to-Scroll on Overview
+    // Bind Horizontal Carousel Left/Right Buttons, Wheel & Drag-to-Scroll on Overview
     if (activeTab === 'overview') {
+      const featuredExecs = FOXSA_TEAM_MEMBERS.filter(m => m.dept === 'bod');
+      const prevExecBtn = document.getElementById('exec-prev-btn');
+      const nextExecBtn = document.getElementById('exec-next-btn');
+
+      if (prevExecBtn) {
+        prevExecBtn.addEventListener('click', () => {
+          const cur = typeof state.profileExecIndex === 'number' ? state.profileExecIndex : 0;
+          state.profileExecIndex = (cur - 1 + featuredExecs.length) % featuredExecs.length;
+          renderProfileView('overview');
+        });
+      }
+      if (nextExecBtn) {
+        nextExecBtn.addEventListener('click', () => {
+          const cur = typeof state.profileExecIndex === 'number' ? state.profileExecIndex : 0;
+          state.profileExecIndex = (cur + 1) % featuredExecs.length;
+          renderProfileView('overview');
+        });
+      }
+
+      mainEl.querySelectorAll('[data-select-exec]').forEach(el => {
+        el.addEventListener('click', () => {
+          const idx = parseInt(el.getAttribute('data-select-exec'), 10);
+          if (!isNaN(idx)) {
+            state.profileExecIndex = idx;
+            renderProfileView('overview');
+          }
+        });
+      });
+
       const viewport = document.getElementById('team-slider-viewport');
       const slidePrev = document.getElementById('team-slider-prev');
       const slideNext = document.getElementById('team-slider-next');
@@ -3505,6 +3644,13 @@
             viewport.scrollBy({ left: getScrollStep(), behavior: 'smooth' });
           }
         });
+
+        viewport.addEventListener('wheel', (e) => {
+          if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            e.preventDefault();
+            viewport.scrollLeft += e.deltaY * 1.4;
+          }
+        }, { passive: false });
 
         // Mouse drag-to-scroll support on desktop
         let isDown = false;
