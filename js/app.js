@@ -2901,6 +2901,70 @@
     return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
   }
 
+  function getCommissionerAvatarSvg() {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 440" width="400" height="440">
+      <defs>
+        <linearGradient id="bocBg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0f172a"/>
+          <stop offset="55%" stop-color="#1e293b"/>
+          <stop offset="100%" stop-color="#090C1E"/>
+        </linearGradient>
+        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#fbbf24"/>
+          <stop offset="50%" stop-color="#f59e0b"/>
+          <stop offset="100%" stop-color="#d97706"/>
+        </linearGradient>
+      </defs>
+      <rect width="400" height="440" fill="url(#bocBg)"/>
+      <circle cx="200" cy="195" r="142" fill="#f59e0b" opacity="0.08"/>
+      <circle cx="200" cy="195" r="118" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.35"/>
+      <!-- Executive Suit Shoulders & Jacket -->
+      <path d="M52 440 C52 332 112 292 200 292 C288 292 348 332 348 440 Z" fill="#090C1E" stroke="#334155" stroke-width="1.5"/>
+      <!-- Inner Vest & Crisp White Shirt -->
+      <polygon points="154,292 246,292 224,440 176,440" fill="#ffffff"/>
+      <polygon points="158,330 200,368 242,330 230,440 170,440" fill="#1e293b"/>
+      <!-- Gold Silk Tie -->
+      <polygon points="191,310 209,310 215,422 200,438 185,422" fill="url(#goldGrad)"/>
+      <polygon points="189,296 211,296 207,314 193,314" fill="#d97706"/>
+      <!-- Suit Lapels with Gold Trim -->
+      <polygon points="154,292 194,398 158,440 116,336" fill="#060916"/>
+      <polygon points="246,292 206,398 242,440 284,336" fill="#060916"/>
+      <!-- Gold Pocket Square -->
+      <polygon points="256,374 282,366 276,382 252,382" fill="url(#goldGrad)"/>
+      <!-- Shirt Collar -->
+      <polygon points="162,286 196,312 174,326 152,298" fill="#f8fafc"/>
+      <polygon points="238,286 204,312 226,326 248,298" fill="#f8fafc"/>
+      <!-- Neck -->
+      <rect x="176" y="242" width="48" height="60" rx="18" fill="#f0c4a0"/>
+      <path d="M176 266 Q200 284 224 266 L224 288 L176 288 Z" fill="#d9a782" opacity="0.45"/>
+      <!-- Ears -->
+      <circle cx="136" cy="186" r="14" fill="#f0c4a0"/>
+      <circle cx="264" cy="186" r="14" fill="#f0c4a0"/>
+      <!-- Head -->
+      <rect x="142" y="106" width="116" height="152" rx="56" fill="#f0c4a0"/>
+      <!-- Distinguished Executive Hair -->
+      <path d="M140 162 C136 112 164 88 202 88 C242 88 266 114 260 162 C252 132 232 120 200 120 C168 120 148 134 140 162 Z" fill="#1e293b"/>
+      <!-- Eyebrows -->
+      <path d="M164 166 Q177 160 188 165" stroke="#1e293b" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <path d="M212 165 Q223 160 236 166" stroke="#1e293b" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <!-- Eyes -->
+      <circle cx="176" cy="180" r="5.5" fill="#0f172a"/>
+      <circle cx="224" cy="180" r="5.5" fill="#0f172a"/>
+      <!-- Executive Glasses Frame -->
+      <rect x="158" y="168" width="36" height="24" rx="6" fill="none" stroke="#d97706" stroke-width="2.5"/>
+      <rect x="206" y="168" width="36" height="24" rx="6" fill="none" stroke="#d97706" stroke-width="2.5"/>
+      <line x1="194" y1="178" x2="206" y2="178" stroke="#d97706" stroke-width="2.5"/>
+      <!-- Nose -->
+      <path d="M200 182 L196 204 L205 206" stroke="#c9956e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Confident Smile -->
+      <path d="M182 222 Q200 234 218 222" stroke="#b87d56" stroke-width="3.8" stroke-linecap="round" fill="none"/>
+      <!-- Gold Commissioner Lapel Crest -->
+      <circle cx="246" cy="352" r="7.5" fill="url(#goldGrad)"/>
+      <circle cx="246" cy="352" r="3.5" fill="#090C1E"/>
+    </svg>`;
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
+
   const FOXSA_TEAM_MEMBERS = [
     {
       id: 'reinhardt',
@@ -3168,36 +3232,51 @@
             </div>
 
             ${commissioner ? `
-            <!-- 1. Board of Commissioners (Dedicated Spotlight Card for Reinhardt Harrison) -->
-            <div class="meet-team-featured-card">
-              <div class="meet-featured-portrait-wrap">
-                <span class="meet-floating-role-pill">${escapeHtml(commissioner.role)}</span>
-                <img src="${getDefaultTeamAvatarSvg(4)}" alt="${escapeHtml(commissioner.name)}" class="meet-featured-portrait-img" />
+            <!-- 1. Board of Commissioners (Special Prestige Executive Showcase for Reinhardt Harrison) -->
+            <div class="meet-commissioner-special-card">
+              <div class="boc-top-ribbon">
+                <div class="boc-ribbon-left">
+                  <i class="fa-solid fa-crown"></i>
+                  <span>SUPREME SUPERVISORY BOARD • BOARD OF COMMISSIONERS</span>
+                </div>
+                <span class="boc-verified-pill"><i class="fa-solid fa-shield-halved"></i> HIGHEST GOVERNANCE</span>
               </div>
 
-              <div class="meet-featured-details">
-                <div class="meet-featured-header-row">
-                  <div>
-                    <span class="meet-exec-kicker">${escapeHtml(commissioner.badge)}</span>
-                    <h3 class="meet-exec-name">${escapeHtml(commissioner.name)}</h3>
+              <div class="boc-card-body-grid">
+                <div class="boc-portrait-frame">
+                  <span class="boc-floating-crest"><i class="fa-solid fa-award"></i> Commissioner</span>
+                  <img src="${getCommissionerAvatarSvg()}" alt="${escapeHtml(commissioner.name)}" class="boc-portrait-img" />
+                  <div class="boc-portrait-caption">
+                    <strong>${escapeHtml(commissioner.name)}</strong>
+                    <span>President Commissioner • FoxSA News</span>
                   </div>
                 </div>
 
-                <p class="meet-exec-bio">${escapeHtml(commissioner.bio)}</p>
+                <div class="boc-details-col">
+                  <div class="boc-title-head">
+                    <span class="boc-kicker-gold">DEWAN KOMISARIS UTAMA FOXSA NEWS AGENCY</span>
+                    <h3 class="boc-exec-name">${escapeHtml(commissioner.name)}</h3>
+                  </div>
 
-                <div class="meet-exec-divider"></div>
+                  <p class="boc-exec-bio">${escapeHtml(commissioner.bio)}</p>
 
-                <h4 class="meet-exec-exp-title">${escapeHtml(commissioner.name)} Experience</h4>
-                <p class="meet-exec-exp-desc">${escapeHtml(commissioner.experienceIntro)}</p>
+                  <blockquote class="boc-mandate-quote">
+                    <i class="fa-solid fa-quote-left"></i>
+                    <span>"Menjaga marwah, independensi ruang redaksi, dan integritas jurnalistik tertinggi FoxSA News Agency di seluruh San Andreas."</span>
+                  </blockquote>
 
-                <ul class="meet-exec-check-list">
-                  ${commissioner.highlights.map(item => `
-                    <li>
-                      <span class="check-circle-dark"><i class="fa-solid fa-check"></i></span>
-                      <span>${escapeHtml(item)}</span>
-                    </li>
-                  `).join('')}
-                </ul>
+                  <h4 class="boc-exp-title"><i class="fa-solid fa-scale-balanced"></i> Wewenang &amp; Fokus Pengawasan Komisaris</h4>
+                  <p class="boc-exp-desc">${escapeHtml(commissioner.experienceIntro)}</p>
+
+                  <ul class="boc-pillars-list">
+                    ${commissioner.highlights.map(item => `
+                      <li>
+                        <span class="boc-check-gold"><i class="fa-solid fa-check"></i></span>
+                        <span>${escapeHtml(item)}</span>
+                      </li>
+                    `).join('')}
+                  </ul>
+                </div>
               </div>
             </div>
             ` : ''}

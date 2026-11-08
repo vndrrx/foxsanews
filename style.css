@@ -9120,23 +9120,221 @@ body,
   color: #F08D39;
 }
 
-.meet-bod-dedicated-section {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 26px 24px;
+/* Special Prestige Executive Showcase for Board of Commissioners (Reinhardt Harrison) */
+.meet-commissioner-special-card {
+  position: relative;
+  background: linear-gradient(135deg, #090C1E 0%, #111833 55%, #172144 100%);
+  border: 1.5px solid rgba(245, 158, 11, 0.45);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(9, 12, 30, 0.22);
+  color: #ffffff;
 }
-.meet-bod-3grid {
+.meet-commissioner-special-card::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.boc-top-ribbon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 24px;
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.18) 0%, rgba(9, 12, 30, 0.65) 100%);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+}
+.boc-ribbon-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #fbbf24;
+}
+.boc-ribbon-left i {
+  font-size: 14px;
+  color: #fbbf24;
+}
+.boc-verified-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #090C1E;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  padding: 4px 12px;
+  border-radius: 99px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+.boc-card-body-grid {
+  position: relative;
+  z-index: 1;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: 310px 1fr;
+  gap: 32px;
+  align-items: center;
+  padding: 26px;
 }
-.meet-bod-3grid .meet-member-card.bod-static-card {
-  flex: none !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  width: 100% !important;
-  cursor: pointer;
+.boc-portrait-frame {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid rgba(251, 191, 36, 0.55);
+  background: #0f172a;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+.boc-floating-crest {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(9, 12, 30, 0.88);
+  border: 1px solid rgba(251, 191, 36, 0.6);
+  color: #fbbf24;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+}
+.boc-portrait-img {
+  width: 100%;
+  aspect-ratio: 4 / 4.2;
+  object-fit: cover;
+  display: block;
+}
+.boc-portrait-caption {
+  padding: 11px 14px;
+  background: rgba(6, 9, 22, 0.95);
+  border-top: 1px solid rgba(251, 191, 36, 0.28);
+  text-align: center;
+}
+.boc-portrait-caption strong {
+  display: block;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+}
+.boc-portrait-caption span {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fbbf24;
+  margin-top: 1px;
+}
+.boc-details-col {
+  display: flex;
+  flex-direction: column;
+}
+.boc-kicker-gold {
+  display: inline-block;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  color: #fbbf24;
+  margin-bottom: 4px;
+}
+.boc-exec-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 12px;
+  line-height: 1.2;
+}
+.boc-exec-bio {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: #cbd5e1;
+  margin: 0 0 14px;
+}
+.boc-mandate-quote {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  background: rgba(251, 191, 36, 0.09);
+  border-left: 3.5px solid #fbbf24;
+  border-radius: 0 10px 10px 0;
+  font-size: 13px;
+  font-style: italic;
+  color: #fef3c7;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.55;
+}
+.boc-mandate-quote i {
+  color: #fbbf24;
+  font-size: 15px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.boc-exp-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.boc-exp-title i {
+  color: #fbbf24;
+}
+.boc-exp-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #94a3b8;
+  margin: 0 0 12px;
+}
+.boc-pillars-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.boc-pillars-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+.boc-check-gold {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  color: #090C1E;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 3px 8px rgba(245, 158, 11, 0.3);
 }
 
 @media screen and (max-width: 980px) {
@@ -9200,11 +9398,13 @@ body,
   .foxsa-mobile-drawer-foot {
     display: block !important;
   }
-  .meet-team-featured-card {
+  .meet-team-featured-card,
+  .boc-card-body-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  .meet-featured-portrait-wrap {
+  .meet-featured-portrait-wrap,
+  .boc-portrait-frame {
     max-width: 300px;
     margin: 0 auto;
     width: 100%;
@@ -9471,11 +9671,19 @@ body,
   .meet-team-top-heading h2 {
     font-size: 22px;
   }
-  .meet-team-featured-card {
+  .meet-team-featured-card,
+  .boc-card-body-grid {
     padding: 14px;
     gap: 16px;
   }
-  .meet-featured-portrait-wrap {
+  .boc-top-ribbon {
+    padding: 10px 14px;
+  }
+  .boc-exec-name {
+    font-size: 20px;
+  }
+  .meet-featured-portrait-wrap,
+  .boc-portrait-frame {
     max-width: 230px;
   }
   .meet-exec-name {
