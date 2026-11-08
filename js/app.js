@@ -2917,6 +2917,251 @@
   // 8B. DEDICATED COMPANY PROFILE PAGE (#/profile, divisions, roadmap, recruitment)
   // =========================================================================
 
+  function getDefaultTeamAvatarSvg(variantIndex = 0) {
+    const palettes = [
+      { bg1: '#dce8f5', bg2: '#c8d9ed', suit: '#1e293b', lapel: '#0f172a', tie: '#F08D39', skin: '#f1c29b', hair: '#27303f' },
+      { bg1: '#fce6d4', bg2: '#f7d3b8', suit: '#172033', lapel: '#090C1E', tie: '#3b82f6', skin: '#f3c6a2', hair: '#4a3525' },
+      { bg1: '#daf2ee', bg2: '#c2e8e2', suit: '#222b3d', lapel: '#111827', tie: '#e11d48', skin: '#ecc098', hair: '#1f242d' },
+      { bg1: '#e6e8f8', bg2: '#d3d7f2', suit: '#1b2436', lapel: '#0b1120', tie: '#10b981', skin: '#f2c5a0', hair: '#382c22' }
+    ];
+    const p = palettes[Math.abs(variantIndex) % palettes.length];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 440" width="400" height="440">
+      <defs>
+        <linearGradient id="bgGrad${variantIndex}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${p.bg1}"/>
+          <stop offset="100%" stop-color="${p.bg2}"/>
+        </linearGradient>
+      </defs>
+      <rect width="400" height="440" fill="url(#bgGrad${variantIndex})"/>
+      <circle cx="200" cy="210" r="150" fill="#ffffff" fill-opacity="0.28"/>
+      <!-- Suit Shoulders & Torso -->
+      <path d="M62 440 C66 334 118 294 200 294 C282 294 334 334 338 440 Z" fill="${p.suit}"/>
+      <!-- White Dress Shirt -->
+      <polygon points="162,294 238,294 216,440 184,440" fill="#ffffff"/>
+      <!-- Tie -->
+      <polygon points="192,306 208,306 214,420 200,438 186,420" fill="${p.tie}"/>
+      <polygon points="189,294 211,294 207,312 193,312" fill="${p.tie}"/>
+      <!-- Suit Lapels -->
+      <polygon points="160,294 192,388 142,440 116,320" fill="${p.lapel}"/>
+      <polygon points="240,294 208,388 258,440 284,320" fill="${p.lapel}"/>
+      <!-- Shirt Collar -->
+      <polygon points="162,286 196,312 174,326 152,298" fill="#f8fafc"/>
+      <polygon points="238,286 204,312 226,326 248,298" fill="#f8fafc"/>
+      <!-- Neck -->
+      <rect x="176" y="242" width="48" height="60" rx="18" fill="${p.skin}"/>
+      <path d="M176 266 Q200 284 224 266 L224 288 L176 288 Z" fill="#d9a782" opacity="0.45"/>
+      <!-- Ears -->
+      <circle cx="136" cy="186" r="14" fill="${p.skin}"/>
+      <circle cx="264" cy="186" r="14" fill="${p.skin}"/>
+      <!-- Head -->
+      <rect x="142" y="106" width="116" height="152" rx="56" fill="${p.skin}"/>
+      <!-- Hair -->
+      <path d="M140 162 C136 112 164 88 202 88 C242 88 266 114 260 162 C252 132 232 120 200 120 C168 120 148 134 140 162 Z" fill="${p.hair}"/>
+      <!-- Eyebrows -->
+      <path d="M164 166 Q177 160 188 165" stroke="${p.hair}" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <path d="M212 165 Q223 160 236 166" stroke="${p.hair}" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <!-- Eyes -->
+      <circle cx="176" cy="180" r="5.5" fill="#1e293b"/>
+      <circle cx="224" cy="180" r="5.5" fill="#1e293b"/>
+      <!-- Nose -->
+      <path d="M200 182 L196 204 L205 206" stroke="#c9956e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Confident Smile -->
+      <path d="M182 222 Q200 235 218 222" stroke="#b87d56" stroke-width="3.8" stroke-linecap="round" fill="none"/>
+      <!-- FoxSA Lapel Pin -->
+      <circle cx="246" cy="354" r="6" fill="#F08D39"/>
+    </svg>`;
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
+
+  const FOXSA_TEAM_MEMBERS = [
+    {
+      id: 'catherine',
+      name: 'Catherine Cecillie',
+      role: 'CEO & Founder Lead',
+      badge: 'Chief Executive Officer',
+      dept: 'bod',
+      featured: true,
+      bio: 'Pimpinan tertinggi FoxSA News Agency yang mengarahkan visi strategis, independensi ruang redaksi, serta kemitraan utama jaringan penyiaran di seluruh San Andreas.',
+      experienceIntro: 'Berpengalaman memimpin transformasi media berita modern di San Andreas dengan standar integritas jurnalistik tinggi dan manajemen lintas divisi.',
+      highlights: [
+        'Memimpin arah strategis & kebijakan penyiaran FoxSA News Network 24/7',
+        'Mengintegrasikan 3 ekosistem utama: News Channel, FoxSA Media, & Audio Station',
+        'Menjaga independensi redaksi dan kemitraan strategis lintas instansi San Andreas'
+      ]
+    },
+    {
+      id: 'boniface',
+      name: 'Boniface Ernest',
+      role: 'Vice CEO',
+      badge: 'Board of Directors',
+      dept: 'bod',
+      featured: true,
+      bio: 'Wakil Chief Executive Officer yang mengawasi jalannya operasional lintas divisi, koordinasi manajemen, serta pengembangan kemitraan strategis perusahaan.',
+      experienceIntro: 'Berfokus pada penguatan struktur internal, tata kelola manajemen eksekutif, serta ekspansi jangkauan publik FoxSA News.',
+      highlights: [
+        'Mengawasi efektivitas operasional harian di seluruh departemen FoxSA News',
+        'Membangun kolaborasi strategis bersama perusahaan & instansi pemerintahan',
+        'Mendampingi kepemimpinan eksekutif dalam pengambilan keputusan redaksi'
+      ]
+    },
+    {
+      id: 'arthur',
+      name: 'Arthur Redfields',
+      role: 'Secretary Chief',
+      badge: 'Board of Directors',
+      dept: 'bod',
+      featured: true,
+      bio: 'Sekretaris Utama & Editor Senior yang mengelola administrasi eksekutif, tata kelola ruang redaksi, serta peliputan investigasi utama di San Andreas.',
+      experienceIntro: 'Memadukan ketajaman penulisan jurnalistik dengan manajemen kesekretariatan perusahaan dan sistem portal digital FoxSA News.',
+      highlights: [
+        'Mengelola administrasi utama & dokumentasi resmi Dewan Direksi FoxSA',
+        'Memimpin penyuntingan artikel utama & liputan khusus berskala kota',
+        'Mengembangkan sistem publikasi berita digital yang cepat dan akurat'
+      ]
+    },
+    {
+      id: 'marshall',
+      name: 'Marshall Swiss',
+      role: 'Executive Director',
+      badge: 'Board of Directors',
+      dept: 'bod',
+      featured: true,
+      bio: 'Jajaran Dewan Direksi FoxSA News Agency yang berperan aktif dalam perumusan kebijakan strategis, pengawasan mutu siaran, dan pengembangan tim.',
+      experienceIntro: 'Berdedikasi tinggi dalam membangun budaya kerja kekeluargaan yang profesional dan berintegritas di lingkungan FoxSA News Agency.',
+      highlights: [
+        'Merumuskan arah kebijakan strategis bersama jajaran Board of Directors',
+        'Membina kultur kerja yang solid, komunikatif, dan menjunjung integritas',
+        'Mendukung inovasi program siaran langsung dan liputan eksklusif'
+      ]
+    },
+    {
+      id: 'nayeon',
+      name: 'Nayeon Park',
+      role: 'HRD Manager',
+      badge: 'Operational Management',
+      dept: 'management',
+      featured: false,
+      bio: 'Manajer Sumber Daya Manusia (HRD) yang bertanggung jawab atas rekrutmen, seleksi talenta baru, serta kesejahteraan seluruh kru FoxSA News.'
+    },
+    {
+      id: 'jeremiah',
+      name: 'Jeremiah Howell',
+      role: 'Event Manager',
+      badge: 'Operational Management',
+      dept: 'management',
+      featured: false,
+      bio: 'Manajer Event & Analis Utama yang memimpin perencanaan liputan akbar, sponsorship, serta kejuaraan Motorsport di San Andreas.'
+    },
+    {
+      id: 'ligma',
+      name: 'Ligma Deek',
+      role: 'Head of Affairs',
+      badge: 'Operational Management',
+      dept: 'management',
+      featured: false,
+      bio: 'Kepala Hubungan Eksternal & Analis Berita yang menjembatani komunikasi strategis antara FoxSA News dengan publik dan instansi.'
+    },
+    {
+      id: 'clarissa',
+      name: 'Clarissa Vencant',
+      role: 'Senior Editor',
+      badge: 'Supervisor Team',
+      dept: 'supervisor',
+      featured: false,
+      bio: 'Supervisor Redaksi & Editor Senior yang mengawasi kualitas tata bahasa, akurasi berita, dan standar publikasi artikel harian.'
+    },
+    {
+      id: 'jesus',
+      name: 'Jesus Conway',
+      role: 'HR & Crime Lead',
+      badge: 'Supervisor Team',
+      dept: 'supervisor',
+      featured: false,
+      bio: 'Staf Divisi HRD sekaligus Koresponden Kriminal senior yang mengawal liputan hukum, operasi kepolisian, dan pembinaan anggota.'
+    },
+    {
+      id: 'franklin',
+      name: 'Franklin Baxter',
+      role: 'HR Supervisor',
+      badge: 'Supervisor Team',
+      dept: 'supervisor',
+      featured: false,
+      bio: 'Staf Divisi HRD yang mendampingi proses orientasi kru baru, evaluasi berkala, serta pelatihan internal FoxSA Academy.'
+    },
+    {
+      id: 'bryan',
+      name: 'Bryan Andregaz',
+      role: 'Field Reporter',
+      badge: 'Operational Staff',
+      dept: 'staff',
+      featured: false,
+      bio: 'Jurnalis Lapangan & Fotografer Dokumentasi yang sigap meliput berbagai peristiwa langsung dari lokasi kejadian di San Andreas.'
+    },
+    {
+      id: 'shen',
+      name: 'Shen Xander',
+      role: 'Journalist',
+      badge: 'Operational Staff',
+      dept: 'staff',
+      featured: false,
+      bio: 'Jurnalis Harian FoxSA News yang aktif menyusun laporan berita terkini, wawancara warga, dan liputan peristiwa kota.'
+    },
+    {
+      id: 'jareel',
+      name: 'Jareel Sancho',
+      role: 'Junior Staff',
+      badge: 'Operational Staff',
+      dept: 'staff',
+      featured: false,
+      bio: 'Staf Operasional & Tim Penyiaran yang mendukung kelancaran produksi berita harian dan program siaran langsung.'
+    },
+    {
+      id: 'niver',
+      name: 'Niver Richardson',
+      role: 'Junior Staff',
+      badge: 'Operational Staff',
+      dept: 'staff',
+      featured: false,
+      bio: 'Staf Operasional & Kru Liputan yang bertugas dalam dokumentasi visual serta dukungan teknis di lapangan.'
+    },
+    {
+      id: 'mendoza',
+      name: 'Mendoza Souza',
+      role: 'Broadcast Crew',
+      badge: 'Operational Staff',
+      dept: 'staff',
+      featured: false,
+      bio: 'Kru Operasional & Jurnalis Muda yang tergabung dalam program pengembangan talenta penyiaran FoxSA News.'
+    },
+    {
+      id: 'aaron',
+      name: 'Aaron Qroy',
+      role: 'Broadcast Crew',
+      badge: 'Operational Staff',
+      dept: 'staff',
+      featured: false,
+      bio: 'Kru Operasional & Penyiaran yang mendukung produksi konten lapangan serta program komunitas warga San Andreas.'
+    },
+    {
+      id: 'sashura',
+      name: 'Sashura Soloveva',
+      role: 'Editorial Crew',
+      badge: 'Operational Staff',
+      dept: 'staff',
+      featured: false,
+      bio: 'Kru Operasional & Redaksi yang berperan dalam riset informasi, pengumpulan data, dan dokumentasi berita.'
+    },
+    {
+      id: 'giovani',
+      name: 'Giovani Marino',
+      role: 'Media Crew',
+      badge: 'Operational Staff',
+      dept: 'staff',
+      featured: false,
+      bio: 'Kru Operasional & Media yang turut mendukung kelancaran teknis siaran serta peliputan agenda publik.'
+    }
+  ];
+
   function renderProfileView(subtab) {
     document.body.className = 'item';
     const mainEl = document.getElementById('main');
@@ -2927,8 +3172,18 @@
 
     let bodyHtml = '';
 
-    // TAB 1: OVERVIEW & ORGANIZATIONAL STRUCTURE
+    // TAB 1: OVERVIEW & "MEET OUR TEAM" INTERACTIVE SLIDER SHOWCASE
     if (activeTab === 'overview') {
+      const featuredExecs = FOXSA_TEAM_MEMBERS.filter(m => m.featured);
+      const activeExecIndex = typeof state.profileExecIndex === 'number'
+        ? ((state.profileExecIndex % featuredExecs.length) + featuredExecs.length) % featuredExecs.length
+        : 0;
+      const exec = featuredExecs[activeExecIndex] || featuredExecs[0];
+      const activeDeptFilter = state.profileDeptFilter || 'all';
+      const filteredMembers = activeDeptFilter === 'all'
+        ? FOXSA_TEAM_MEMBERS
+        : FOXSA_TEAM_MEMBERS.filter(m => m.dept === activeDeptFilter);
+
       bodyHtml = `
         <div class="foxsa-profile-section">
           <div class="foxsa-profile-intro-grid">
@@ -2939,30 +3194,17 @@
                 <strong>FoxSA News</strong> adalah jaringan televisi kabel dan portal berita 24 jam di San Andreas yang dikenal karena pengaruh besarnya terhadap liputan politik, opini publik, penegakan hukum, motorsport, dan peristiwa nasional. FoxSA News resmi diluncurkan pada <strong>17 November 2025</strong> dengan <strong>Messiah Dillard</strong> sebagai CEO pertama, dan kini dipimpin oleh <strong>Catherine Cecillie</strong> selaku <em>Chief Executive Officer (CEO)</em>.
               </p>
               <p>
-                Sejak awal berdirinya, FoxSA News hadir sebagai alternatif media independen yang berani, tajam, dan lugas dibandingkan jaringan media konvensional lainnya. Dengan menjunjung tinggi akurasi fakta di lapangan, kecepatan siaran langsung, serta integritas redaksi, FoxSA News kini menjadi salah satu jaringan media paling berpengaruh dan paling banyak diikuti oleh masyarakat San Andreas.
+                Sejak awal berdirinya, FoxSA News hadir sebagai alternatif media independen yang berani, tajam, dan lugas. Kami bukan sekadar jaringan berita, melainkan keluarga para pencerita (<em>a family of storytellers</em>) yang menjunjung tinggi kerja sama tim, persahabatan, dan integritas jurnalistik di seluruh San Andreas.
               </p>
 
               <div class="foxsa-profile-values-grid">
                 <div class="profile-value-box">
-                  <i class="fa-solid fa-bolt"></i>
-                  <div>
-                    <strong>Cepat &amp; Akurat</strong>
-                    <span>Liputan langsung dari lokasi kejadian bersama aparat &amp; warga.</span>
-                  </div>
+                  <h4><i class="fa-solid fa-bolt"></i> Cepat &amp; Akurat</h4>
+                  <p>Liputan langsung dari lokasi kejadian bersama aparat &amp; warga San Andreas.</p>
                 </div>
                 <div class="profile-value-box">
-                  <i class="fa-solid fa-scale-balanced"></i>
-                  <div>
-                    <strong>Independen &amp; Kredibel</strong>
-                    <span>Menyajikan fakta objektif, wawancara narasumber, dan jurnalisme berimbang.</span>
-                  </div>
-                </div>
-                <div class="profile-value-box">
-                  <i class="fa-solid fa-tower-broadcast"></i>
-                  <div>
-                    <strong>Multi-Platform 24/7</strong>
-                    <span>Terintegrasi melalui Portal Berita Web, Siaran TV Harian, dan Radio Podcast.</span>
-                  </div>
+                  <h4><i class="fa-solid fa-scale-balanced"></i> Independen &amp; Kredibel</h4>
+                  <p>Menyajikan fakta objektif, wawancara narasumber, dan jurnalisme berimbang.</p>
                 </div>
               </div>
             </div>
@@ -2970,137 +3212,152 @@
             <div class="foxsa-profile-side-emblem">
               <div class="profile-emblem-Showcase">
                 <img src="assets/logo/foxsa-icon.jpg" alt="FoxSA News Official Emblem" />
-                <div class="emblem-caption">
-                  <strong>FOXSA NEWS NETWORK</strong>
-                  <span>Serving The Truth, Delivering The News</span>
-                </div>
+                <div class="profile-emblem-caption">FOXSA NEWS AGENCY</div>
               </div>
-              <div class="profile-quick-facts">
-                <div class="qfact-row"><span>Tanggal Berdiri</span><strong>17 November 2025</strong></div>
-                <div class="qfact-row"><span>Pendiri / CEO Pertama</span><strong>Messiah Dillard</strong></div>
-                <div class="qfact-row"><span>CEO Saat Ini</span><strong>Catherine Cecillie</strong></div>
-                <div class="qfact-row"><span>Vice CEO</span><strong>Boniface Ernest</strong></div>
-                <div class="qfact-row"><span>Kantor Pusat</span><strong>Los Santos, San Andreas</strong></div>
-              </div>
+              <ul class="profile-quick-facts">
+                <li><span>Tanggal Berdiri</span><strong>17 November 2025</strong></li>
+                <li><span>Pendiri Pertama</span><strong>Messiah Dillard</strong></li>
+                <li><span>CEO Saat Ini</span><strong>Catherine Cecillie</strong></li>
+                <li><span>Vice CEO</span><strong>Boniface Ernest</strong></li>
+                <li><span>Secretary Chief</span><strong>Arthur Redfields</strong></li>
+                <li><span>Kantor Pusat</span><strong>Los Santos, SA</strong></li>
+              </ul>
             </div>
           </div>
 
           <hr class="foxsa-profile-divider" />
 
-          <!-- ORGANIZATIONAL STRUCTURE -->
-          <div class="foxsa-org-section">
-            <div class="foxsa-org-header">
-              <span class="foxsa-profile-kicker"><i class="fa-solid fa-sitemap"></i> STRUKTUR ORGANISASI</span>
-              <h3>Jajaran Pimpinan, Manajemen &amp; Redaksi FoxSA News</h3>
-              <p>Susunan kepemimpinan eksekutif, divisi sumber daya manusia (HRD), serta tim operasional dan jurnalis FoxSA News Network.</p>
+          <!-- ==================== MEET OUR TEAM (REFERENCE IMAGE 1 STYLE + SLIDER) ==================== -->
+          <div class="foxsa-meet-team-wrap" id="foxsa-meet-team-section">
+            <div class="meet-team-top-heading">
+              <h2>Meet Our <span class="team-underline">Team</span></h2>
+              <p>Mengenal lebih dekat jajaran pimpinan eksekutif, manajemen operasional, supervisor, dan kru redaksi yang menggerakkan FoxSA News Agency setiap hari.</p>
             </div>
 
-            <!-- High Executive Team -->
-            <div class="org-tier-block">
-              <div class="org-tier-title"><i class="fa-solid fa-crown"></i> High Executive Team</div>
-              <div class="org-cards-grid org-grid-3">
-                <div class="org-person-card highlight-ceo">
-                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjczAy7LhtUkBsZZzOW5IrPDtx0XsQ_HvUTdjCTdK1uggIg9itmaLx523OOTEdiEAjEoZtHZBmGFl08XshLL-07nbD7NpkwLEEiV3OsyaXUeeKVfTNpotuo32uOi9v6kDXSQRPWseWo0xDNkJAdfVD2YWTupqmUK5mplTs1vBbL_bRBag/s200/pexels-photo-5717546.jpeg" alt="Catherine Cecillie" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
-                  <span class="org-role-badge">Chief Executive Officer (CEO)</span>
-                  <h4>Catherine Cecillie</h4>
-                  <p>Pimpinan tertinggi FoxSA News Network yang mengarahkan visi strategis dan kebijakan penyiaran.</p>
-                </div>
-                <div class="org-person-card highlight-exec">
-                  <img src="assets/logo/foxsa-icon.jpg" alt="Boniface Ernest" />
-                  <span class="org-role-badge">Vice Chief Executive Officer</span>
-                  <h4>Boniface Ernest</h4>
-                  <p>Wakil CEO yang mengawasi jalannya operasional lintas divisi serta kemitraan strategis.</p>
-                </div>
-                <div class="org-person-card highlight-exec">
-                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEijelpjGHfXOoTKfqD1mokSIESF0WySrKkFx3EV9rhrMxaQHJmPSkWe7Lj9QbiFJQbVx7z2os7vSHs3TVJFg1nzGX2MTzdqBO1eO-gppMt99EfwrEBOG9BqW1ZrbkNcNNqd-k9pS8vHOItd_EF7yVe_MfaTvhN2EvXpcWmK7ZDpX94RY14/s200/In%20Edward%20Snowden%E2%80%99s%20New%20Memoir,%20the%20Disclosures%20This%20Time%20Are%20Personal%20(Published%202019).jpg" alt="Arthur Redfields" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
-                  <span class="org-role-badge">Secretary Chief &amp; Senior Staff</span>
-                  <h4>Arthur Redfields</h4>
-                  <p>Sekretaris Utama &amp; Editor Senior yang mengelola administrasi redaksi serta peliputan utama.</p>
-                </div>
+            <!-- Featured Executive Spotlight (Top Row like "Darwin Luiz - CEO & Founder" with Slide Switcher) -->
+            <div class="meet-team-featured-card">
+              <div class="meet-featured-portrait-wrap">
+                <span class="meet-floating-role-pill">${escapeHtml(exec.role)}</span>
+                <img src="${getDefaultTeamAvatarSvg(activeExecIndex)}" alt="${escapeHtml(exec.name)}" class="meet-featured-portrait-img" />
               </div>
-              <div class="org-vacant-pills">
-                <span><strong>Commissioner:</strong> Vacant</span>
-                <span><strong>GM Human Resource:</strong> Vacant</span>
-                <span><strong>GM Event &amp; Sponsorship:</strong> Vacant</span>
-              </div>
-            </div>
 
-            <!-- Executive & HR Division Team -->
-            <div class="org-tier-block">
-              <div class="org-tier-title"><i class="fa-solid fa-user-tie"></i> Executive &amp; HR Division Team</div>
-              <div class="org-cards-grid org-grid-4">
-                <div class="org-person-card">
-                  <div class="org-avatar-circle"><i class="fa-solid fa-user-shield"></i></div>
-                  <span class="org-role-badge secondary">Manager of Division (HRD)</span>
-                  <h4>Nayeon Park</h4>
-                  <p>Manajer Sumber Daya Manusia &amp; Rekrutmen Internal.</p>
+              <div class="meet-featured-details">
+                <div class="meet-featured-header-row">
+                  <div>
+                    <span class="meet-exec-kicker">${escapeHtml(exec.badge)}</span>
+                    <h3 class="meet-exec-name">${escapeHtml(exec.name)}</h3>
+                  </div>
+                  <div class="meet-exec-slider-controls" title="Geser Pimpinan Eksekutif">
+                    <button type="button" class="meet-slide-arrow" id="exec-prev-btn" aria-label="Sebelumnya">
+                      <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <span class="meet-exec-counter">${activeExecIndex + 1} / ${featuredExecs.length}</span>
+                    <button type="button" class="meet-slide-arrow" id="exec-next-btn" aria-label="Selanjutnya">
+                      <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                  </div>
                 </div>
-                <div class="org-person-card">
-                  <div class="org-avatar-circle"><i class="fa-solid fa-flag-checkered"></i></div>
-                  <span class="org-role-badge secondary">Manager (Event)</span>
-                  <h4>Jeremiah Howell</h4>
-                  <p>Manajer Event &amp; Analis Utama Kejuaraan Motorsport.</p>
+
+                <p class="meet-exec-bio">${escapeHtml(exec.bio)}</p>
+
+                <div class="meet-exec-socials">
+                  <a href="https://discord.gg/rVeaKGzhyy" target="_blank" rel="noopener" title="Discord FoxSA News"><i class="fa-brands fa-discord"></i></a>
+                  <a href="#/" title="Portal Berita FoxSA"><i class="fa-solid fa-globe"></i></a>
+                  <a href="#/profile/recruitment" title="Open Recruitment"><i class="fa-solid fa-bullhorn"></i></a>
                 </div>
-                <div class="org-person-card">
-                  <div class="org-avatar-circle"><i class="fa-solid fa-chart-line"></i></div>
-                  <span class="org-role-badge secondary">Head of Affairs &amp; Analyst</span>
-                  <h4>Ligma Deek</h4>
-                  <p>Executive Staff, Hubungan Eksternal &amp; Analis Berita.</p>
-                </div>
-                <div class="org-person-card">
-                  <div class="org-avatar-circle"><i class="fa-solid fa-shield-halved"></i></div>
-                  <span class="org-role-badge secondary">HR Staff &amp; Crime Reporter</span>
-                  <h4>Jesus Conway</h4>
-                  <p>Staf HRD &amp; Koresponden Kriminal / Kepolisian.</p>
-                </div>
-                <div class="org-person-card">
-                  <div class="org-avatar-circle"><i class="fa-solid fa-id-badge"></i></div>
-                  <span class="org-role-badge secondary">HR Staff</span>
-                  <h4>Franklin Baxter</h4>
-                  <p>Staf Divisi HRD &amp; Pembinaan Anggota.</p>
-                </div>
-                <div class="org-person-card">
-                  <div class="org-avatar-circle"><i class="fa-solid fa-pen-nib"></i></div>
-                  <span class="org-role-badge secondary">Senior Staff | Editor</span>
-                  <h4>Clarissa Vencant</h4>
-                  <p>Editor Senior &amp; Pengarah Kualitas Artikel Redaksi.</p>
-                </div>
-                <div class="org-person-card">
-                  <div class="org-avatar-circle"><i class="fa-solid fa-camera-retro"></i></div>
-                  <span class="org-role-badge secondary">Field Reporter</span>
-                  <h4>Bryan Andregaz</h4>
-                  <p>Jurnalis Lapangan &amp; Dokumentasi Peristiwa San Andreas.</p>
-                </div>
-                <div class="org-person-card">
-                  <div class="org-avatar-circle"><i class="fa-solid fa-newspaper"></i></div>
-                  <span class="org-role-badge secondary">Junior Staff | Journalist</span>
-                  <h4>Shen Xander</h4>
-                  <p>Jurnalis &amp; Tim Liputan Berita Harian FoxSA News.</p>
-                </div>
+
+                <div class="meet-exec-divider"></div>
+
+                <h4 class="meet-exec-exp-title">${escapeHtml(exec.name)} Experience &amp; Focus</h4>
+                <p class="meet-exec-exp-desc">${escapeHtml(exec.experienceIntro)}</p>
+
+                <ul class="meet-exec-check-list">
+                  ${exec.highlights.map(item => `
+                    <li>
+                      <span class="check-circle-dark"><i class="fa-solid fa-check"></i></span>
+                      <span>${escapeHtml(item)}</span>
+                    </li>
+                  `).join('')}
+                </ul>
               </div>
             </div>
 
-            <!-- Operational Staff & Internship -->
-            <div class="org-tier-block">
-              <div class="org-tier-title"><i class="fa-solid fa-users"></i> Operational Staff &amp; Internship</div>
-              <div class="org-operational-pills">
-                <div class="op-pill"><strong>Jareel Sancho</strong><span>Junior Staff</span></div>
-                <div class="op-pill"><strong>Niver Richardson</strong><span>Junior Staff</span></div>
-                <div class="op-pill"><strong>Mendoza Souza</strong><span>Internship</span></div>
-                <div class="op-pill"><strong>Aaron Qroy</strong><span>Internship</span></div>
-                <div class="op-pill"><strong>Sashura Soloveva</strong><span>Internship</span></div>
-                <div class="op-pill"><strong>Giovani Marino</strong><span>Internship</span></div>
+            <!-- Board of Directors & Staff Carousel Section (Slide Right & Left) -->
+            <div class="meet-board-slider-section">
+              <div class="meet-board-header">
+                <div class="meet-board-title-col">
+                  <h3>Board of <span class="team-underline">Directors</span> &amp; Crew</h3>
+                </div>
+                <div class="meet-board-desc-col">
+                  <p>Geser ke kanan atau kiri menggunakan tombol panah untuk melihat jajaran lengkap Board of Directors, Operational Management, Supervisor Team, dan Operational Staff FoxSA News.</p>
+                </div>
+              </div>
+
+              <!-- Department Filter Pills + Slider Left/Right Arrows -->
+              <div class="meet-slider-toolbar">
+                <div class="meet-dept-pills">
+                  <button type="button" class="meet-dept-pill ${activeDeptFilter === 'all' ? 'active' : ''}" data-dept-filter="all">
+                    Semua Jajaran (${FOXSA_TEAM_MEMBERS.length})
+                  </button>
+                  <button type="button" class="meet-dept-pill ${activeDeptFilter === 'bod' ? 'active' : ''}" data-dept-filter="bod">
+                    Board of Directors
+                  </button>
+                  <button type="button" class="meet-dept-pill ${activeDeptFilter === 'management' ? 'active' : ''}" data-dept-filter="management">
+                    Operational Management
+                  </button>
+                  <button type="button" class="meet-dept-pill ${activeDeptFilter === 'supervisor' ? 'active' : ''}" data-dept-filter="supervisor">
+                    Supervisor Team
+                  </button>
+                  <button type="button" class="meet-dept-pill ${activeDeptFilter === 'staff' ? 'active' : ''}" data-dept-filter="staff">
+                    Operational Staff
+                  </button>
+                </div>
+
+                <div class="meet-carousel-nav-btns">
+                  <button type="button" class="meet-carousel-btn" id="team-slider-prev" aria-label="Geser Kiri">
+                    <i class="fa-solid fa-arrow-left"></i>
+                  </button>
+                  <button type="button" class="meet-carousel-btn" id="team-slider-next" aria-label="Geser Kanan">
+                    <i class="fa-solid fa-arrow-right"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Horizontal Slidable Cards Track -->
+              <div class="meet-team-slider-viewport" id="team-slider-viewport">
+                <div class="meet-team-slider-track" id="team-slider-track">
+                  ${filteredMembers.map((member, idx) => `
+                    <div class="meet-member-card" data-member-id="${escapeHtml(member.id)}">
+                      <div class="meet-member-photo-box">
+                        <span class="meet-floating-role-pill">${escapeHtml(member.role)}</span>
+                        <img src="${getDefaultTeamAvatarSvg(idx)}" alt="${escapeHtml(member.name)}" loading="lazy" />
+                      </div>
+                      <div class="meet-member-info-box">
+                        <span class="meet-member-dept-tag">${escapeHtml(member.badge)}</span>
+                        <h4>${escapeHtml(member.name)}</h4>
+                        <p>${escapeHtml(member.bio)}</p>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="meet-slider-hint">
+                <span><i class="fa-solid fa-hand-pointer"></i> Tip: Anda dapat menggeser kartu ke kanan/kiri atau klik tombol panah untuk melihat anggota lainnya.</span>
+                <a href="#/profile/recruitment" class="meet-join-link"><i class="fa-solid fa-user-plus"></i> Ingin bergabung ke dalam jajaran tim kami? Cek Open Recruitment &rarr;</a>
               </div>
             </div>
 
             <!-- Official Organization Chart Image -->
             <div class="org-chart-image-card">
-              <div class="org-chart-head">
-                <h4><i class="fa-solid fa-diagram-project" style="color:#F08D39;"></i> Bagan Struktur Organisasi Resmi FoxSA News</h4>
-                <span>Klik gambar untuk melihat ukuran penuh</span>
+              <div class="org-chart-header">
+                <span><i class="fa-solid fa-sitemap"></i> Bagan Struktur Organisasi Resmi FoxSA News</span>
+                <a href="assets/logo/foxsa-org-chart.jpg" target="_blank" rel="noopener" class="org-chart-zoom-btn">
+                  <i class="fa-solid fa-up-right-from-square"></i> Lihat Ukuran Penuh
+                </a>
               </div>
-              <a href="assets/logo/foxsa-org-chart.jpg" target="_blank" rel="noopener" class="org-chart-img-link">
-                <img src="assets/logo/foxsa-org-chart.jpg" alt="Bagan Struktur Organisasi FoxSA News" loading="lazy" />
+              <a href="assets/logo/foxsa-org-chart.jpg" target="_blank" rel="noopener">
+                <img src="assets/logo/foxsa-org-chart.jpg" alt="Bagan Struktur Organisasi FoxSA News" class="org-chart-img" loading="lazy" />
               </a>
             </div>
           </div>
@@ -3114,19 +3371,19 @@
         <div class="foxsa-profile-section">
           <div class="foxsa-org-header" style="margin-bottom:24px;">
             <span class="foxsa-profile-kicker"><i class="fa-solid fa-layer-group"></i> EKOSISTEM PENYIARAN FOXSA</span>
-            <h3>3 Divisi Utama FoxSA News Network</h3>
-            <p>Setiap divisi memiliki identitas visual dan fokus layanan tersendiri untuk menjangkau seluruh lapisan warga San Andreas melalui televisi, artikel digital, dan frekuensi suara.</p>
+            <h3 class="foxsa-profile-section-title">3 Divisi Utama FoxSA News Network</h3>
+            <p class="foxsa-profile-lead">Setiap divisi memiliki identitas visual dan fokus layanan tersendiri untuk menjangkau seluruh lapisan warga San Andreas melalui televisi, artikel digital, dan frekuensi suara.</p>
           </div>
 
           <div class="foxsa-divisions-grid">
             <!-- Division 1: FoxSA News Channel -->
             <div class="foxsa-division-card">
-              <div class="division-logo-box">
+              <div class="division-logo-wrap">
                 <img src="assets/logo/foxsa-channel.jpg" alt="FoxSA News Channel Logo" />
               </div>
               <div class="division-body">
-                <span class="division-tag">TELEVISI &amp; LIVE BROADCAST</span>
-                <h4>FoxSA News Channel</h4>
+                <span class="division-badge">TELEVISI &amp; LIVE BROADCAST</span>
+                <h3>FoxSA News Channel</h3>
                 <p>
                   Divisi penyiaran televisi kabel 24 jam yang menyuguhkan program <strong>Live Broadcast Harian</strong> (mulai pukul 19.30 WIB), liputan Breaking News langsung dari tempat kejadian perkara (TKP), serta siaran eksklusif acara kenegaraan dan kejuaraan motorsport San Andreas.
                 </p>
@@ -3140,12 +3397,12 @@
 
             <!-- Division 2: FoxSA News Media -->
             <div class="foxsa-division-card">
-              <div class="division-logo-box">
+              <div class="division-logo-wrap">
                 <img src="assets/logo/foxsa-media.jpg" alt="FoxSA News Media Logo" />
               </div>
               <div class="division-body">
-                <span class="division-tag">PORTAL BERITA DIGITAL &amp; JURNALISME</span>
-                <h4>FoxSA News Media</h4>
+                <span class="division-badge">PORTAL BERITA DIGITAL &amp; JURNALISME</span>
+                <h3>FoxSA News Media</h3>
                 <p>
                   Divisi surat kabar digital (<em>Daily Digital Newspaper</em>) dan jurnalisme investigasi berbasis web. Menyajikan artikel berita harian yang terstruktur, cepat diakses melalui perangkat PC maupun HP Android, serta didukung dokumentasi fotografi jurnalis lapangan.
                 </p>
@@ -3159,12 +3416,12 @@
 
             <!-- Division 3: FoxSA Audio & Radio Station -->
             <div class="foxsa-division-card">
-              <div class="division-logo-box">
+              <div class="division-logo-wrap">
                 <img src="assets/logo/foxsa-audio.jpg" alt="FoxSA Audio & Radio Station Logo" />
               </div>
               <div class="division-body">
-                <span class="division-tag">RADIO STATION &amp; PODCAST ACADEMY</span>
-                <h4>FoxSA Audio &amp; Radio Station</h4>
+                <span class="division-badge">RADIO STATION &amp; PODCAST ACADEMY</span>
+                <h3>FoxSA Audio &amp; Radio Station</h3>
                 <p>
                   Divisi penyiaran audio, radio komunitas San Andreas, dan pusat pelatihan internal <strong>FoxSA Podcast Academy</strong>. Dirancang untuk menemani warga yang sedang berkendara sekaligus mencetak talenta penyiaran profesional.
                 </p>
@@ -3180,10 +3437,10 @@
           <!-- Official Brand Logos Showcase -->
           <div class="foxsa-brand-assets-bar">
             <div class="brand-assets-info">
-              <h4><i class="fa-solid fa-palette" style="color:#F08D39;"></i> Identitas Visual Resmi FoxSA News</h4>
+              <h4><i class="fa-solid fa-palette"></i> Identitas Visual Resmi FoxSA News</h4>
               <p>Logo utama dan lambang divisi FoxSA News dirancang dengan perpaduan warna <strong>Dark Navy (#090C1E)</strong>, <strong>FoxSA Orange (#F08D39)</strong>, dan <strong>Broadcast Red (#BA2131)</strong> yang melambangkan ketegasan, kecepatan, serta kredibilitas berita.</p>
             </div>
-            <div class="brand-assets-previews">
+            <div class="brand-assets-Thumbs">
               <img src="assets/logo/foxsa-icon.jpg" alt="FoxSA Icon" title="FoxSA Main Emblem" />
               <img src="assets/logo/foxsa-channel.jpg" alt="FoxSA Channel" title="FoxSA News Channel" />
               <img src="assets/logo/foxsa-media.jpg" alt="FoxSA Media" title="FoxSA News Media" />
@@ -3203,75 +3460,52 @@
         <div class="foxsa-profile-section">
           <div class="foxsa-org-header" style="margin-bottom:22px;">
             <span class="foxsa-profile-kicker"><i class="fa-solid fa-rocket"></i> ROADMAP &amp; INOVASI</span>
-            <h3>Rencana Pengembangan &amp; Pembaruan FoxSA News</h3>
-            <p>FoxSA News tengah menjalankan berbagai langkah strategis untuk meningkatkan kualitas penyajian informasi serta memperluas jangkauan audiens di seluruh San Andreas.</p>
+            <h3 class="foxsa-profile-section-title">Rencana Pengembangan &amp; Pembaruan FoxSA News</h3>
+            <p class="foxsa-profile-lead">FoxSA News tengah menjalankan berbagai langkah strategis untuk meningkatkan kualitas penyajian informasi serta memperluas jangkauan audiens di seluruh San Andreas.</p>
           </div>
 
           <div class="foxsa-roadmap-grid">
             <div class="roadmap-item-card">
-              <div class="roadmap-item-top">
-                <span class="roadmap-num">01</span>
-                <span class="roadmap-status-pill"><span class="pulse-dot-green"></span> ON-GOING</span>
-              </div>
-              <h4>Transformasi Newspaper Digital</h4>
-              <p>
-                Format <em>newspaper</em> dikembangkan menjadi <strong>Berita Harian berbasis teks &amp; web</strong> yang lebih sederhana, informatif, dan mudah diakses kapan saja oleh warga.
-              </p>
-              <p>
-                Konten tidak lagi bergantung pada poster statis seperti Canva, melainkan difokuskan pada penyampaian informasi jurnalistik yang jelas, terstruktur, dan profesional langsung melalui website resmi FoxSA News.
-              </p>
+              <span class="roadmap-step-num">PROGRAM 01 • ON-GOING</span>
+              <h4><i class="fa-solid fa-newspaper"></i> Transformasi Newspaper Digital</h4>
+              <ul>
+                <li>Format <em>newspaper</em> dikembangkan menjadi <strong>Berita Harian berbasis teks &amp; web</strong> yang lebih sederhana, informatif, dan mudah diakses kapan saja oleh warga.</li>
+                <li>Konten tidak lagi bergantung pada poster statis seperti Canva, melainkan difokuskan pada penyampaian informasi jurnalistik yang jelas, terstruktur, dan profesional.</li>
+              </ul>
             </div>
 
             <div class="roadmap-item-card">
-              <div class="roadmap-item-top">
-                <span class="roadmap-num">02</span>
-                <span class="roadmap-status-pill"><span class="pulse-dot-green"></span> ON-GOING</span>
-              </div>
-              <h4>Penjadwalan Broadcast Harian</h4>
-              <p>
-                FoxSA News menyusun sistem siaran rutin harian guna menjaga konsistensi penyampaian informasi terkini kepada seluruh audiens di San Andreas.
-              </p>
-              <p>
-                <strong>Broadcast dilaksanakan setiap hari</strong> dengan waktu tayang minimal dimulai pada pukul <strong>19.30 WIB</strong>, sehingga meningkatkan keterlibatan serta loyalitas pemirsa setia FoxSA.
-              </p>
+              <span class="roadmap-step-num">PROGRAM 02 • ON-GOING</span>
+              <h4><i class="fa-solid fa-tv"></i> Penjadwalan Broadcast Harian</h4>
+              <ul>
+                <li>FoxSA News menyusun sistem siaran rutin harian guna menjaga konsistensi penyampaian informasi terkini kepada seluruh audiens di San Andreas.</li>
+                <li><strong>Broadcast dilaksanakan setiap hari</strong> dengan waktu tayang minimal dimulai pada pukul <strong>19.30 WIB</strong> untuk meningkatkan keterlibatan pemirsa.</li>
+              </ul>
             </div>
 
             <div class="roadmap-item-card">
-              <div class="roadmap-item-top">
-                <span class="roadmap-num">03</span>
-                <span class="roadmap-status-pill"><span class="pulse-dot-green"></span> ON-GOING</span>
-              </div>
-              <h4>Pengembangan Academy melalui Podcast</h4>
-              <p>
-                Sebagai upaya peningkatan kualitas SDM internal, FoxSA News menghadirkan program <strong>Podcast Academy</strong> untuk melatih anggota dalam berbagai peran penting di dunia <em>broadcasting</em>:
-              </p>
-              <div class="roadmap-role-tags">
-                <span><i class="fa-solid fa-microphone-lines"></i> Presenter</span>
-                <span><i class="fa-solid fa-video"></i> Cameraperson</span>
-                <span><i class="fa-solid fa-sliders"></i> Mixer / Audio</span>
-              </div>
+              <span class="roadmap-step-num">PROGRAM 03 • ON-GOING</span>
+              <h4><i class="fa-solid fa-podcast"></i> Pengembangan Academy melalui Podcast</h4>
+              <ul>
+                <li>Menghadirkan program <strong>Podcast Academy</strong> untuk melatih anggota dalam berbagai peran penting di dunia <em>broadcasting</em>.</li>
+                <li>Fokus pelatihan mencakup peran <strong>Presenter</strong>, <strong>Cameraperson</strong>, serta <strong>Mixer / Audio Engineer</strong>.</li>
+              </ul>
             </div>
 
             <div class="roadmap-item-card">
-              <div class="roadmap-item-top">
-                <span class="roadmap-num">04</span>
-                <span class="roadmap-status-pill"><span class="pulse-dot-green"></span> ON-GOING</span>
-              </div>
-              <h4>Kerja Sama Strategis Lintas Instansi</h4>
-              <p>
-                Memperluas jaringan melalui kolaborasi strategis dengan berbagai pihak di San Andreas untuk meningkatkan kredibilitas, relasi, serta eksistensi FoxSA News di berbagai sektor:
-              </p>
-              <div class="roadmap-role-tags">
-                <span><i class="fa-solid fa-building"></i> Companies di Valliant</span>
-                <span><i class="fa-solid fa-shield-halved"></i> Faction LSPD, LSSD &amp; LSFD</span>
-              </div>
+              <span class="roadmap-step-num">PROGRAM 04 • ON-GOING</span>
+              <h4><i class="fa-solid fa-handshake"></i> Kerja Sama Strategis Lintas Instansi</h4>
+              <ul>
+                <li>Memperluas jaringan melalui kolaborasi strategis dengan berbagai <strong>Companies di Valliant</strong>.</li>
+                <li>Membangun kemitraan publikasi dan peliputan resmi bersama <strong>Faction LSPD, LSSD, &amp; LSFD</strong>.</li>
+              </ul>
             </div>
           </div>
 
           <div class="foxsa-roadmap-closing">
-            <h4><i class="fa-solid fa-bullhorn" style="color:#F08D39;"></i> Komitmen &amp; Partisipasi Publik</h4>
+            <i class="fa-solid fa-bullhorn"></i>
             <p>
-              FoxSA News berkomitmen untuk terus berkembang sebagai media informasi yang profesional, terpercaya, dan inovatif. Kami sangat terbuka terhadap partisipasi dari seluruh audiens — apabila Anda memiliki <strong>saran, kritik, dan masukan</strong>, silakan tuliskan pada kotak tanggapan di bawah ini.
+              <strong>Komitmen &amp; Partisipasi Publik:</strong> FoxSA News berkomitmen untuk terus berkembang sebagai media informasi yang profesional, terpercaya, dan inovatif. Apabila Anda memiliki <strong>saran, kritik, dan masukan</strong>, silakan tuliskan pada kotak tanggapan di bawah ini.
             </p>
           </div>
 
@@ -3327,92 +3561,135 @@
       `;
     }
 
-    // TAB 4: OPEN RECRUITMENT FOXSA NEWS
+    // TAB 4: NEW OPEN RECRUITMENT FOXSA NEWS AGENCY + OFFICIAL POSTER DESIGN
     else if (activeTab === 'recruitment') {
       bodyHtml = `
         <div class="foxsa-profile-section">
+          <!-- Top Hero Recruitment Banner -->
           <div class="foxsa-rec-banner">
             <div class="rec-banner-left">
-              <span class="rec-status-badge"><i class="fa-solid fa-bullhorn"></i> OPEN RECRUITMENT FOXSA NEWS</span>
-              <h3>Bergabunglah Bersama Tim Jurnalisme &amp; Penyiaran Profesional San Andreas!</h3>
+              <div class="rec-status-pill">
+                <span class="pulse-dot"></span> RECRUITMENT STATUS: OPEN!
+              </div>
+              <h2>🎙️ START YOUR STORY WITH FOXSA NEWS AGENCY! 🎙️</h2>
               <p>
-                FoxSA News resmi membuka kesempatan bagi kamu yang ingin berkarier sebagai Jurnalis, Reporter Lapangan, Presenter, Cameraperson, maupun Editor. Jika kamu memiliki semangat dalam dunia berita, komunikasi, dan informasi publik, ini saatnya kamu menunjukkan kemampuanmu!
+                We are more than just a news network; we are a family of storytellers. FoxSA News is currently looking for passionate individuals who value teamwork, camaraderie, and journalistic integrity. If you are looking for a workplace where colleagues become close friends, this is your home!
               </p>
-              <div class="rec-cta-buttons">
-                <a href="https://bit.ly/FoxSAREC-1" target="_blank" rel="noopener" class="foxsa-btn rec-apply-btn">
-                  <i class="fa-solid fa-file-signature"></i> Daftar Sekarang (bit.ly/FoxSAREC-1)
-                </a>
-                <a href="https://discord.gg/KF6qETnr4j" target="_blank" rel="noopener" class="foxsa-btn foxsa-btn-secondary">
-                  <i class="fa-brands fa-discord"></i> Hubungi Kami di Discord
-                </a>
-              </div>
             </div>
-            <div class="rec-banner-poster">
-              <a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgrScS06klrWWHG807Twx3hj_U4pXv369aEunc4lJlPoa3Vilx6BlZIZFlrn7LZFJgrkk1BWxhsQd9bu4J_IUf6Lhn3a0Ep40FcbCnpbP8609XcxGBbV8TDPaGmQxXplxmbtgq7jcG5HPV_YY2HYrOZPIp2NXY6YEBq7V_KTuwrT4RNpikcIjzHz8sc8uk/s2245/Biru_Modern_Poster_Paket_Pendakian_Open_Trip_Gunung_20251118_054148_0000%20(1).png" target="_blank" rel="noopener">
-                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgrScS06klrWWHG807Twx3hj_U4pXv369aEunc4lJlPoa3Vilx6BlZIZFlrn7LZFJgrkk1BWxhsQd9bu4J_IUf6Lhn3a0Ep40FcbCnpbP8609XcxGBbV8TDPaGmQxXplxmbtgq7jcG5HPV_YY2HYrOZPIp2NXY6YEBq7V_KTuwrT4RNpikcIjzHz8sc8uk/w600/Biru_Modern_Poster_Paket_Pendakian_Open_Trip_Gunung_20251118_054148_0000%20(1).png" alt="Poster Open Recruitment FoxSA News" onerror="this.src='assets/logo/foxsa-channel.jpg'" />
-              </a>
-            </div>
-          </div>
-
-          <div class="foxsa-rec-requirements-grid">
-            <!-- Section A: In Character -->
-            <div class="rec-req-card">
-              <div class="rec-req-head ic-head">
-                <span class="req-icon"><i class="fa-solid fa-id-card"></i></span>
-                <div>
-                  <span class="req-sub">SECTION A</span>
-                  <h4>Persyaratan In Character (IC)</h4>
-                </div>
-              </div>
-              <ul class="rec-req-list">
-                <li><i class="fa-solid fa-check"></i> Minimal berumur <strong>20 – 30 tahun</strong></li>
-                <li><i class="fa-solid fa-check"></i> Memiliki <strong>ID Card &amp; Driving License</strong> yang valid dan aktif</li>
-                <li><i class="fa-solid fa-check"></i> Tidak memiliki catatan kriminal berat</li>
-                <li><i class="fa-solid fa-check"></i> Sehat jasmani dan rohani serta memiliki kondisi fisik yang baik</li>
-                <li><i class="fa-solid fa-check"></i> Memiliki latar belakang pendidikan yang memadai</li>
-                <li><i class="fa-solid fa-check"></i> Mampu melakukan <em>public speaking</em> dan fasih berbahasa Indonesia (formal maupun nonformal)</li>
-                <li><i class="fa-solid fa-check"></i> Memiliki <em>attitude</em> yang baik (sikap, perilaku, dan tutur kata)</li>
-                <li><i class="fa-solid fa-check"></i> Warga negara Amerika atau WNA dengan status <em>permanent resident</em></li>
-                <li><i class="fa-solid fa-check"></i> Memiliki minat tinggi dalam literasi, menulis, dan membaca</li>
-                <li><i class="fa-solid fa-check"></i> Tidak terlibat dalam penyalahgunaan narkoba atau obat-obatan terlarang</li>
-                <li><i class="fa-solid fa-check"></i> Wajib mengikuti seluruh tahapan rekrutmen dan akademi dengan baik</li>
-              </ul>
-            </div>
-
-            <!-- Section B: Out Of Character -->
-            <div class="rec-req-card">
-              <div class="rec-req-head ooc-head">
-                <span class="req-icon"><i class="fa-solid fa-headset"></i></span>
-                <div>
-                  <span class="req-sub">SECTION B</span>
-                  <h4>Persyaratan Out Of Character (OOC)</h4>
-                </div>
-              </div>
-              <ul class="rec-req-list">
-                <li><i class="fa-solid fa-check"></i> Minimal <strong>Level 3</strong> di dalam game</li>
-                <li><i class="fa-solid fa-check"></i> Memiliki <em>Character Development</em> (alur karakter) yang jelas</li>
-                <li><i class="fa-solid fa-check"></i> Tidak memiliki <em>warn</em> lebih dari 3</li>
-                <li><i class="fa-solid fa-check"></i> Menjaga <em>attitude</em> yang baik secara IC maupun OOC</li>
-                <li><i class="fa-solid fa-check"></i> Mampu membedakan urusan IC dan OOC dengan tegas</li>
-                <li><i class="fa-solid fa-check"></i> Berusia minimal <strong>14 tahun</strong> (OOC)</li>
-                <li><i class="fa-solid fa-check"></i> Memiliki rasa tanggung jawab dan komitmen tinggi</li>
-                <li><i class="fa-solid fa-check"></i> Dilarang keras melakukan plagiarisme / <em>copy-paste</em> formulir</li>
-                <li><i class="fa-solid fa-check"></i> Menguasai penggunaan EYD dan tanda baca yang baik</li>
-                <li><i class="fa-solid fa-check"></i> Mampu membagi waktu antara <em>in-game</em> dan <em>real life</em></li>
-                <li><i class="fa-solid fa-check"></i> Jujur dan tidak berbohong selama proses recruitment berlangsung</li>
-                <li><i class="fa-solid fa-check"></i> Memahami dasar-dasar <em>RolePlay</em> &amp; peraturan server (<em>Breakrules</em>)</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="foxsa-rec-footer-cta">
-            <div>
-              <h4>📌 Siap Mendaftar ke FoxSA News?</h4>
-              <p>Jika kamu memenuhi seluruh persyaratan IC &amp; OOC di atas, silakan isi formulir pendaftaran resmi kami melalui tautan berikut. Kami tunggu kontribusi terbaikmu di FoxSA News!</p>
-            </div>
-            <a href="https://bit.ly/FoxSAREC-1" target="_blank" rel="noopener" class="foxsa-btn">
-              <i class="fa-solid fa-up-right-from-square"></i> Buka Formulir: bit.ly/FoxSAREC-1
+            <a href="https://discord.gg/rVeaKGzhyy" target="_blank" rel="noopener" class="rec-discord-cta-btn">
+              <i class="fa-brands fa-discord"></i> Join Communication Hub
             </a>
+          </div>
+
+          <!-- 2-Column Showcase: Official Announcement + "WE'RE HIRING!" Poster Design -->
+          <div class="foxsa-rec-showcase-grid">
+            <!-- Left Column: Full Recruitment Details -->
+            <div class="foxsa-rec-details-col">
+              <!-- Departments We Are Hiring For -->
+              <div class="rec-detail-block">
+                <h3><i class="fa-solid fa-sitemap"></i> Departments We Are Hiring For</h3>
+                <p class="rec-detail-intro">We are actively filling key positions to complete our new structural family:</p>
+                <div class="rec-dept-cards-grid">
+                  <div class="rec-dept-item">
+                    <span class="rec-dept-icon"><i class="fa-solid fa-crown"></i></span>
+                    <div>
+                      <strong>Board of Directors</strong>
+                      <span>Strategic Leadership &amp; Executive Governance</span>
+                    </div>
+                  </div>
+                  <div class="rec-dept-item">
+                    <span class="rec-dept-icon"><i class="fa-solid fa-briefcase"></i></span>
+                    <div>
+                      <strong>Operational Management</strong>
+                      <span>Division Managers, HRD, PR &amp; Event Operations</span>
+                    </div>
+                  </div>
+                  <div class="rec-dept-item">
+                    <span class="rec-dept-icon"><i class="fa-solid fa-user-check"></i></span>
+                    <div>
+                      <strong>Supervisor Team</strong>
+                      <span>Editorial Supervisors, Lead Reporters &amp; Quality Control</span>
+                    </div>
+                  </div>
+                  <div class="rec-dept-item">
+                    <span class="rec-dept-icon"><i class="fa-solid fa-microphone-lines"></i></span>
+                    <div>
+                      <strong>Operational Staff</strong>
+                      <span>Journalists, Presenters, Camerapersons &amp; Broadcast Crew</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Recruitment Timeline -->
+              <div class="rec-detail-block">
+                <h3><i class="fa-regular fa-calendar-check"></i> Recruitment Timeline</h3>
+                <div class="rec-timeline-box">
+                  <div class="rec-timeline-row">
+                    <span class="tl-label">Status:</span>
+                    <span class="tl-badge-open">OPEN!</span>
+                  </div>
+                  <div class="rec-timeline-row">
+                    <span class="tl-label">Deadline:</span>
+                    <span class="tl-text">We are keeping our doors open until we find the right people to complete our crew. Take your time, but don't miss the chance!</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Next Steps to Join -->
+              <div class="rec-detail-block highlight-next-steps">
+                <h3><i class="fa-solid fa-compass"></i> Next Steps to Join</h3>
+                <p>
+                  No lengthy paperwork or forms required just yet! To start your journey with us, simply hop into our communication hub, get to know the crew, and wait for further directions from our Executive Board.
+                </p>
+
+                <div class="rec-official-links-box">
+                  <a href="https://discord.gg/rVeaKGzhyy" target="_blank" rel="noopener" class="rec-link-card discord-card">
+                    <i class="fa-brands fa-discord"></i>
+                    <div>
+                      <small>🔗 Join our Discord</small>
+                      <strong>https://discord.gg/rVeaKGzhyy</strong>
+                    </div>
+                  </a>
+                  <a href="#/" class="rec-link-card web-card">
+                    <i class="fa-solid fa-globe"></i>
+                    <div>
+                      <small>🌐 Check our Website</small>
+                      <strong>www.foxsanews.blogspot.com</strong>
+                    </div>
+                  </a>
+                </div>
+
+                <div class="rec-closing-quote">
+                  <p>Come for the career, stay for the family. Let’s build something great together! 🤝📰</p>
+                  <div class="rec-hashtags">
+                    <span>#DeliveringTheTruth</span>
+                    <span>#FoxSANews</span>
+                    <span>#MoreThanJustNews</span>
+                    <span class="everyone-tag">(( @everyone ))</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Official "WE'RE HIRING!" Poster Design -->
+            <div class="foxsa-rec-poster-col">
+              <div class="rec-poster-card">
+                <div class="rec-poster-card-head">
+                  <span><i class="fa-solid fa-image"></i> Official Recruitment Poster</span>
+                  <a href="assets/logo/foxsa-recruitment-poster.jpg" target="_blank" rel="noopener" title="Buka ukuran penuh">
+                    <i class="fa-solid fa-expand"></i> Full Size
+                  </a>
+                </div>
+                <a href="assets/logo/foxsa-recruitment-poster.jpg" target="_blank" rel="noopener" class="rec-poster-img-link">
+                  <img src="assets/logo/foxsa-recruitment-poster.jpg" alt="FoxSA News Agency - We're Hiring Poster" />
+                </a>
+                <div class="rec-poster-card-foot">
+                  <span>FoxSA News Agency — We're Hiring!</span>
+                  <a href="https://discord.gg/rVeaKGzhyy" target="_blank" rel="noopener">Join Discord &rarr;</a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       `;
@@ -3422,34 +3699,40 @@
       <div class="foxsa-company-profile-wrap">
         <!-- Company Profile Top Hero Header -->
         <div class="foxsa-profile-hero">
-          <div class="profile-hero-bg-pattern"></div>
-          <div class="profile-hero-content">
-            <img src="assets/logo/foxsa-icon.jpg" alt="FoxSA News" class="profile-hero-logo" />
-            <div class="profile-hero-text">
-              <div class="profile-hero-badges">
-                <span class="p-badge-orange"><i class="fa-solid fa-certificate"></i> OFFICIAL COMPANY PROFILE</span>
-                <span class="p-badge-dark"><i class="fa-solid fa-location-dot"></i> LOS SANTOS, SAN ANDREAS</span>
+          <div class="foxsa-profile-hero-bg"></div>
+          <div class="foxsa-profile-hero-inner">
+            <div class="profile-hero-content">
+              <div class="profile-hero-badge">
+                <i class="fa-solid fa-certificate"></i> OFFICIAL COMPANY PROFILE • LOS SANTOS, SA
               </div>
               <h1>FoxSA News — Independent News Network</h1>
-              <p>Portal Informasi Resmi, Struktur Organisasi, Divisi Penyiaran, Program Pengembangan &amp; Rekrutmen Redaksi FoxSA News.</p>
+              <p class="profile-hero-tagline">Portal Informasi Resmi, Jajaran Pimpinan &amp; Tim Redaksi, Divisi Penyiaran, Program Pengembangan &amp; Rekrutmen FoxSA News Agency.</p>
+              <div class="profile-hero-chips">
+                <span><i class="fa-solid fa-tv"></i> FoxSA News Channel</span>
+                <span><i class="fa-solid fa-newspaper"></i> FoxSA News Media</span>
+                <span><i class="fa-solid fa-radio"></i> FoxSA Audio &amp; Radio</span>
+              </div>
+            </div>
+            <div class="profile-hero-logo">
+              <img src="assets/logo/foxsa-icon.jpg" alt="FoxSA News" />
             </div>
           </div>
+        </div>
 
-          <!-- Sub-Navigation Tabs -->
-          <div class="foxsa-profile-tabs">
-            <a href="#/profile" class="foxsa-profile-tab ${activeTab === 'overview' ? 'active' : ''}">
-              <i class="fa-regular fa-building"></i> Tentang &amp; Struktur
-            </a>
-            <a href="#/profile/divisions" class="foxsa-profile-tab ${activeTab === 'divisions' ? 'active' : ''}">
-              <i class="fa-solid fa-tower-broadcast"></i> Divisi Media &amp; Radio
-            </a>
-            <a href="#/profile/roadmap" class="foxsa-profile-tab ${activeTab === 'roadmap' ? 'active' : ''}">
-              <i class="fa-solid fa-rocket"></i> Program &amp; Rencana
-            </a>
-            <a href="#/profile/recruitment" class="foxsa-profile-tab ${activeTab === 'recruitment' ? 'active' : ''}">
-              <i class="fa-solid fa-bullhorn"></i> Open Recruitment
-            </a>
-          </div>
+        <!-- Sub-Navigation Tabs -->
+        <div class="foxsa-profile-tabs">
+          <a href="#/profile" class="foxsa-profile-tab ${activeTab === 'overview' ? 'is-active' : ''}">
+            <i class="fa-regular fa-building"></i> Tentang &amp; Tim Kami
+          </a>
+          <a href="#/profile/divisions" class="foxsa-profile-tab ${activeTab === 'divisions' ? 'is-active' : ''}">
+            <i class="fa-solid fa-tower-broadcast"></i> Divisi Media &amp; Radio
+          </a>
+          <a href="#/profile/roadmap" class="foxsa-profile-tab ${activeTab === 'roadmap' ? 'is-active' : ''}">
+            <i class="fa-solid fa-rocket"></i> Program &amp; Rencana
+          </a>
+          <a href="#/profile/recruitment" class="foxsa-profile-tab ${activeTab === 'recruitment' ? 'is-active' : ''}">
+            <i class="fa-solid fa-bullhorn"></i> Open Recruitment
+          </a>
         </div>
 
         <!-- Tab Body Content -->
@@ -3458,6 +3741,91 @@
         </div>
       </div>
     `;
+
+    // Bind Interactive Controls on Overview ("Meet Our Team" Slider & Executive Switcher)
+    if (activeTab === 'overview') {
+      const featuredExecs = FOXSA_TEAM_MEMBERS.filter(m => m.featured);
+      const prevExecBtn = document.getElementById('exec-prev-btn');
+      const nextExecBtn = document.getElementById('exec-next-btn');
+
+      if (prevExecBtn) {
+        prevExecBtn.addEventListener('click', () => {
+          const cur = typeof state.profileExecIndex === 'number' ? state.profileExecIndex : 0;
+          state.profileExecIndex = (cur - 1 + featuredExecs.length) % featuredExecs.length;
+          renderProfileView('overview');
+        });
+      }
+      if (nextExecBtn) {
+        nextExecBtn.addEventListener('click', () => {
+          const cur = typeof state.profileExecIndex === 'number' ? state.profileExecIndex : 0;
+          state.profileExecIndex = (cur + 1) % featuredExecs.length;
+          renderProfileView('overview');
+        });
+      }
+
+      // Department filter buttons for the slider
+      mainEl.querySelectorAll('[data-dept-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.profileDeptFilter = btn.getAttribute('data-dept-filter') || 'all';
+          renderProfileView('overview');
+        });
+      });
+
+      // Horizontal Carousel Left/Right Buttons & Drag-to-Scroll
+      const viewport = document.getElementById('team-slider-viewport');
+      const slidePrev = document.getElementById('team-slider-prev');
+      const slideNext = document.getElementById('team-slider-next');
+
+      if (viewport && slidePrev && slideNext) {
+        const getScrollStep = () => {
+          const firstCard = viewport.querySelector('.meet-member-card');
+          return firstCard ? (firstCard.offsetWidth + 20) * 2 : 560;
+        };
+
+        slidePrev.addEventListener('click', () => {
+          if (viewport.scrollLeft <= 10) {
+            viewport.scrollTo({ left: viewport.scrollWidth, behavior: 'smooth' });
+          } else {
+            viewport.scrollBy({ left: -getScrollStep(), behavior: 'smooth' });
+          }
+        });
+
+        slideNext.addEventListener('click', () => {
+          if (viewport.scrollLeft + viewport.clientWidth >= viewport.scrollWidth - 10) {
+            viewport.scrollTo({ left: 0, behavior: 'smooth' });
+          } else {
+            viewport.scrollBy({ left: getScrollStep(), behavior: 'smooth' });
+          }
+        });
+
+        // Mouse drag-to-scroll support on desktop
+        let isDown = false;
+        let startX = 0;
+        let scrollLeftStart = 0;
+
+        viewport.addEventListener('mousedown', (e) => {
+          isDown = true;
+          viewport.classList.add('is-dragging');
+          startX = e.pageX - viewport.offsetLeft;
+          scrollLeftStart = viewport.scrollLeft;
+        });
+        viewport.addEventListener('mouseleave', () => {
+          isDown = false;
+          viewport.classList.remove('is-dragging');
+        });
+        viewport.addEventListener('mouseup', () => {
+          isDown = false;
+          viewport.classList.remove('is-dragging');
+        });
+        viewport.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - viewport.offsetLeft;
+          const walk = (x - startX) * 1.4;
+          viewport.scrollLeft = scrollLeftStart - walk;
+        });
+      }
+    }
 
     // Bind Feedback Form on Roadmap tab
     const fbForm = document.getElementById('foxsa-profile-feedback-form');
