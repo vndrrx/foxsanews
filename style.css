@@ -8899,7 +8899,122 @@ body.nav-active #header-wrap .mobile-menu-wrap {
   text-decoration: none;
 }
 
-/* 7.10 Responsive Adjustments for Navbar, Team Slider & Recruitment */
+/* 7.10 Full-Width Main Area (No Cramped Right Sidebar) & Android Responsive Polish */
+#content-wrapper {
+  padding: 0 !important;
+  margin-top: 20px !important;
+}
+.foxsa-main-grid,
+.foxsa-main-grid.foxsa-full-main {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 24px !important;
+  width: 100% !important;
+}
+#sidebar-wrapper {
+  display: none !important;
+}
+
+/* Take advantage of the wider 100% container on desktop */
+@media screen and (min-width: 1041px) {
+  .an-news-feed.layout-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .meet-member-card {
+    flex: 0 0 calc((100% - 60px) / 4);
+    min-width: 220px;
+  }
+}
+
+/* Mobile Slide-Out Drawer Menu Reset (Fix legacy Blogger float:left & cramped submenus) */
+#header-wrap .mobile-menu {
+  padding: 12px 16px !important;
+  overflow-y: auto !important;
+  flex: 1 !important;
+}
+#header-wrap .mobile-menu ul,
+#header-wrap .mobile-menu ul li {
+  float: none !important;
+  width: 100% !important;
+  overflow: visible !important;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+#header-wrap .mobile-menu > ul > li {
+  border-bottom: 1px solid #f1f5f9 !important;
+  position: relative !important;
+  line-height: 1.4 !important;
+}
+#header-wrap .mobile-menu > ul > li:last-child {
+  border-bottom: none !important;
+}
+#header-wrap .mobile-menu > ul > li > a {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 44px !important;
+  line-height: 1.35 !important;
+  padding: 10px 44px 10px 6px !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #090C1E !important;
+  text-decoration: none !important;
+}
+#header-wrap .mobile-menu > ul > li > a.admin-nav-btn {
+  padding: 10px 14px !important;
+  color: #ffffff !important;
+  justify-content: center !important;
+  margin-top: 12px !important;
+  border-radius: 10px !important;
+}
+#header-wrap .mobile-menu ul li.has-sub .submenu-toggle {
+  position: absolute !important;
+  top: 3px !important;
+  right: 0 !important;
+  width: 38px !important;
+  height: 38px !important;
+  line-height: 38px !important;
+  border-radius: 8px !important;
+  background: #f1f5f9 !important;
+  color: #090C1E !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 3 !important;
+}
+#header-wrap .mobile-menu ul li.has-sub .submenu-toggle:after {
+  float: none !important;
+  width: auto !important;
+}
+#header-wrap .mobile-menu .m-sub {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  padding: 6px 10px !important;
+  margin: 0 0 10px 0 !important;
+}
+#header-wrap .mobile-menu .m-sub li {
+  border-bottom: 1px solid #eef2f6 !important;
+}
+#header-wrap .mobile-menu .m-sub li:last-child {
+  border-bottom: none !important;
+}
+#header-wrap .mobile-menu .m-sub li a {
+  display: block !important;
+  padding: 9px 10px !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  color: #334155 !important;
+  opacity: 1 !important;
+  line-height: 1.4 !important;
+  text-decoration: none !important;
+}
+#header-wrap .mobile-menu .m-sub li a:hover {
+  color: #F08D39 !important;
+}
+
 @media screen and (max-width: 980px) {
   #header-wrap .foxsa-nav-center,
   #header-wrap .foxsa-inline-search {
@@ -8908,17 +9023,24 @@ body.nav-active #header-wrap .mobile-menu-wrap {
   #header-wrap .mobile-menu-toggle {
     display: inline-flex !important;
   }
+  /* Override legacy Blogger `.header-logo { width: 100%; max-width: 226px; margin: 0 auto; }` */
   #header-wrap .header-logo.foxsa-brand-box {
-    margin-left: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
     padding: 8px 14px !important;
-    border-radius: 10px;
+    border-radius: 10px !important;
+  }
+  .foxsa-mobile-search-box,
+  .foxsa-mobile-drawer-foot {
+    display: block !important;
   }
   .meet-team-featured-card {
     grid-template-columns: 1fr;
     gap: 20px;
   }
   .meet-featured-portrait-wrap {
-    max-width: 320px;
+    max-width: 300px;
     margin: 0 auto;
     width: 100%;
   }
@@ -8942,51 +9064,225 @@ body.nav-active #header-wrap .mobile-menu-wrap {
   }
 }
 
+/* Android & Mobile Screens (<= 680px) */
 @media screen and (max-width: 680px) {
-  .foxsa-brand-emblem {
-    width: 34px !important;
-    height: 34px !important;
-    max-height: 34px !important;
+  .container {
+    padding: 0 12px !important;
   }
-  .foxsa-brand-text .brand-main {
-    font-size: 15px;
+
+  /* Sleek Single-Line Scrollable Topbar on Android */
+  .foxsa-topbar {
+    padding: 5px 0 !important;
   }
-  .foxsa-brand-text .brand-sub {
-    font-size: 8px;
+  .foxsa-topbar-live-date,
+  #foxsa-live-date,
+  .foxsa-topbar-divider,
+  .foxsa-topbar-right {
+    display: none !important;
   }
+  .foxsa-topbar-inner {
+    padding: 0 12px !important;
+  }
+  .foxsa-topbar-left {
+    width: 100%;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    gap: 6px !important;
+  }
+  .foxsa-topbar-left::-webkit-scrollbar {
+    display: none;
+  }
+  .foxsa-topbar-link {
+    font-size: 11px;
+    padding: 3px 9px;
+    flex-shrink: 0;
+  }
+
+  /* Compact Sticky Header on Android (Zero Overflow on 320px-412px phones) */
+  #header-wrap.foxsa-modern-header .foxsa-header-flex {
+    min-height: 56px !important;
+    padding: 6px 12px !important;
+    gap: 8px !important;
+    align-items: center !important;
+  }
+  #header-wrap .mobile-menu-toggle {
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    font-size: 15px !important;
+  }
+  #header-wrap .header-logo.foxsa-brand-box {
+    padding: 6px 11px !important;
+    border-radius: 8px !important;
+    border-bottom-width: 2px !important;
+  }
+  #header-wrap .foxsa-brand-box .foxsa-brand-lockup {
+    gap: 8px !important;
+  }
+  #header-wrap .foxsa-brand-box .foxsa-brand-emblem {
+    width: 30px !important;
+    height: 30px !important;
+    max-height: 30px !important;
+    border-radius: 7px !important;
+  }
+  #header-wrap .foxsa-brand-box .foxsa-brand-text .brand-main {
+    font-size: 14.5px !important;
+  }
+  #header-wrap .foxsa-brand-box .foxsa-brand-text .brand-sub {
+    display: none !important;
+  }
+  .foxsa-staff-pill-btn {
+    padding: 6px 11px !important;
+    font-size: 11px !important;
+    gap: 5px !important;
+  }
+
+  /* Popular Tags Strip on Android */
+  #header-wrap.foxsa-modern-header .foxsa-popular-tags-inner {
+    padding: 0 12px !important;
+    gap: 8px !important;
+  }
+  .ptags-label {
+    font-size: 10.5px;
+  }
+  .ptag-chip {
+    font-size: 11px;
+    padding: 2px 8px;
+  }
+
+  /* Breaking News Bar on Android (Single Row) */
+  .foxsa-hero-showcase {
+    margin-top: 12px;
+  }
+  .kreeti-breaking-bar {
+    flex-wrap: nowrap !important;
+    min-height: 38px !important;
+    margin-bottom: 14px;
+  }
+  .breaking-badge {
+    height: 38px !important;
+    font-size: 10px !important;
+    padding: 0 10px !important;
+    gap: 6px !important;
+  }
+  .breaking-ticker-content {
+    padding: 0 10px;
+  }
+  .ticker-thumb,
+  .ticker-cat {
+    display: none !important;
+  }
+  .ticker-title {
+    font-size: 12px;
+  }
+
+  /* Company Profile Hero & 2x2 Tabs on Android */
   .foxsa-profile-hero {
-    padding: 20px;
+    padding: 18px 16px;
+    border-radius: 14px;
   }
   .foxsa-profile-hero-inner {
-    flex-direction: column-reverse;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+  .profile-hero-badge {
+    font-size: 9.5px;
+    padding: 3px 8px;
+    margin-bottom: 6px;
   }
   .profile-hero-logo img {
-    width: 76px;
-    height: 76px;
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
   }
   .profile-hero-content h1 {
-    font-size: 21px;
+    font-size: 17.5px;
+    margin-bottom: 6px;
+  }
+  .profile-hero-tagline {
+    font-size: 12px;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .profile-hero-chips span {
+    font-size: 10.5px;
+    padding: 4px 8px;
   }
   .foxsa-profile-tabs {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    padding: 6px;
+  }
+  .foxsa-profile-tab {
+    font-size: 11.5px;
+    padding: 9px 6px;
+    gap: 5px;
   }
   .foxsa-profile-card-body {
-    padding: 18px 14px;
+    padding: 16px 14px;
+    border-radius: 12px;
   }
   .foxsa-profile-values-grid,
   .rec-dept-cards-grid,
   .rec-official-links-box {
     grid-template-columns: 1fr;
   }
+
+  /* Meet Our Team & Horizontal Slider on Android */
+  .meet-team-top-heading h2 {
+    font-size: 22px;
+  }
+  .meet-team-featured-card {
+    padding: 14px;
+    gap: 16px;
+  }
+  .meet-featured-portrait-wrap {
+    max-width: 230px;
+  }
+  .meet-exec-name {
+    font-size: 19px;
+  }
+  .meet-board-slider-section {
+    padding: 16px 12px;
+    border-radius: 12px;
+  }
+  .meet-board-title-col h3 {
+    font-size: 19px;
+  }
+  .meet-slider-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .meet-dept-pills {
+    width: 100%;
+  }
+  .meet-carousel-nav-btns {
+    align-self: flex-end;
+  }
+  .meet-team-slider-track {
+    gap: 14px;
+  }
   .meet-member-card {
-    flex: 0 0 84%;
+    flex: 0 0 80%;
+    min-width: 210px;
+    max-width: 260px;
   }
   .foxsa-rec-banner,
   .foxsa-brand-assets-bar {
     flex-direction: column;
     align-items: stretch;
+    padding: 18px 16px;
+  }
+  .rec-discord-cta-btn {
+    justify-content: center;
+    text-align: center;
   }
 }
+
 
 
