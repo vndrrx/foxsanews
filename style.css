@@ -5245,3 +5245,1813 @@ html, body {
     text-align: center;
   }
 }
+
+/* ==========================================================================
+   6. KREETI + ANIMENETWORK HYBRID MAGAZINE PORTAL & VISUAL STUDIO EDITOR
+   ========================================================================== */
+
+body {
+  background-color: #F4F5F9 !important;
+  color: #1E2438;
+}
+
+.container {
+  max-width: 1220px !important;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 18px;
+  box-sizing: border-box;
+}
+
+/* 6.1 Kreeti Top Utility Date Bar */
+.foxsa-topbar {
+  background: #090C1E;
+  color: #cbd5e1;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 7px 0;
+}
+.foxsa-topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.foxsa-topbar-left,
+.foxsa-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.foxsa-topbar-left i {
+  color: #F08D39;
+  margin-right: 4px;
+}
+.topbar-sep {
+  opacity: 0.35;
+}
+.topbar-tagline {
+  color: #94a3b8;
+}
+.foxsa-topbar-right a {
+  color: #e2e8f0;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+.foxsa-topbar-right a:hover {
+  color: #F08D39;
+}
+.topbar-social {
+  background: rgba(240, 141, 57, 0.16);
+  color: #F08D39 !important;
+  padding: 2px 9px;
+  border-radius: 99px;
+  font-weight: 600 !important;
+}
+
+/* 6.2 AnimeNetwork Style Modern Header (Dark Brand Box + Crisp White Nav) */
+.foxsa-modern-header {
+  height: auto !important;
+  background: #ffffff !important;
+  box-shadow: 0 4px 20px rgba(9, 12, 30, 0.07) !important;
+  border-bottom: 1px solid #eceef5;
+}
+.foxsa-modern-header .header-header {
+  height: auto !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+.foxsa-header-flex {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  min-height: 72px;
+  gap: 18px;
+}
+.foxsa-brand-box {
+  background: #090C1E;
+  padding: 10px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 3px solid #F08D39;
+  margin-left: -18px;
+  flex-shrink: 0;
+}
+.foxsa-brand-box .main-logo {
+  height: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  float: none !important;
+}
+.foxsa-brand-box .Header h1 {
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+.foxsa-brand-box .Header h1 img {
+  max-height: 44px !important;
+  width: auto !important;
+  display: block;
+}
+.foxsa-nav-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.foxsa-nav-center #main-menu {
+  height: auto !important;
+  float: none !important;
+}
+.foxsa-nav-center #main-menu ul > li {
+  float: left;
+  position: relative;
+  margin: 0 2px;
+  padding: 0;
+}
+.foxsa-nav-center #main-menu ul > li > a {
+  height: 72px !important;
+  line-height: 72px !important;
+  padding: 0 13px !important;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  color: #1E2438 !important;
+  position: relative;
+  transition: color 0.15s ease;
+}
+.foxsa-nav-center #main-menu ul > li:hover > a {
+  color: #F08D39 !important;
+}
+.foxsa-nav-center #main-menu ul > li > ul.sub-menu {
+  top: 72px !important;
+  border-top: 3px solid #F08D39;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 12px 30px rgba(9, 12, 30, 0.14);
+}
+.foxsa-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.foxsa-inline-search {
+  display: flex;
+  align-items: center;
+  background: #F4F6FB;
+  border: 1px solid #E2E6F2;
+  border-radius: 99px;
+  padding: 3px 5px 3px 14px;
+  width: 220px;
+  transition: all 0.2s ease;
+}
+.foxsa-inline-search:focus-within {
+  background: #ffffff;
+  border-color: #F08D39;
+  box-shadow: 0 0 0 3px rgba(240, 141, 57, 0.15);
+  width: 250px;
+}
+.foxsa-inline-search input {
+  border: none;
+  background: transparent;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  color: #090C1E;
+  width: 100%;
+  outline: none;
+}
+.foxsa-inline-search button {
+  background: #F08D39;
+  color: #ffffff;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.foxsa-staff-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #090C1E;
+  color: #ffffff !important;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 15px;
+  border-radius: 99px;
+  text-decoration: none;
+  border: 1px solid #090C1E;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+.foxsa-staff-pill-btn i {
+  color: #F08D39;
+}
+.foxsa-staff-pill-btn:hover {
+  background: #F08D39;
+  border-color: #F08D39;
+  color: #ffffff !important;
+}
+.foxsa-staff-pill-btn:hover i {
+  color: #ffffff;
+}
+
+/* 6.3 Kreeti Popular Tags Strip */
+.foxsa-popular-tags-bar {
+  background: #FAFBFD;
+  border-top: 1px solid #EEF0F6;
+  padding: 7px 0;
+}
+.foxsa-popular-tags-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+.ptags-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #090C1E;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.ptags-label i {
+  color: #F08D39;
+}
+.ptags-scroll {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.ptags-scroll::-webkit-scrollbar {
+  display: none;
+}
+.ptag-chip {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 2px 10px;
+  border-radius: 99px;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.ptag-chip:hover {
+  background: #F08D39;
+  color: #ffffff;
+  border-color: #F08D39;
+}
+
+/* 6.4 Kreeti Breaking News Ticker & 3-Column Hero Magazine Showcase */
+.foxsa-hero-showcase {
+  margin-top: 18px;
+  margin-bottom: 10px;
+}
+.kreeti-breaking-bar {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(9, 12, 30, 0.06);
+  border: 1px solid #e9ecf4;
+  margin-bottom: 20px;
+  min-height: 46px;
+}
+.breaking-badge {
+  background: linear-gradient(135deg, #d92626, #F08D39);
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 0 18px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+}
+.pulse-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8);
+  animation: foxsaPulse 1.6s infinite;
+}
+@keyframes foxsaPulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8); }
+  70% { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+.breaking-ticker-content {
+  flex: 1;
+  padding: 0 16px;
+  overflow: hidden;
+}
+.ticker-item-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #090C1E;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ticker-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.ticker-cat {
+  font-family: 'Poppins', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(240, 141, 57, 0.15);
+  color: #d97218;
+  padding: 2px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.ticker-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #090C1E;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.15s;
+}
+.ticker-item-link:hover .ticker-title {
+  color: #F08D39;
+}
+.breaking-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 10px;
+  flex-shrink: 0;
+}
+.breaking-controls button {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #090C1E;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+.breaking-controls button:hover {
+  background: #F08D39;
+  color: #ffffff;
+  border-color: #F08D39;
+}
+
+/* Kreeti Section Headings */
+.kreeti-sec-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.kreeti-sec-heading .heading-line {
+  width: 18px;
+  height: 3px;
+  background: #F08D39;
+  border-radius: 2px;
+  display: inline-block;
+}
+.kreeti-sec-heading h3 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #090C1E;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+/* Kreeti 3-Column Hero Grid */
+.kreeti-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.85fr 1fr;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.kreeti-col {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Left Column: Editor's Picks */
+.kreeti-pick-featured {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  height: 205px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 18px rgba(9, 12, 30, 0.08);
+}
+.pick-featured-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  text-decoration: none;
+}
+.pick-featured-link img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+.pick-featured-link:hover img {
+  transform: scale(1.04);
+}
+.pick-featured-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(9, 12, 30, 0.92) 0%, rgba(9, 12, 30, 0.35) 60%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 14px;
+}
+.pick-featured-overlay h4 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.35;
+  margin: 6px 0 0;
+}
+.kreeti-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.k-badge-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #e11d48;
+  color: #ffffff;
+  font-size: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.k-badge-time {
+  background: rgba(9, 12, 30, 0.75);
+  color: #f8fafc;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.k-badge-cat {
+  background: #F08D39;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.kreeti-pick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+.kreeti-pick-text-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 13px 15px;
+  border: 1px solid #ebedf5;
+  box-shadow: 0 3px 10px rgba(9, 12, 30, 0.04);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.pick-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10.5px;
+  margin-bottom: 5px;
+}
+.pick-read {
+  color: #64748b;
+}
+.pick-cat {
+  color: #F08D39;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.kreeti-pick-text-card h4 {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.kreeti-pick-text-card h4 a {
+  color: #090C1E;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.kreeti-pick-text-card h4 a:hover {
+  color: #F08D39;
+}
+
+/* Center Column: Main News Hero */
+.kreeti-main-hero-card {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  flex: 1;
+  min-height: 390px;
+  box-shadow: 0 10px 28px rgba(9, 12, 30, 0.12);
+}
+.main-hero-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  text-decoration: none;
+}
+.main-hero-link img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.main-hero-link:hover img {
+  transform: scale(1.03);
+}
+.main-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(9, 12, 30, 0.95) 0%, rgba(9, 12, 30, 0.48) 55%, rgba(9, 12, 30, 0.08) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px;
+}
+.main-hero-overlay h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.3;
+  margin: 10px 0 8px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+.main-hero-excerpt {
+  font-size: 13.5px;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin: 0 0 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.main-hero-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11.5px;
+  color: #e2e8f0;
+}
+.main-hero-meta i {
+  color: #F08D39;
+  margin-right: 4px;
+}
+
+/* Right Column: Trending Now (Numbered 1-5) */
+.kreeti-trending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  flex: 1;
+}
+.kreeti-trending-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 8px 10px;
+  border: 1px solid #ebedf5;
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(9, 12, 30, 0.03);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  flex: 1;
+}
+.kreeti-trending-item:hover {
+  transform: translateX(3px);
+  border-color: #F08D39;
+}
+.trending-thumb-wrap {
+  position: relative;
+  width: 68px;
+  height: 54px;
+  border-radius: 7px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.trending-thumb-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.trending-rank-badge {
+  position: absolute;
+  bottom: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #d92626;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+.trending-item-info {
+  flex: 1;
+  min-width: 0;
+}
+.trending-item-info h4 {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #090C1E;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.15s;
+}
+.kreeti-trending-item:hover .trending-item-info h4 {
+  color: #F08D39;
+}
+
+/* Kreeti 4-Column Featured Posts Row */
+.kreeti-featured-row-wrap {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 18px 20px;
+  border: 1px solid #ebedf5;
+  box-shadow: 0 6px 20px rgba(9, 12, 30, 0.04);
+  margin-bottom: 10px;
+}
+.kreeti-featured-4grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.kreeti-feat-card {
+  background: #FAFBFD;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #eef0f6;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.kreeti-feat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(9, 12, 30, 0.08);
+}
+.feat-card-img {
+  position: relative;
+  height: 145px;
+  overflow: hidden;
+  display: block;
+}
+.feat-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+.kreeti-feat-card:hover .feat-card-img img {
+  transform: scale(1.05);
+}
+.feat-read-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(9, 12, 30, 0.8);
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.feat-read-badge i {
+  color: #F08D39;
+}
+.feat-card-body {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.feat-card-cat {
+  font-family: 'Poppins', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #F08D39;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.feat-card-body h4 {
+  margin: 0 0 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.38;
+  flex: 1;
+}
+.feat-card-body h4 a {
+  color: #090C1E;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.feat-card-body h4 a:hover {
+  color: #F08D39;
+}
+.feat-card-meta {
+  font-size: 11px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* 6.5 AnimeNetwork Main Grid + Category Tabs + Grid/List Switcher */
+.foxsa-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 26px;
+  align-items: start;
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+.foxsa-main-grid #main-wrapper,
+.foxsa-main-grid #sidebar-wrapper {
+  width: 100% !important;
+  float: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.an-filter-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 0 16px;
+  border: 1px solid #ebedf5;
+  box-shadow: 0 4px 14px rgba(9, 12, 30, 0.04);
+  margin-bottom: 18px;
+  min-height: 54px;
+}
+.an-tabs-scroll {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.an-tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+.an-tab-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 54px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+.an-tab-item small {
+  font-size: 10.5px;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 1px 6px;
+  border-radius: 99px;
+}
+.an-tab-item:hover {
+  color: #090C1E;
+}
+.an-tab-item.active {
+  color: #090C1E;
+  font-weight: 700;
+  border-bottom-color: #F08D39;
+}
+.an-tab-item.active small {
+  background: rgba(240, 141, 57, 0.16);
+  color: #d97218;
+}
+.an-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.an-cat-select-wrap {
+  width: 175px;
+}
+.an-view-switcher {
+  display: flex;
+  align-items: center;
+  background: #f4f6fb;
+  border: 1px solid #e2e6f2;
+  border-radius: 8px;
+  padding: 2px;
+}
+.an-view-btn {
+  width: 32px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+.an-view-btn.active {
+  background: #F08D39;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(240, 141, 57, 0.35);
+}
+
+.an-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #ebedf5;
+}
+.an-section-header h3 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: #090C1E;
+  margin: 0;
+}
+.an-section-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.an-quick-add-link {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #F08D39;
+  text-decoration: none;
+}
+.an-quick-add-link:hover {
+  text-decoration: underline;
+}
+.an-total-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* AnimeNetwork Recent News Cards (List & Grid Modes) */
+.an-news-feed.layout-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.an-news-feed.layout-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+.an-news-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #ebedf5;
+  box-shadow: 0 4px 16px rgba(9, 12, 30, 0.04);
+  display: flex;
+  gap: 18px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.an-news-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(9, 12, 30, 0.08);
+  border-color: #fbd3b0;
+}
+.an-news-thumb-wrap {
+  width: 245px;
+  height: 158px;
+  border-radius: 9px;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+}
+.an-news-thumb-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.an-news-thumb-link img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+.an-news-card:hover .an-news-thumb-link img {
+  transform: scale(1.04);
+}
+.an-thumb-read {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(9, 12, 30, 0.78);
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.an-news-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.an-news-meta-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 6px;
+}
+.an-news-cat {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: #F08D39;
+  padding: 2px 9px;
+  border-radius: 4px;
+  text-decoration: none;
+}
+.an-news-subcat {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+}
+.an-news-subcat:hover {
+  background: #090C1E;
+  color: #ffffff;
+}
+.an-news-date {
+  font-size: 11.5px;
+  color: #94a3b8;
+  margin-left: auto;
+}
+.an-news-title {
+  margin: 0 0 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 17.5px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.an-news-title a {
+  color: #090C1E;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.an-news-title a:hover {
+  color: #F08D39;
+}
+.an-news-excerpt {
+  font-size: 13.5px;
+  color: #475569;
+  line-height: 1.55;
+  margin: 0 0 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+.an-news-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+  margin-top: auto;
+}
+.an-continue-link {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #F08D39;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.an-continue-link:hover {
+  color: #d97218;
+  text-decoration: underline;
+}
+.an-comment-count {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.an-comment-count i {
+  color: #94a3b8;
+}
+.an-comment-count:hover {
+  color: #F08D39;
+}
+
+/* Grid mode adjustments */
+.an-news-feed.layout-grid .an-news-card {
+  flex-direction: column;
+  gap: 12px;
+}
+.an-news-feed.layout-grid .an-news-thumb-wrap {
+  width: 100%;
+  height: 185px;
+}
+.an-news-feed.layout-grid .an-news-date {
+  margin-left: 0;
+}
+
+/* 6.6 AnimeNetwork Style Sidebar Widgets */
+.foxsa-side-card {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  padding: 18px !important;
+  border: 1px solid #ebedf5 !important;
+  box-shadow: 0 4px 16px rgba(9, 12, 30, 0.04) !important;
+  margin-bottom: 20px !important;
+}
+.foxsa-side-tabs {
+  display: flex;
+  border-bottom: 2px solid #eef0f6;
+  margin-bottom: 14px;
+}
+.foxsa-side-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 8px 6px 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  letter-spacing: 0.4px;
+  margin-bottom: -2px;
+  transition: all 0.15s;
+}
+.foxsa-side-tab.active {
+  color: #F08D39;
+  border-bottom-color: #F08D39;
+}
+.foxsa-side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #eef0f6;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+.foxsa-side-head h3 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #090C1E;
+  margin: 0;
+}
+.side-more-link {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-decoration: none;
+}
+.side-more-link:hover {
+  color: #F08D39;
+}
+
+.an-side-post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.an-side-post-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.an-side-post-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.an-side-post-item img {
+  width: 64px;
+  height: 52px;
+  border-radius: 7px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.an-side-post-info {
+  flex: 1;
+  min-width: 0;
+}
+.an-side-post-info h4 {
+  margin: 0 0 3px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #090C1E;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.15s;
+}
+.an-side-post-item:hover .an-side-post-info h4 {
+  color: #F08D39;
+}
+.an-side-sub {
+  font-size: 11px;
+  color: #64748b;
+  display: block;
+}
+.an-side-views {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #F08D39;
+}
+
+/* FoxSA Spotlight Card */
+.spotlight-banner-link {
+  display: block;
+  border-radius: 9px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.spotlight-banner-link img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.spotlight-tag {
+  font-family: 'Poppins', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #F08D39;
+  text-transform: uppercase;
+}
+.spotlight-info h4 {
+  margin: 2px 0 6px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #090C1E;
+}
+.spotlight-info p {
+  font-size: 12.5px;
+  color: #475569;
+  line-height: 1.5;
+  margin: 0 0 12px;
+}
+.spotlight-stats {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.stat-box {
+  flex: 1;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px;
+  text-align: center;
+}
+.stat-box strong {
+  display: block;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: #090C1E;
+}
+.stat-box span {
+  font-size: 10.5px;
+  color: #64748b;
+}
+.spotlight-follow-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: #fff7ed;
+  border: 1.5px solid #F08D39;
+  color: #d97218 !important;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 9px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.spotlight-follow-btn:hover {
+  background: #F08D39;
+  color: #ffffff !important;
+}
+
+/* 6.7 Clean Single Article Reader View */
+.foxsa-clean-article-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 28px 32px;
+  border: 1px solid #ebedf5;
+  box-shadow: 0 6px 24px rgba(9, 12, 30, 0.05);
+}
+.article-top-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.article-cat-pill {
+  background: #F08D39;
+  color: #ffffff !important;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 99px;
+  text-decoration: none;
+}
+.article-read-time {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  margin-left: auto;
+}
+.article-read-time i {
+  color: #F08D39;
+}
+.article-byline-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 0;
+  margin: 14px 0 22px;
+  border-top: 1px solid #eef0f6;
+  border-bottom: 1px solid #eef0f6;
+}
+.byline-author-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.byline-author-left img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #F08D39;
+}
+.byline-author-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #090C1E;
+}
+.byline-date-meta {
+  font-size: 12px;
+  color: #64748b;
+}
+.foxsa-clean-prose {
+  font-family: 'Karla', sans-serif;
+  font-size: 16.5px !important;
+  line-height: 1.8 !important;
+  color: #1E2438 !important;
+}
+.foxsa-clean-prose p {
+  margin: 0 0 18px;
+}
+.foxsa-clean-prose h3 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #090C1E;
+  margin: 26px 0 12px;
+}
+.foxsa-clean-prose blockquote {
+  margin: 20px 0;
+  padding: 16px 20px;
+  background: #fffaf5;
+  border-left: 4px solid #F08D39;
+  border-radius: 0 10px 10px 0;
+  font-style: italic;
+  color: #334155;
+}
+.foxsa-clean-prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin: 14px auto;
+  display: block;
+}
+.foxsa-article-figure {
+  margin: 22px 0;
+  text-align: center;
+}
+.foxsa-article-figure figcaption {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* 6.8 Zero-HTML 4-Step Visual Studio Editor (Staff/Admin) */
+.foxsa-editor-step-card {
+  background: #FAFBFD;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 18px;
+}
+.step-card-badge {
+  display: inline-block;
+  background: #090C1E;
+  color: #F08D39;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 4px 12px;
+  border-radius: 99px;
+  margin-bottom: 14px;
+}
+.foxsa-title-big-input {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  padding: 13px 16px !important;
+}
+.foxsa-cover-upload-row {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.foxsa-cover-preview {
+  width: 240px;
+  height: 145px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f1f5f9;
+  border: 2px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.foxsa-cover-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cover-empty {
+  text-align: center;
+  color: #64748b;
+  padding: 12px;
+}
+.cover-empty i {
+  font-size: 28px;
+  color: #94a3b8;
+  display: block;
+  margin-bottom: 6px;
+}
+.cover-empty span {
+  font-size: 11.5px;
+}
+.foxsa-cover-inputs {
+  flex: 1;
+  min-width: 240px;
+}
+
+/* Visual Canvas & Word-like Toolbar */
+.foxsa-visual-editor-wrap {
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.foxsa-visual-editor-wrap:focus-within {
+  border-color: #F08D39;
+  box-shadow: 0 0 0 4px rgba(240, 141, 57, 0.14);
+}
+.foxsa-visual-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px;
+  background: #f1f5f9;
+  border-bottom: 1px solid #cbd5e1;
+}
+.vtool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  padding: 6px 11px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #090C1E;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.vtool-btn:hover {
+  background: #090C1E;
+  color: #ffffff;
+  border-color: #090C1E;
+}
+.vtool-btn-accent {
+  background: #F08D39;
+  color: #ffffff;
+  border-color: #F08D39;
+}
+.vtool-btn-accent:hover {
+  background: #d97218;
+  border-color: #d97218;
+}
+.vtool-divider {
+  width: 1px;
+  height: 22px;
+  background: #cbd5e1;
+  margin: 0 3px;
+}
+.foxsa-visual-canvas {
+  min-height: 360px;
+  max-height: 680px;
+  overflow-y: auto;
+  padding: 22px 24px;
+  font-family: 'Karla', sans-serif;
+  font-size: 16.5px;
+  line-height: 1.75;
+  color: #090C1E;
+  outline: none;
+}
+.foxsa-visual-canvas p {
+  margin: 0 0 16px;
+}
+.foxsa-visual-canvas h3 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: #090C1E;
+  margin: 20px 0 10px;
+}
+.foxsa-visual-canvas blockquote {
+  margin: 16px 0;
+  padding: 14px 18px;
+  background: #fffaf5;
+  border-left: 4px solid #F08D39;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+}
+.foxsa-visual-canvas img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  display: block;
+  margin: 12px auto;
+}
+.foxsa-visual-footer-hint {
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  padding: 9px 14px;
+  font-size: 12px;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.foxsa-visual-footer-hint i {
+  color: #F08D39;
+}
+
+/* 6.9 AnimeNetwork Style Dark Footer */
+.foxsa-dark-footer {
+  background: #090C1E !important;
+  color: #cbd5e1 !important;
+  border-top: 4px solid #F08D39;
+  padding: 42px 0 36px;
+  margin-top: 40px;
+}
+.foxsa-footer-main {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1.2fr;
+  gap: 32px;
+}
+.footer-brand-logo {
+  max-height: 44px;
+  width: auto;
+  margin-bottom: 12px;
+  display: block;
+}
+.footer-brand-desc {
+  font-size: 13.5px;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+.footer-copy-text {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+.foxsa-footer-links h4,
+.foxsa-footer-popular h4 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.foxsa-footer-links ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.foxsa-footer-links ul li a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 13.5px;
+  transition: color 0.15s;
+}
+.foxsa-footer-links ul li a:hover {
+  color: #F08D39;
+}
+.footer-pop-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  margin-bottom: 10px;
+}
+.footer-pop-item img {
+  width: 54px;
+  height: 42px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.footer-pop-item span {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #e2e8f0;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.footer-pop-item:hover span {
+  color: #F08D39;
+}
+
+/* 6.10 Responsive Media Queries for Tablet & Android Phones */
+@media screen and (max-width: 1040px) {
+  .kreeti-hero-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .kreeti-col-main {
+    grid-column: 1 / -1;
+    order: -1;
+  }
+  .kreeti-featured-4grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .foxsa-main-grid {
+    grid-template-columns: 1fr;
+  }
+  .foxsa-footer-main {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+@media screen and (max-width: 880px) {
+  .foxsa-topbar-right {
+    display: none;
+  }
+  .foxsa-nav-center,
+  .foxsa-inline-search {
+    display: none !important;
+  }
+  .foxsa-header-flex {
+    min-height: 60px;
+  }
+  .foxsa-brand-box {
+    padding: 8px 16px;
+  }
+  .foxsa-brand-box .Header h1 img {
+    max-height: 36px !important;
+  }
+  .slide-menu-toggle {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 38px !important;
+    height: 38px !important;
+    line-height: 38px !important;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #090C1E !important;
+    float: none !important;
+    margin: 0 !important;
+  }
+}
+
+@media screen and (max-width: 680px) {
+  .kreeti-breaking-bar {
+    flex-wrap: wrap;
+  }
+  .breaking-badge {
+    height: 34px;
+    font-size: 11px;
+    padding: 0 12px;
+  }
+  .breaking-controls {
+    display: none;
+  }
+  .kreeti-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .kreeti-main-hero-card {
+    min-height: 280px;
+  }
+  .main-hero-overlay {
+    padding: 16px;
+  }
+  .main-hero-overlay h2 {
+    font-size: 19px;
+  }
+  .kreeti-featured-4grid {
+    grid-template-columns: 1fr;
+  }
+  .an-filter-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  .an-tab-item {
+    height: 40px;
+  }
+  .an-toolbar-right {
+    justify-content: space-between;
+  }
+  .an-cat-select-wrap {
+    flex: 1;
+  }
+  .an-news-card,
+  .an-news-feed.layout-grid {
+    flex-direction: column;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .an-news-thumb-wrap {
+    width: 100%;
+    height: 190px;
+  }
+  .an-news-date {
+    margin-left: 0;
+  }
+  .foxsa-clean-article-card {
+    padding: 18px 16px;
+  }
+  .foxsa-cover-preview {
+    width: 100%;
+    height: 170px;
+  }
+  .foxsa-visual-canvas {
+    padding: 16px;
+    min-height: 280px;
+  }
+}
