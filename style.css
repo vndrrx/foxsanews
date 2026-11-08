@@ -8136,6 +8136,12 @@ body.nav-active #header-wrap .mobile-menu-wrap {
   color: #090C1E;
   margin: 0;
 }
+.meet-board-desc-col {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
 .meet-board-desc-col p {
   font-size: 13px;
   line-height: 1.6;
@@ -8385,17 +8391,19 @@ body.nav-active #header-wrap .mobile-menu-wrap {
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
 }
 .division-logo-wrap {
-  height: 170px;
-  background: #090C1E;
+  height: 180px;
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: 20px;
   border-bottom: 3px solid #F08D39;
 }
 .division-logo-wrap img {
   max-width: 100%;
-  max-height: 138px;
+  max-height: 140px;
+  width: auto;
+  height: auto;
   object-fit: contain;
   border-radius: 8px;
 }
@@ -8689,24 +8697,31 @@ body.nav-active #header-wrap .mobile-menu-wrap {
 }
 .rec-dept-item {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
-  padding: 12px;
+  padding: 12px 14px;
 }
-.rec-dept-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  background: #090C1E;
-  color: #F08D39;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  flex-shrink: 0;
+.rec-dept-item .rec-dept-icon {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  border-radius: 9px !important;
+  background: #090C1E !important;
+  color: #F08D39 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 15px !important;
+  line-height: 1 !important;
+  flex-shrink: 0 !important;
+}
+.rec-dept-item .rec-dept-icon i {
+  color: #F08D39 !important;
+  font-size: 15px !important;
+  line-height: 1 !important;
 }
 .rec-dept-item strong {
   display: block;
@@ -8716,7 +8731,8 @@ body.nav-active #header-wrap .mobile-menu-wrap {
   color: #090C1E;
   margin-bottom: 2px;
 }
-.rec-dept-item span {
+.rec-dept-item .rec-dept-desc,
+.rec-dept-item span:not(.rec-dept-icon) {
   font-size: 11.5px;
   color: #64748b;
   line-height: 1.4;
@@ -9016,20 +9032,49 @@ body.nav-active #header-wrap .mobile-menu-wrap {
 }
 
 @media screen and (max-width: 980px) {
+  #header-wrap.foxsa-modern-header {
+    background: #090C1E !important;
+    border-bottom: 3px solid #F08D39 !important;
+  }
+  #header-wrap.foxsa-modern-header .foxsa-header-flex {
+    min-height: 60px !important;
+    padding: 8px 14px !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+  }
   #header-wrap .foxsa-nav-center,
   #header-wrap .foxsa-inline-search {
     display: none !important;
   }
   #header-wrap .mobile-menu-toggle {
     display: inline-flex !important;
+    width: 38px !important;
+    height: 38px !important;
+    line-height: 38px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+    border-radius: 9px !important;
+    margin: 0 !important;
   }
-  /* Override legacy Blogger `.header-logo { width: 100%; max-width: 226px; margin: 0 auto; }` */
+  /* Seamless brand lockup on dark mobile header */
   #header-wrap .header-logo.foxsa-brand-box {
     width: auto !important;
     max-width: none !important;
     margin: 0 !important;
-    padding: 8px 14px !important;
-    border-radius: 10px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+  #header-wrap .foxsa-staff-pill-btn {
+    background: #F08D39 !important;
+    border-color: #F08D39 !important;
+    color: #ffffff !important;
+  }
+  #header-wrap .foxsa-staff-pill-btn i {
+    color: #ffffff !important;
   }
   .foxsa-mobile-search-box,
   .foxsa-mobile-drawer-foot {
@@ -9070,40 +9115,9 @@ body.nav-active #header-wrap .mobile-menu-wrap {
     padding: 0 12px !important;
   }
 
-  /* Sleek Single-Line Scrollable Topbar on Android */
-  .foxsa-topbar {
-    padding: 5px 0 !important;
-  }
-  .foxsa-topbar-live-date,
-  #foxsa-live-date,
-  .foxsa-topbar-divider,
-  .foxsa-topbar-right {
-    display: none !important;
-  }
-  .foxsa-topbar-inner {
-    padding: 0 12px !important;
-  }
-  .foxsa-topbar-left {
-    width: 100%;
-    flex-wrap: nowrap !important;
-    overflow-x: auto;
-    white-space: nowrap;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    gap: 6px !important;
-  }
-  .foxsa-topbar-left::-webkit-scrollbar {
-    display: none;
-  }
-  .foxsa-topbar-link {
-    font-size: 11px;
-    padding: 3px 9px;
-    flex-shrink: 0;
-  }
-
-  /* Compact Sticky Header on Android (Zero Overflow on 320px-412px phones) */
+  /* Compact Unified Sticky Header on Android */
   #header-wrap.foxsa-modern-header .foxsa-header-flex {
-    min-height: 56px !important;
+    min-height: 54px !important;
     padding: 6px 12px !important;
     gap: 8px !important;
     align-items: center !important;
@@ -9114,69 +9128,140 @@ body.nav-active #header-wrap .mobile-menu-wrap {
     line-height: 36px !important;
     font-size: 15px !important;
   }
-  #header-wrap .header-logo.foxsa-brand-box {
-    padding: 6px 11px !important;
-    border-radius: 8px !important;
-    border-bottom-width: 2px !important;
-  }
   #header-wrap .foxsa-brand-box .foxsa-brand-lockup {
     gap: 8px !important;
   }
   #header-wrap .foxsa-brand-box .foxsa-brand-emblem {
-    width: 30px !important;
-    height: 30px !important;
-    max-height: 30px !important;
+    width: 32px !important;
+    height: 32px !important;
+    max-height: 32px !important;
     border-radius: 7px !important;
   }
   #header-wrap .foxsa-brand-box .foxsa-brand-text .brand-main {
-    font-size: 14.5px !important;
+    font-size: 15px !important;
   }
   #header-wrap .foxsa-brand-box .foxsa-brand-text .brand-sub {
-    display: none !important;
+    font-size: 7.5px !important;
+    letter-spacing: 1px !important;
   }
   .foxsa-staff-pill-btn {
     padding: 6px 11px !important;
     font-size: 11px !important;
     gap: 5px !important;
+    border-radius: 7px !important;
   }
 
-  /* Popular Tags Strip on Android */
-  #header-wrap.foxsa-modern-header .foxsa-popular-tags-inner {
-    padding: 0 12px !important;
-    gap: 8px !important;
-  }
-  .ptags-label {
-    font-size: 10.5px;
-  }
-  .ptag-chip {
-    font-size: 11px;
-    padding: 2px 8px;
-  }
-
-  /* Breaking News Bar on Android (Single Row) */
+  /* Hero Showcase on Android (Fix Main Headline Card Clipping & Spacing) */
   .foxsa-hero-showcase {
-    margin-top: 12px;
+    margin-top: 12px !important;
+    margin-bottom: 16px !important;
   }
-  .kreeti-breaking-bar {
-    flex-wrap: nowrap !important;
-    min-height: 38px !important;
-    margin-bottom: 14px;
+  .kreeti-hero-grid {
+    gap: 16px !important;
+    margin-bottom: 0 !important;
   }
-  .breaking-badge {
-    height: 38px !important;
-    font-size: 10px !important;
-    padding: 0 10px !important;
-    gap: 6px !important;
+  .kreeti-main-hero-card,
+  .main-hero-link {
+    height: 280px !important;
+    min-height: 280px !important;
   }
-  .breaking-ticker-content {
-    padding: 0 10px;
+  .main-hero-link img {
+    height: 100% !important;
+    object-fit: cover !important;
   }
-  .ticker-thumb,
-  .ticker-cat {
+  .main-hero-overlay {
+    padding: 16px !important;
+  }
+  .main-hero-overlay h2 {
+    font-size: 16.5px !important;
+    line-height: 1.32 !important;
+    margin-bottom: 6px !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+  .main-hero-excerpt {
     display: none !important;
   }
-  .ticker-title {
-    font-size: 12px;
+  .main-hero-meta {
+    font-size: 11px !important;
+    gap: 6px !important;
+  }
+  .kreeti-pick-featured,
+  .pick-featured-link {
+    height: 185px !important;
+  }
+
+  /* Category Filter Toolbar & News Cards on Android */
+  .an-filter-toolbar {
+    flex-direction: row !important;
+    align-items: center !important;
+    padding: 8px 10px !important;
+    gap: 8px !important;
+  }
+  .an-tabs-scroll {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  .an-tab-item {
+    font-size: 11.5px !important;
+    padding: 6px 11px !important;
+  }
+  .an-toolbar-right {
+    width: auto !important;
+    flex-shrink: 0 !important;
+  }
+  .an-news-card {
+    padding: 12px !important;
+    border-radius: 10px !important;
+    gap: 12px !important;
+  }
+  .an-news-Feed.layout-list .an-news-thumb-wrap,
+  .an-news-feed.layout-list .an-news-thumb-wrap {
+    height: 180px !important;
+  }
+  .an-news-title {
+    font-size: 15.5px !important;
+  }
+  .an-news-excerpt {
+    font-size: 12.5px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* Single Article View on Android (Fix legacy Blogger separator image margin & 2-col post-nav) */
+  .item-post h1.post-title {
+    font-size: 19px !important;
+    line-height: 1.32 !important;
+  }
+  .foxsa-clean-prose .separator,
+  .foxsa-clean-prose .separator a {
+    margin: 0 0 12px 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    text-align: center !important;
+  }
+  .foxsa-clean-prose img {
+    max-width: 100% !important;
+    height: auto !important;
+    border-radius: 8px !important;
+  }
+  .foxsa-article-author-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 14px !important;
+    gap: 10px !important;
+  }
+  ul.post-nav {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  ul.post-nav li {
+    width: 100% !important;
+    padding: 0 !important;
+    border: none !important;
+    text-align: left !important;
   }
 
   /* Company Profile Hero & 2x2 Tabs on Android */
@@ -9185,8 +9270,8 @@ body.nav-active #header-wrap .mobile-menu-wrap {
     border-radius: 14px;
   }
   .foxsa-profile-hero-inner {
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column-reverse;
+    align-items: flex-start;
     gap: 12px;
   }
   .profile-hero-badge {
@@ -9195,12 +9280,12 @@ body.nav-active #header-wrap .mobile-menu-wrap {
     margin-bottom: 6px;
   }
   .profile-hero-logo img {
-    width: 60px;
-    height: 60px;
-    border-radius: 14px;
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
   }
   .profile-hero-content h1 {
-    font-size: 17.5px;
+    font-size: 18px;
     margin-bottom: 6px;
   }
   .profile-hero-tagline {
@@ -9231,6 +9316,13 @@ body.nav-active #header-wrap .mobile-menu-wrap {
   .rec-official-links-box {
     grid-template-columns: 1fr;
   }
+  .division-logo-wrap {
+    height: 150px;
+    padding: 16px;
+  }
+  .division-logo-wrap img {
+    max-height: 115px;
+  }
 
   /* Meet Our Team & Horizontal Slider on Android */
   .meet-team-top-heading h2 {
@@ -9250,37 +9342,44 @@ body.nav-active #header-wrap .mobile-menu-wrap {
     padding: 16px 12px;
     border-radius: 12px;
   }
+  .meet-board-header {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
   .meet-board-title-col h3 {
     font-size: 19px;
   }
-  .meet-slider-toolbar {
-    flex-direction: column;
-    align-items: stretch;
+  .meet-board-desc-col {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     gap: 10px;
   }
-  .meet-dept-pills {
-    width: 100%;
-  }
-  .meet-carousel-nav-btns {
-    align-self: flex-end;
+  .meet-board-desc-col p {
+    font-size: 12px;
   }
   .meet-team-slider-track {
     gap: 14px;
   }
   .meet-member-card {
-    flex: 0 0 80%;
-    min-width: 210px;
-    max-width: 260px;
+    flex: 0 0 82%;
+    min-width: 215px;
+    max-width: 265px;
   }
-  .foxsa-rec-banner,
-  .foxsa-brand-assets-bar {
+  .foxsa-rec-banner {
     flex-direction: column;
     align-items: stretch;
     padding: 18px 16px;
   }
+  .rec-banner-left h2 {
+    font-size: 17.5px;
+  }
   .rec-discord-cta-btn {
     justify-content: center;
     text-align: center;
+  }
+  .rec-poster-card {
+    position: static;
   }
 }
 

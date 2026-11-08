@@ -22,27 +22,7 @@
 
   <div id="outer-wrapper">
 
-    <!-- ==================== TOP UTILITY BAR (KREETI STYLE) ==================== -->
-    <div class="foxsa-topbar">
-      <div class="container foxsa-topbar-inner">
-        <div class="foxsa-topbar-left">
-          <span class="foxsa-live-date" id="foxsa-live-date">
-            <i class="fa-regular fa-calendar"></i> San Andreas Independent News Network
-          </span>
-          <span class="foxsa-topbar-divider">|</span>
-          <a href="#/profile" class="foxsa-topbar-link"><i class="fa-regular fa-building"></i> Profil Perusahaan</a>
-          <a href="#/profile/roadmap" class="foxsa-topbar-link">Program &amp; Rencana</a>
-          <a href="#/profile/recruitment" class="foxsa-topbar-link"><i class="fa-solid fa-bullhorn" style="color:#F08D39;"></i> Open Recruitment</a>
-        </div>
-        <div class="foxsa-topbar-right">
-          <a href="https://discord.gg/rVeaKGzhyy" target="_blank" rel="noopener" class="foxsa-topbar-social" title="Join Discord FoxSA News">
-            <i class="fa-brands fa-discord"></i> Discord Komunitas
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== MAIN HEADER (ANIMENETWORK + KREETI STYLE) ==================== -->
+    <!-- ==================== MAIN HEADER (CLEAN & RESPONSIVE) ==================== -->
     <header id="header-wrap" class="foxsa-modern-header">
       <!-- Mobile Drawer Menu -->
       <div class="mobile-menu-wrap" id="mobile-menu-drawer">
@@ -108,19 +88,19 @@
                 <li class="has-sub">
                   <a href="#/profile" role="menuitem">Profil Perusahaan</a>
                   <ul class="sub-menu m-sub">
-                    <li><a href="#/profile" role="menuitem">Tentang &amp; Struktur Organisasi</a></li>
-                    <li><a href="#/profile/divisions" role="menuitem">Divisi Media &amp; Penyiaran</a></li>
-                    <li><a href="#/profile/roadmap" role="menuitem">Program &amp; Rencana (Roadmap)</a></li>
-                    <li><a href="#/profile/recruitment" role="menuitem">Open Recruitment Staff</a></li>
+                    <li><a href="#/profile" role="menuitem">Tentang &amp; Tim Kami</a></li>
+                    <li><a href="#/profile/divisions" role="menuitem">Divisi Media &amp; Radio</a></li>
+                    <li><a href="#/profile/roadmap" role="menuitem">Program &amp; Rencana</a></li>
+                    <li><a href="#/profile/recruitment" role="menuitem">Open Recruitment</a></li>
                   </ul>
                 </li>
-                <li><a href="#/popular" role="menuitem">Trending</a></li>
+                <li><a href="#/profile/recruitment" role="menuitem">Recruitment</a></li>
               </ul>
             </div>
           </div>
         </div>
 
-        <!-- Right Inline Search & Staff Portal Button (AnimeNetwork Style - No overlapping icons!) -->
+        <!-- Right Inline Search & Staff Portal Button -->
         <div class="foxsa-header-right">
           <form class="foxsa-inline-search" id="header-inline-search-form" role="search">
             <input type="search" name="q" id="header-inline-search-input" placeholder="Cari berita..." autocomplete="off" />
@@ -131,16 +111,6 @@
             <i class="fa-solid fa-user-shield"></i>
             <span class="staff-btn-label">Staff Login</span>
           </a>
-        </div>
-      </div>
-
-      <!-- Popular Tags Strip (Kreeti Reference Style) -->
-      <div class="foxsa-popular-tags-bar">
-        <div class="container foxsa-popular-tags-inner">
-          <span class="ptags-label"><i class="fa-solid fa-bolt"></i> POPULAR TAGS:</span>
-          <div class="ptags-scroll" id="header-popular-tags-list">
-            <!-- Populated dynamically by js/app.js -->
-          </div>
         </div>
       </div>
     </header>

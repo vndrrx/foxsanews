@@ -68,15 +68,6 @@
       avatar: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEijelpjGHfXOoTKfqD1mokSIESF0WySrKkFx3EV9rhrMxaQHJmPSkWe7Lj9QbiFJQbVx7z2os7vSHs3TVJFg1nzGX2MTzdqBO1eO-gppMt99EfwrEBOG9BqW1ZrbkNcNNqd-k9pS8vHOItd_EF7yVe_MfaTvhN2EvXpcWmK7ZDpX94RY14/s200/In%20Edward%20Snowden%E2%80%99s%20New%20Memoir,%20the%20Disclosures%20This%20Time%20Are%20Personal%20(Published%202019).jpg'
     },
     {
-      username: 'ligma',
-      password: 'ligmafoxsa',
-      displayName: 'Ligma Deek',
-      authorName: 'Ligma Deek',
-      role: 'Executive Staff | Head of Affairs & Analyst',
-      isAdmin: true,
-      avatar: 'assets/logo/foxsa-icon.jpg'
-    },
-    {
       username: 'clarissa',
       password: 'clarissafoxsa',
       displayName: 'Clarissa Vencant',
@@ -145,18 +136,11 @@
     if (!Array.isArray(cloned.staffAccounts) || cloned.staffAccounts.length === 0) {
       cloned.staffAccounts = JSON.parse(JSON.stringify(DEFAULT_STAFF_ACCOUNTS));
     }
-
-    if (!Array.isArray(cloned.profileFeedback)) {
-      cloned.profileFeedback = [
-        {
-          id: 'fb-1',
-          author: 'Ligma Deek',
-          role: 'Executive Staff | Head of Affairs',
-          date: '2026-04-08T10:15:00.000Z',
-          body: 'Terus tingkatkan kualitas liputan lapangan dan jadwal Live Broadcast harian FoxSA News!'
-        }
-      ];
-    }
+    cloned.staffAccounts = cloned.staffAccounts.filter(acc =>
+      !String(acc.username || '').toLowerCase().includes('ligma') &&
+      !String(acc.displayName || '').toLowerCase().includes('ligma')
+    );
+    delete cloned.profileFeedback;
 
     cloned.staffAccounts.forEach(acc => {
       const known = cloned.authors[acc.authorName];
@@ -180,6 +164,7 @@
       if (!Array.isArray(post.labels)) post.labels = [];
       post.labels = post.labels.map(l => String(l).trim()).filter(Boolean);
       if (!Array.isArray(post.comments)) post.comments = [];
+      post.comments = post.comments.filter(c => !String(c.author || '').toLowerCase().includes('ligma'));
       post.comments.forEach(c => {
         c.body = repairMojibakeText(c.body);
       });
@@ -687,40 +672,11 @@
     }
     trendingPosts = trendingPosts.slice(0, 5);
 
-    // 4. Featured Posts 4-Column Row (4 strong visual stories)
-    const featuredRowPosts = newsPosts.slice(1, 5).length === 4
-      ? newsPosts.slice(1, 5)
-      : posts.slice(0, 4);
-
-    // Breaking News Ticker items
-    const tickerPosts = posts.slice(0, 6);
-    if (state.tickerIndex >= tickerPosts.length) state.tickerIndex = 0;
-    const activeTickerPost = tickerPosts[state.tickerIndex] || mainPost;
-
     const mainTag = (mainPost.labels && mainPost.labels[0]) || 'News';
     const topPickTag = (topPick.labels && topPick.labels[0]) || 'News';
 
     heroSection.innerHTML = `
       <div class="container">
-        <!-- BREAKING NEWS BAR (KREETI STYLE) -->
-        <div class="kreeti-breaking-bar">
-          <div class="breaking-badge">
-            <span class="pulse-dot"></span>
-            <span>BREAKING NEWS</span>
-          </div>
-          <div class="breaking-ticker-content" id="foxsa-ticker-slot">
-            <a href="${getPostHref(activeTickerPost)}" class="ticker-item-link">
-              <img src="${escapeHtml(activeTickerPost.featuredImage || state.data.siteInfo.aboutBanner)}" alt="thumb" class="ticker-thumb" />
-              <span class="ticker-cat">[${escapeHtml((activeTickerPost.labels && activeTickerPost.labels[0]) || 'News')}]</span>
-              <span class="ticker-title">${escapeHtml(activeTickerPost.title)}</span>
-            </a>
-          </div>
-          <div class="breaking-controls">
-            <button type="button" id="ticker-prev-btn" aria-label="Sebelumnya"><i class="fa-solid fa-chevron-left"></i></button>
-            <button type="button" id="ticker-next-btn" aria-label="Berikutnya"><i class="fa-solid fa-chevron-right"></i></button>
-          </div>
-        </div>
-
         <!-- 3-COLUMN HERO MAGAZINE GRID (KREETI STYLE) -->
         <div class="kreeti-hero-grid">
           <!-- Left Column: Editor's Picks -->
@@ -809,77 +765,8 @@
             </div>
           </div>
         </div>
-
-        <!-- 4-COLUMN FEATURED POSTS ROW (KREETI STYLE) -->
-        <div class="kreeti-featured-row-wrap">
-          <div class="kreeti-sec-heading">
-            <span class="heading-line"></span>
-            <h3>Sorotan Pilihan Redaksi</h3>
-          </div>
-          <div class="kreeti-featured-4grid">
-            ${featuredRowPosts.map(fp => {
-              const cat = (fp.labels && fp.labels[0]) || 'News';
-              return `
-                <article class="kreeti-feat-card">
-                  <a href="${getPostHref(fp)}" class="feat-card-img">
-                    <img src="${escapeHtml(fp.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(fp.title)}" loading="lazy" />
-                    <span class="feat-read-badge"><i class="fa-regular fa-clock"></i> ${getReadingTime(fp.content)}</span>
-                  </a>
-                  <div class="feat-card-body">
-                    <a href="#/label/${encodeURIComponent(cat)}" class="feat-card-cat">${escapeHtml(cat)}</a>
-                    <h4><a href="${getPostHref(fp)}">${escapeHtml(fp.title)}</a></h4>
-                    <div class="feat-card-meta">
-                      <span>${escapeHtml(fp.author)}</span>
-                      <span>•</span>
-                      <span>${escapeHtml(formatShortDate(fp.published))}</span>
-                      <span>•</span>
-                      <span><i class="fa-regular fa-comment"></i> ${(fp.comments || []).length}</span>
-                    </div>
-                  </div>
-                </article>
-              `;
-            }).join('')}
-          </div>
-        </div>
       </div>
     `;
-
-    // Bind Breaking News Ticker Controls & Auto-Cycle
-    const updateTickerDOM = () => {
-      const slot = document.getElementById('foxsa-ticker-slot');
-      if (!slot) return;
-      const p = tickerPosts[state.tickerIndex] || mainPost;
-      slot.innerHTML = `
-        <a href="${getPostHref(p)}" class="ticker-item-link">
-          <img src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" alt="thumb" class="ticker-thumb" />
-          <span class="ticker-cat">[${escapeHtml((p.labels && p.labels[0]) || 'News')}]</span>
-          <span class="ticker-title">${escapeHtml(p.title)}</span>
-        </a>
-      `;
-    };
-
-    const prevBtn = document.getElementById('ticker-prev-btn');
-    const nextBtn = document.getElementById('ticker-next-btn');
-    if (prevBtn) {
-      prevBtn.addEventListener('click', () => {
-        state.tickerIndex = (state.tickerIndex - 1 + tickerPosts.length) % tickerPosts.length;
-        updateTickerDOM();
-      });
-    }
-    if (nextBtn) {
-      nextBtn.addEventListener('click', () => {
-        state.tickerIndex = (state.tickerIndex + 1) % tickerPosts.length;
-        updateTickerDOM();
-      });
-    }
-
-    clearInterval(state.tickerTimer);
-    state.tickerTimer = setInterval(() => {
-      if (state.currentRoute.view === 'home' && tickerPosts.length > 1) {
-        state.tickerIndex = (state.tickerIndex + 1) % tickerPosts.length;
-        updateTickerDOM();
-      }
-    }, 5500);
   }
 
   // =========================================================================
@@ -930,32 +817,18 @@
     const isPopular = view === 'popular';
     const activeLabelLower = view === 'label' && param ? param.trim().toLowerCase() : '';
 
-    // Top 5 categories as clean tabs (AnimeNetwork style) + Dropdown for all categories
-    const topTabCategories = sortedCategories.slice(0, 5);
-
     return `
       <div class="an-filter-toolbar">
         <div class="an-tabs-scroll" id="foxsa-cat-pills-scroll">
           <a href="#/" class="an-tab-item ${isHome ? 'active' : ''}">Semua Berita</a>
           <a href="#/popular" class="an-tab-item ${isPopular ? 'active' : ''}">🔥 Terpopuler</a>
-          ${topTabCategories.map(cat => {
+          ${sortedCategories.map(cat => {
             const isActive = activeLabelLower === cat.toLowerCase();
             return `<a href="#/label/${encodeURIComponent(cat)}" class="an-tab-item ${isActive ? 'active' : ''}">${escapeHtml(cat)}</a>`;
           }).join('')}
         </div>
 
         <div class="an-toolbar-right">
-          <select id="foxsa-quick-category-select" class="foxsa-cat-select" aria-label="Pilih Kategori Berita">
-            <option value="#/" ${isHome ? 'selected' : ''}>📂 Semua Kategori (${state.data.posts.length})</option>
-            <option value="#/popular" ${isPopular ? 'selected' : ''}>🔥 Berita Terpopuler</option>
-            <optgroup label="Filter Kategori:">
-              ${sortedCategories.map(cat => {
-                const isSelected = activeLabelLower === cat.toLowerCase();
-                return `<option value="#/label/${encodeURIComponent(cat)}" ${isSelected ? 'selected' : ''}>#${escapeHtml(cat)} (${labelCounts[cat]})</option>`;
-              }).join('')}
-            </optgroup>
-          </select>
-
           <div class="an-view-switcher" role="group" aria-label="Tampilan Berita">
             <button type="button" class="an-view-btn ${state.feedLayout === 'grid' ? 'active' : ''}" data-set-layout="grid" title="Tampilan Grid (Kartu)">
               <i class="fa-solid fa-border-all"></i>
@@ -1470,7 +1343,7 @@
             <label for="login-username">Username Staff / Admin *</label>
             <div class="foxsa-input-icon-wrap">
               <i class="fa-solid fa-user"></i>
-              <input type="text" id="login-username" class="foxsa-input" placeholder="Contoh: admin, arthur, ligma, clarissa, shen" autocomplete="username" required />
+              <input type="text" id="login-username" class="foxsa-input" placeholder="Contoh: admin, arthur, clarissa, shen" autocomplete="username" required />
             </div>
           </div>
 
@@ -2059,9 +1932,6 @@
           </button>
           <button type="button" class="foxsa-admin-tab ${state.adminTab === 'staff' ? 'active' : ''}" data-admin-tab="staff">
             <i class="fa-solid fa-users-gear"></i> Akun Staff (${totalStaff})
-          </button>
-          <button type="button" class="foxsa-admin-tab ${state.adminTab === 'storage' ? 'active' : ''}" data-admin-tab="storage">
-            <i class="fa-solid fa-cloud-arrow-up"></i> Cloud &amp; Backup
           </button>
         </div>
 
@@ -3053,15 +2923,6 @@
       bio: 'Manajer Event & Analis Utama yang memimpin perencanaan liputan akbar, sponsorship, serta kejuaraan Motorsport di San Andreas.'
     },
     {
-      id: 'ligma',
-      name: 'Ligma Deek',
-      role: 'Head of Affairs',
-      badge: 'Operational Management',
-      dept: 'management',
-      featured: false,
-      bio: 'Kepala Hubungan Eksternal & Analis Berita yang menjembatani komunikasi strategis antara FoxSA News dengan publik dan instansi.'
-    },
-    {
       id: 'clarissa',
       name: 'Clarissa Vencant',
       role: 'Senior Editor',
@@ -3174,15 +3035,8 @@
 
     // TAB 1: OVERVIEW & "MEET OUR TEAM" INTERACTIVE SLIDER SHOWCASE
     if (activeTab === 'overview') {
-      const featuredExecs = FOXSA_TEAM_MEMBERS.filter(m => m.featured);
-      const activeExecIndex = typeof state.profileExecIndex === 'number'
-        ? ((state.profileExecIndex % featuredExecs.length) + featuredExecs.length) % featuredExecs.length
-        : 0;
-      const exec = featuredExecs[activeExecIndex] || featuredExecs[0];
-      const activeDeptFilter = state.profileDeptFilter || 'all';
-      const filteredMembers = activeDeptFilter === 'all'
-        ? FOXSA_TEAM_MEMBERS
-        : FOXSA_TEAM_MEMBERS.filter(m => m.dept === activeDeptFilter);
+      const exec = FOXSA_TEAM_MEMBERS[0];
+      const sliderMembers = FOXSA_TEAM_MEMBERS.slice(1);
 
       bodyHtml = `
         <div class="foxsa-profile-section">
@@ -3234,11 +3088,11 @@
               <p>Mengenal lebih dekat jajaran pimpinan eksekutif, manajemen operasional, supervisor, dan kru redaksi yang menggerakkan FoxSA News Agency setiap hari.</p>
             </div>
 
-            <!-- Featured Executive Spotlight (Top Row like "Darwin Luiz - CEO & Founder" with Slide Switcher) -->
+            <!-- Featured Executive Spotlight (Top Row like "Darwin Luiz - CEO & Founder") -->
             <div class="meet-team-featured-card">
               <div class="meet-featured-portrait-wrap">
                 <span class="meet-floating-role-pill">${escapeHtml(exec.role)}</span>
-                <img src="${getDefaultTeamAvatarSvg(activeExecIndex)}" alt="${escapeHtml(exec.name)}" class="meet-featured-portrait-img" />
+                <img src="${getDefaultTeamAvatarSvg(0)}" alt="${escapeHtml(exec.name)}" class="meet-featured-portrait-img" />
               </div>
 
               <div class="meet-featured-details">
@@ -3247,28 +3101,13 @@
                     <span class="meet-exec-kicker">${escapeHtml(exec.badge)}</span>
                     <h3 class="meet-exec-name">${escapeHtml(exec.name)}</h3>
                   </div>
-                  <div class="meet-exec-slider-controls" title="Geser Pimpinan Eksekutif">
-                    <button type="button" class="meet-slide-arrow" id="exec-prev-btn" aria-label="Sebelumnya">
-                      <i class="fa-solid fa-chevron-left"></i>
-                    </button>
-                    <span class="meet-exec-counter">${activeExecIndex + 1} / ${featuredExecs.length}</span>
-                    <button type="button" class="meet-slide-arrow" id="exec-next-btn" aria-label="Selanjutnya">
-                      <i class="fa-solid fa-chevron-right"></i>
-                    </button>
-                  </div>
                 </div>
 
                 <p class="meet-exec-bio">${escapeHtml(exec.bio)}</p>
 
-                <div class="meet-exec-socials">
-                  <a href="https://discord.gg/rVeaKGzhyy" target="_blank" rel="noopener" title="Discord FoxSA News"><i class="fa-brands fa-discord"></i></a>
-                  <a href="#/" title="Portal Berita FoxSA"><i class="fa-solid fa-globe"></i></a>
-                  <a href="#/profile/recruitment" title="Open Recruitment"><i class="fa-solid fa-bullhorn"></i></a>
-                </div>
-
                 <div class="meet-exec-divider"></div>
 
-                <h4 class="meet-exec-exp-title">${escapeHtml(exec.name)} Experience &amp; Focus</h4>
+                <h4 class="meet-exec-exp-title">${escapeHtml(exec.name)} Experience</h4>
                 <p class="meet-exec-exp-desc">${escapeHtml(exec.experienceIntro)}</p>
 
                 <ul class="meet-exec-check-list">
@@ -3289,48 +3128,26 @@
                   <h3>Board of <span class="team-underline">Directors</span> &amp; Crew</h3>
                 </div>
                 <div class="meet-board-desc-col">
-                  <p>Geser ke kanan atau kiri menggunakan tombol panah untuk melihat jajaran lengkap Board of Directors, Operational Management, Supervisor Team, dan Operational Staff FoxSA News.</p>
-                </div>
-              </div>
-
-              <!-- Department Filter Pills + Slider Left/Right Arrows -->
-              <div class="meet-slider-toolbar">
-                <div class="meet-dept-pills">
-                  <button type="button" class="meet-dept-pill ${activeDeptFilter === 'all' ? 'active' : ''}" data-dept-filter="all">
-                    Semua Jajaran (${FOXSA_TEAM_MEMBERS.length})
-                  </button>
-                  <button type="button" class="meet-dept-pill ${activeDeptFilter === 'bod' ? 'active' : ''}" data-dept-filter="bod">
-                    Board of Directors
-                  </button>
-                  <button type="button" class="meet-dept-pill ${activeDeptFilter === 'management' ? 'active' : ''}" data-dept-filter="management">
-                    Operational Management
-                  </button>
-                  <button type="button" class="meet-dept-pill ${activeDeptFilter === 'supervisor' ? 'active' : ''}" data-dept-filter="supervisor">
-                    Supervisor Team
-                  </button>
-                  <button type="button" class="meet-dept-pill ${activeDeptFilter === 'staff' ? 'active' : ''}" data-dept-filter="staff">
-                    Operational Staff
-                  </button>
-                </div>
-
-                <div class="meet-carousel-nav-btns">
-                  <button type="button" class="meet-carousel-btn" id="team-slider-prev" aria-label="Geser Kiri">
-                    <i class="fa-solid fa-arrow-left"></i>
-                  </button>
-                  <button type="button" class="meet-carousel-btn" id="team-slider-next" aria-label="Geser Kanan">
-                    <i class="fa-solid fa-arrow-right"></i>
-                  </button>
+                  <p>Geser ke kanan atau kiri untuk melihat jajaran lengkap Board of Directors, Operational Management, Supervisor Team, dan Operational Staff FoxSA News.</p>
+                  <div class="meet-carousel-nav-btns">
+                    <button type="button" class="meet-carousel-btn" id="team-slider-prev" aria-label="Geser Kiri">
+                      <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <button type="button" class="meet-carousel-btn" id="team-slider-next" aria-label="Geser Kanan">
+                      <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
 
               <!-- Horizontal Slidable Cards Track -->
               <div class="meet-team-slider-viewport" id="team-slider-viewport">
                 <div class="meet-team-slider-track" id="team-slider-track">
-                  ${filteredMembers.map((member, idx) => `
+                  ${sliderMembers.map((member, idx) => `
                     <div class="meet-member-card" data-member-id="${escapeHtml(member.id)}">
                       <div class="meet-member-photo-box">
                         <span class="meet-floating-role-pill">${escapeHtml(member.role)}</span>
-                        <img src="${getDefaultTeamAvatarSvg(idx)}" alt="${escapeHtml(member.name)}" loading="lazy" />
+                        <img src="${getDefaultTeamAvatarSvg(idx + 1)}" alt="${escapeHtml(member.name)}" loading="lazy" />
                       </div>
                       <div class="meet-member-info-box">
                         <span class="meet-member-dept-tag">${escapeHtml(member.badge)}</span>
@@ -3341,24 +3158,6 @@
                   `).join('')}
                 </div>
               </div>
-
-              <div class="meet-slider-hint">
-                <span><i class="fa-solid fa-hand-pointer"></i> Tip: Anda dapat menggeser kartu ke kanan/kiri atau klik tombol panah untuk melihat anggota lainnya.</span>
-                <a href="#/profile/recruitment" class="meet-join-link"><i class="fa-solid fa-user-plus"></i> Ingin bergabung ke dalam jajaran tim kami? Cek Open Recruitment &rarr;</a>
-              </div>
-            </div>
-
-            <!-- Official Organization Chart Image -->
-            <div class="org-chart-image-card">
-              <div class="org-chart-header">
-                <span><i class="fa-solid fa-sitemap"></i> Bagan Struktur Organisasi Resmi FoxSA News</span>
-                <a href="assets/logo/foxsa-org-chart.jpg" target="_blank" rel="noopener" class="org-chart-zoom-btn">
-                  <i class="fa-solid fa-up-right-from-square"></i> Lihat Ukuran Penuh
-                </a>
-              </div>
-              <a href="assets/logo/foxsa-org-chart.jpg" target="_blank" rel="noopener">
-                <img src="assets/logo/foxsa-org-chart.jpg" alt="Bagan Struktur Organisasi FoxSA News" class="org-chart-img" loading="lazy" />
-              </a>
             </div>
           </div>
         </div>
@@ -3433,29 +3232,12 @@
               </div>
             </div>
           </div>
-
-          <!-- Official Brand Logos Showcase -->
-          <div class="foxsa-brand-assets-bar">
-            <div class="brand-assets-info">
-              <h4><i class="fa-solid fa-palette"></i> Identitas Visual Resmi FoxSA News</h4>
-              <p>Logo utama dan lambang divisi FoxSA News dirancang dengan perpaduan warna <strong>Dark Navy (#090C1E)</strong>, <strong>FoxSA Orange (#F08D39)</strong>, dan <strong>Broadcast Red (#BA2131)</strong> yang melambangkan ketegasan, kecepatan, serta kredibilitas berita.</p>
-            </div>
-            <div class="brand-assets-Thumbs">
-              <img src="assets/logo/foxsa-icon.jpg" alt="FoxSA Icon" title="FoxSA Main Emblem" />
-              <img src="assets/logo/foxsa-channel.jpg" alt="FoxSA Channel" title="FoxSA News Channel" />
-              <img src="assets/logo/foxsa-media.jpg" alt="FoxSA Media" title="FoxSA News Media" />
-              <img src="assets/logo/foxsa-audio.jpg" alt="FoxSA Audio" title="FoxSA Audio & Radio" />
-            </div>
-          </div>
         </div>
       `;
     }
 
     // TAB 3: ROADMAP / PROGRAM & RENCANA PENGEMBANGAN
     else if (activeTab === 'roadmap') {
-      const feedbacks = Array.isArray(state.data.profileFeedback) ? state.data.profileFeedback : [];
-      const isStaff = !!state.currentUser;
-
       bodyHtml = `
         <div class="foxsa-profile-section">
           <div class="foxsa-org-header" style="margin-bottom:22px;">
@@ -3505,57 +3287,8 @@
           <div class="foxsa-roadmap-closing">
             <i class="fa-solid fa-bullhorn"></i>
             <p>
-              <strong>Komitmen &amp; Partisipasi Publik:</strong> FoxSA News berkomitmen untuk terus berkembang sebagai media informasi yang profesional, terpercaya, dan inovatif. Apabila Anda memiliki <strong>saran, kritik, dan masukan</strong>, silakan tuliskan pada kotak tanggapan di bawah ini.
+              <strong>Komitmen Pelayanan Informasi:</strong> FoxSA News berkomitmen untuk terus berkembang sebagai media informasi independen yang profesional, terpercaya, dan inovatif bagi seluruh warga San Andreas.
             </p>
-          </div>
-
-          <!-- Interactive Public Suggestion Box -->
-          <div class="foxsa-comments-wrap" style="margin-top:24px;">
-            <div class="foxsa-comments-header">
-              <h3><i class="fa-regular fa-lightbulb" style="color:#F08D39;"></i> Kotak Saran &amp; Masukan Publik FoxSA News</h3>
-              <span class="foxsa-badge">${feedbacks.length} Masukan</span>
-            </div>
-
-            ${feedbacks.length === 0
-              ? `<div class="foxsa-no-comments">Belum ada saran atau masukan. Jadilah yang pertama memberikan saran pengembangan untuk FoxSA News!</div>`
-              : `<div class="foxsa-comment-list">
-                   ${feedbacks.map(fb => `
-                     <div class="foxsa-comment-item">
-                       <img class="foxsa-comment-avatar" src="assets/logo/foxsa-icon.jpg" alt="${escapeHtml(fb.author)}" />
-                       <div class="foxsa-comment-content">
-                         <div class="foxsa-comment-meta">
-                           <span class="foxsa-comment-author">${escapeHtml(fb.author)}</span>
-                           ${fb.role ? `<span class="foxsa-comment-role">${escapeHtml(fb.role)}</span>` : ''}
-                           <span class="foxsa-comment-date">${escapeHtml(formatDateTimeID(fb.date))}</span>
-                           ${isStaff ? `<button type="button" class="foxsa-comment-delete" data-del-feedback="${escapeHtml(fb.id)}"><i class="fa-solid fa-trash-can"></i> Hapus</button>` : ''}
-                         </div>
-                         <div class="foxsa-comment-body">${escapeHtml(fb.body)}</div>
-                       </div>
-                     </div>
-                   `).join('')}
-                 </div>`
-            }
-
-            <form class="foxsa-comment-form" id="foxsa-profile-feedback-form">
-              <h4><i class="fa-solid fa-paper-plane" style="color:#F08D39;margin-right:6px;"></i> Kirim Saran / Masukan untuk Redaksi FoxSA News</h4>
-              <div class="foxsa-form-row">
-                <div class="foxsa-form-group">
-                  <label>Nama Anda / Karakter IC *</label>
-                  <input type="text" id="fb-author-input" class="foxsa-input" value="${state.currentUser ? escapeHtml(state.currentUser.displayName) : ''}" placeholder="Contoh: Warga Los Santos" required />
-                </div>
-                <div class="foxsa-form-group">
-                  <label>Afiliasi / Instansi (Opsional)</label>
-                  <input type="text" id="fb-role-input" class="foxsa-input" value="${state.currentUser ? 'FoxSA News Staff' : ''}" placeholder="Contoh: Citizen / LSPD / LSFD / Valliant Company" />
-                </div>
-              </div>
-              <div class="foxsa-form-group">
-                <label>Saran, Kritik, atau Masukan *</label>
-                <textarea id="fb-body-input" class="foxsa-textarea" rows="3" placeholder="Tuliskan saran program atau masukan untuk pengembangan FoxSA News..." required></textarea>
-              </div>
-              <button type="submit" class="foxsa-btn">
-                <i class="fa-solid fa-paper-plane"></i> Kirim Masukan
-              </button>
-            </form>
           </div>
         </div>
       `;
@@ -3591,31 +3324,31 @@
                 <p class="rec-detail-intro">We are actively filling key positions to complete our new structural family:</p>
                 <div class="rec-dept-cards-grid">
                   <div class="rec-dept-item">
-                    <span class="rec-dept-icon"><i class="fa-solid fa-crown"></i></span>
-                    <div>
+                    <div class="rec-dept-icon"><i class="fa-solid fa-crown"></i></div>
+                    <div class="rec-dept-text">
                       <strong>Board of Directors</strong>
-                      <span>Strategic Leadership &amp; Executive Governance</span>
+                      <span class="rec-dept-desc">Strategic Leadership &amp; Executive Governance</span>
                     </div>
                   </div>
                   <div class="rec-dept-item">
-                    <span class="rec-dept-icon"><i class="fa-solid fa-briefcase"></i></span>
-                    <div>
+                    <div class="rec-dept-icon"><i class="fa-solid fa-briefcase"></i></div>
+                    <div class="rec-dept-text">
                       <strong>Operational Management</strong>
-                      <span>Division Managers, HRD, PR &amp; Event Operations</span>
+                      <span class="rec-dept-desc">Division Managers, HRD, PR &amp; Event Operations</span>
                     </div>
                   </div>
                   <div class="rec-dept-item">
-                    <span class="rec-dept-icon"><i class="fa-solid fa-user-check"></i></span>
-                    <div>
+                    <div class="rec-dept-icon"><i class="fa-solid fa-user-check"></i></div>
+                    <div class="rec-dept-text">
                       <strong>Supervisor Team</strong>
-                      <span>Editorial Supervisors, Lead Reporters &amp; Quality Control</span>
+                      <span class="rec-dept-desc">Editorial Supervisors, Lead Reporters &amp; Quality Control</span>
                     </div>
                   </div>
                   <div class="rec-dept-item">
-                    <span class="rec-dept-icon"><i class="fa-solid fa-microphone-lines"></i></span>
-                    <div>
+                    <div class="rec-dept-icon"><i class="fa-solid fa-microphone-lines"></i></div>
+                    <div class="rec-dept-text">
                       <strong>Operational Staff</strong>
-                      <span>Journalists, Presenters, Camerapersons &amp; Broadcast Crew</span>
+                      <span class="rec-dept-desc">Journalists, Presenters, Camerapersons &amp; Broadcast Crew</span>
                     </div>
                   </div>
                 </div>
@@ -3742,36 +3475,8 @@
       </div>
     `;
 
-    // Bind Interactive Controls on Overview ("Meet Our Team" Slider & Executive Switcher)
+    // Bind Horizontal Carousel Left/Right Buttons & Drag-to-Scroll on Overview
     if (activeTab === 'overview') {
-      const featuredExecs = FOXSA_TEAM_MEMBERS.filter(m => m.featured);
-      const prevExecBtn = document.getElementById('exec-prev-btn');
-      const nextExecBtn = document.getElementById('exec-next-btn');
-
-      if (prevExecBtn) {
-        prevExecBtn.addEventListener('click', () => {
-          const cur = typeof state.profileExecIndex === 'number' ? state.profileExecIndex : 0;
-          state.profileExecIndex = (cur - 1 + featuredExecs.length) % featuredExecs.length;
-          renderProfileView('overview');
-        });
-      }
-      if (nextExecBtn) {
-        nextExecBtn.addEventListener('click', () => {
-          const cur = typeof state.profileExecIndex === 'number' ? state.profileExecIndex : 0;
-          state.profileExecIndex = (cur + 1) % featuredExecs.length;
-          renderProfileView('overview');
-        });
-      }
-
-      // Department filter buttons for the slider
-      mainEl.querySelectorAll('[data-dept-filter]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          state.profileDeptFilter = btn.getAttribute('data-dept-filter') || 'all';
-          renderProfileView('overview');
-        });
-      });
-
-      // Horizontal Carousel Left/Right Buttons & Drag-to-Scroll
       const viewport = document.getElementById('team-slider-viewport');
       const slidePrev = document.getElementById('team-slider-prev');
       const slideNext = document.getElementById('team-slider-next');
@@ -3779,7 +3484,10 @@
       if (viewport && slidePrev && slideNext) {
         const getScrollStep = () => {
           const firstCard = viewport.querySelector('.meet-member-card');
-          return firstCard ? (firstCard.offsetWidth + 20) * 2 : 560;
+          if (!firstCard) return 300;
+          const isMobile = window.innerWidth <= 680;
+          const gap = isMobile ? 14 : 20;
+          return isMobile ? (firstCard.offsetWidth + gap) : (firstCard.offsetWidth + gap) * 2;
         };
 
         slidePrev.addEventListener('click', () => {
@@ -3826,44 +3534,6 @@
         });
       }
     }
-
-    // Bind Feedback Form on Roadmap tab
-    const fbForm = document.getElementById('foxsa-profile-feedback-form');
-    if (fbForm) {
-      fbForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const author = document.getElementById('fb-author-input').value.trim();
-        const role = document.getElementById('fb-role-input').value.trim();
-        const body = document.getElementById('fb-body-input').value.trim();
-        if (!author || !body) return;
-
-        if (!Array.isArray(state.data.profileFeedback)) {
-          state.data.profileFeedback = [];
-        }
-        state.data.profileFeedback.unshift({
-          id: 'fb-' + Date.now(),
-          author,
-          role,
-          date: new Date().toISOString(),
-          body
-        });
-        saveDataToLocal(true);
-        showToast('Terima kasih! Saran & masukan Anda telah diterima Redaksi FoxSA News.');
-        renderProfileView('roadmap');
-      });
-    }
-
-    mainEl.querySelectorAll('[data-del-feedback]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (!state.currentUser) return;
-        const id = btn.getAttribute('data-del-feedback');
-        if (!confirm('Hapus masukan ini?')) return;
-        state.data.profileFeedback = (state.data.profileFeedback || []).filter(f => String(f.id) !== String(id));
-        saveDataToLocal(true);
-        showToast('Masukan telah dihapus.');
-        renderProfileView('roadmap');
-      });
-    });
   }
 
   function renderMainView() {
