@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg8BFSDlMuk9oQMdt54bGJWdFRjLoRiTGicU3Tbo1g1ROZfwnbnGdEQ_XFe4LCNnan9EzICIdp6nE4pchL0FKgAfrgoxxEivmFrArKlg0yS94xAqXKLdT6pj6qOBvBqnTdBX5Hu1s0oNY64JRerTaU9hV0p6fNkH5bq0arILGTkG4mGS4Y/s200/FoxSA2.png" />
 
   <!-- Google Fonts (Karla & Poppins) + Font Awesome Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,700;1,400;1,700&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,700;1,400;1,700&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
 
@@ -22,8 +22,27 @@
 
   <div id="outer-wrapper">
 
-    <!-- ==================== HEADER ==================== -->
-    <div id="header-wrap">
+    <!-- ==================== TOP UTILITY BAR (KREETI STYLE) ==================== -->
+    <div class="foxsa-topbar">
+      <div class="container foxsa-topbar-inner">
+        <div class="foxsa-topbar-left">
+          <span class="foxsa-live-date" id="foxsa-live-date">
+            <i class="fa-regular fa-calendar"></i> San Andreas Independent News Network
+          </span>
+          <span class="foxsa-topbar-divider">|</span>
+          <a href="#/post/2526320561083681754" class="foxsa-topbar-link">About FoxSA</a>
+          <a href="#/post/4080555137325759950" class="foxsa-topbar-link">Open Recruitment</a>
+        </div>
+        <div class="foxsa-topbar-right">
+          <a href="https://discord.gg/KF6qETnr4j" target="_blank" rel="noopener" class="foxsa-topbar-social" title="Join Discord FoxSA News">
+            <i class="fa-brands fa-discord"></i> Discord Komunitas
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MAIN HEADER (ANIMENETWORK + KREETI STYLE) ==================== -->
+    <header id="header-wrap" class="foxsa-modern-header">
       <!-- Mobile Drawer Menu -->
       <div class="mobile-menu-wrap" id="mobile-menu-drawer">
         <div class="foxsa-mobile-drawer-head">
@@ -48,9 +67,12 @@
         </div>
       </div>
 
-      <div class="container row">
-        <!-- Header Logo -->
-        <div class="header-logo">
+      <div class="container foxsa-header-flex">
+        <!-- Mobile Hamburger Button -->
+        <button type="button" class="mobile-menu-toggle" aria-label="Buka Menu"></button>
+
+        <!-- Dark Brand Logo Box (AnimeNetwork Style) -->
+        <div class="header-logo foxsa-brand-box">
           <div class="main-logo section" id="main-logo" name="Header Logo">
             <div class="widget Header" id="Header1">
               <div class="header-widget">
@@ -62,20 +84,12 @@
           </div>
         </div>
 
-        <!-- Main Navigation Menu -->
-        <div class="header-menu">
+        <!-- Center Navigation Links -->
+        <div class="header-menu foxsa-nav-center">
           <div class="main-menu section" id="main-menu" name="Main Menu">
             <div class="widget LinkList show-menu" id="LinkList74">
               <ul id="main-menu-nav" role="menubar">
                 <li><a href="#/" role="menuitem">Home</a></li>
-                <li class="has-sub">
-                  <a href="javascript:void(0)" role="menuitem">Profil &amp; Info</a>
-                  <ul class="sub-menu m-sub">
-                    <li><a href="#/post/2526320561083681754" role="menuitem">About FoxSA</a></li>
-                    <li><a href="#/post/3689427128628530545" role="menuitem">Rencana &amp; Pembaruan</a></li>
-                    <li><a href="#/post/4080555137325759950" role="menuitem">Open Recruitment</a></li>
-                  </ul>
-                </li>
                 <li class="has-sub">
                   <a href="javascript:void(0)" role="menuitem">Kategori Berita</a>
                   <ul class="sub-menu m-sub" id="nav-dynamic-categories">
@@ -86,34 +100,66 @@
                     <li><a href="#/label/Los%20Santos%20Event" role="menuitem">Los Santos Event</a></li>
                   </ul>
                 </li>
-                <li><a href="https://discord.gg/KF6qETnr4j" target="_blank" rel="noopener" role="menuitem">Contact FoxSA</a></li>
-                <li>
-                  <a href="#/admin" role="menuitem" class="admin-nav-btn" id="header-staff-btn">
-                    <i class="fa-solid fa-user-shield"></i> <span class="staff-btn-label">Staff / Admin</span>
-                  </a>
+                <li class="has-sub">
+                  <a href="javascript:void(0)" role="menuitem">Profil FoxSA</a>
+                  <ul class="sub-menu m-sub">
+                    <li><a href="#/post/2526320561083681754" role="menuitem">Overview &amp; About Us</a></li>
+                    <li><a href="#/post/3689427128628530545" role="menuitem">Rencana &amp; Pembaruan</a></li>
+                    <li><a href="#/post/4080555137325759950" role="menuitem">Open Recruitment</a></li>
+                  </ul>
                 </li>
+                <li><a href="#/popular" role="menuitem">Trending</a></li>
               </ul>
             </div>
           </div>
         </div>
 
-        <!-- Search Box -->
+        <!-- Right Inline Search & Staff Portal Button (AnimeNetwork Style) -->
+        <div class="foxsa-header-right">
+          <form class="foxsa-inline-search" id="header-inline-search-form" role="search">
+            <input type="search" name="q" id="header-inline-search-input" placeholder="Cari berita..." autocomplete="off" />
+            <button type="submit" aria-label="Cari"><i class="fa-solid fa-magnifying-glass"></i></button>
+          </form>
+
+          <a href="#/admin" class="foxsa-staff-pill-btn" id="header-staff-btn">
+            <i class="fa-solid fa-user-shield"></i>
+            <span class="staff-btn-label">Staff Login</span>
+          </a>
+
+          <!-- Mobile Search Trigger -->
+          <span class="show-search" title="Cari Berita"></span>
+        </div>
+
+        <!-- Mobile Search Overlay -->
         <div id="nav-search">
           <form action="#/search" class="search-form" role="search">
             <input autocomplete="off" class="search-input" name="q" placeholder="Ketik kata kunci berita lalu tekan Enter..." type="search" value="" />
             <span class="hide-search" title="Tutup Pencarian"></span>
           </form>
         </div>
-        <span class="show-search" title="Cari Berita"></span>
-        <span class="mobile-menu-toggle" title="Buka Menu"></span>
       </div>
-    </div>
+
+      <!-- Popular Tags Strip (Kreeti Reference Style) -->
+      <div class="foxsa-popular-tags-bar">
+        <div class="container foxsa-popular-tags-inner">
+          <span class="ptags-label"><i class="fa-solid fa-bolt"></i> POPULAR TAGS:</span>
+          <div class="ptags-scroll" id="header-popular-tags-list">
+            <!-- Populated dynamically by js/app.js -->
+          </div>
+        </div>
+      </div>
+    </header>
 
     <div class="clearfix"></div>
 
+    <!-- ==================== HERO & BREAKING NEWS AREA (HOME ONLY) ==================== -->
+    <section id="foxsa-hero-showcase" class="foxsa-hero-showcase" style="display:none;">
+      <!-- Rendered dynamically by js/app.js on Home view -->
+    </section>
+
     <!-- ==================== CONTENT WRAPPER ==================== -->
     <div class="row" id="content-wrapper">
-      <div class="container">
+      <div class="container foxsa-main-grid">
 
         <!-- Main Posts / Single Article / Admin Area -->
         <div id="main-wrapper">
@@ -122,38 +168,57 @@
           </div>
         </div>
 
-        <!-- Sidebar -->
-        <div id="sidebar-wrapper">
-          <div class="sidebar common-widget section" id="sidebar1" name="Sidebar Right (A)">
-            <!-- About Us Widget -->
-            <div class="widget HTML" id="HTML11">
-              <div class="widget-title">
-                <h3 class="title">About Us</h3>
-              </div>
-              <div class="widget-content">
-                <div class="about-widget">
-                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhe3VgBXy3KlnE98f_SreDbbja_7F_wuPPg_i1o51dr2aAVeS2dZFoL0TyA13bxQ4xpQ-rz1jjXGzzWuqultZ-aD6VZ6mP0tJ0x3NrAIKQztNZuoPpt4T1_iKsQaos_ybxOZmBBPLX0xT5-qn_y1V2QbCZDv9hbhrrioV-i3cG_q9SqANyTK5Zqo3Hb1UY1/w640-h212/FoxSA%20News%20Media.jpg" alt="FoxSA News" />
-                  <p>
-                    <strong>FoxSA News</strong> — media berita independen yang mengutamakan akurasi, kredibilitas, dan integritas.
-                  </p>
-                  <a href="#/post/2526320561083681754">Baca selengkapnya &#8594;</a>
-                </div>
-              </div>
-            </div>
+        <!-- Sidebar (AnimeNetwork + Kreeti Style) -->
+        <aside id="sidebar-wrapper">
+          <div class="sidebar common-widget section" id="sidebar1" name="Sidebar Right">
 
-            <!-- Most Popular Widget -->
-            <div class="widget PopularPosts" id="PopularPosts1">
-              <div class="widget-title">
-                <h3 class="title">Most Popular</h3>
+            <!-- Tabbed Popular / Recent Widget (AnimeNetwork Style) -->
+            <div class="widget foxsa-side-card" id="PopularPosts1">
+              <div class="foxsa-side-tabs">
+                <button type="button" class="foxsa-side-tab active" data-side-tab="popular">TERPOPULER</button>
+                <button type="button" class="foxsa-side-tab" data-side-tab="latest">TERBARU</button>
               </div>
-              <div class="widget-content">
+              <div class="widget-content" id="sidebar-tabbed-posts">
                 <!-- Rendered dynamically by js/app.js -->
               </div>
             </div>
 
+            <!-- FoxSA Spotlight / About Card (AnimeNetwork "Anime of the Week" Style) -->
+            <div class="widget foxsa-side-card" id="HTML11">
+              <div class="foxsa-side-head">
+                <h3 class="title">Tentang FoxSA News</h3>
+                <a href="#/post/2526320561083681754" class="side-more-link">Selengkapnya</a>
+              </div>
+              <div class="widget-content">
+                <div class="foxsa-spotlight-card">
+                  <a href="#/post/2526320561083681754" class="spotlight-banner-link">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhe3VgBXy3KlnE98f_SreDbbja_7F_wuPPg_i1o51dr2aAVeS2dZFoL0TyA13bxQ4xpQ-rz1jjXGzzWuqultZ-aD6VZ6mP0tJ0x3NrAIKQztNZuoPpt4T1_iKsQaos_ybxOZmBBPLX0xT5-qn_y1V2QbCZDv9hbhrrioV-i3cG_q9SqANyTK5Zqo3Hb1UY1/w640-h212/FoxSA%20News%20Media.jpg" alt="FoxSA News" />
+                  </a>
+                  <div class="spotlight-info">
+                    <span class="spotlight-tag">INDEPENDENT NEWS NETWORK</span>
+                    <h4>FoxSA News Media</h4>
+                    <p>Media berita independen di San Andreas yang mengutamakan akurasi, kredibilitas, dan integritas jurnalistik.</p>
+                    <div class="spotlight-stats">
+                      <div class="stat-box">
+                        <strong id="side-stat-posts">10</strong>
+                        <span>Artikel</span>
+                      </div>
+                      <div class="stat-box">
+                        <strong id="side-stat-authors">6</strong>
+                        <span>Jurnalis</span>
+                      </div>
+                      <a href="https://discord.gg/KF6qETnr4j" target="_blank" rel="noopener" class="spotlight-follow-btn">
+                        <i class="fa-brands fa-discord"></i> + Join Discord
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Categories Dropdown & List Widget -->
-            <div class="widget Label" id="Label1">
-              <div class="widget-title">
+            <div class="widget foxsa-side-card Label" id="Label1">
+              <div class="foxsa-side-head">
                 <h3 class="title">Kategori Berita</h3>
               </div>
               <div class="widget-content list-label">
@@ -161,20 +226,10 @@
               </div>
             </div>
 
-            <!-- Tags Cloud Widget -->
-            <div class="widget Label" id="Label2">
-              <div class="widget-title">
-                <h3 class="title">Tags Cepat</h3>
-              </div>
-              <div class="widget-content cloud-label">
-                <!-- Rendered dynamically by js/app.js -->
-              </div>
-            </div>
-
             <!-- Blog Archive Widget -->
-            <div class="widget BlogArchive" id="BlogArchive1">
-              <div class="widget-title">
-                <h3 class="title">Article Archive</h3>
+            <div class="widget foxsa-side-card BlogArchive" id="BlogArchive1">
+              <div class="foxsa-side-head">
+                <h3 class="title">Arsip Bulan</h3>
               </div>
               <div class="widget-content">
                 <div id="ArchiveList">
@@ -182,93 +237,52 @@
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="sidebar common-widget no-items section" id="sidebar2" name="Sidebar Right (B)"></div>
-        </div>
+          </div>
+        </aside>
 
       </div>
     </div>
 
     <div class="clearfix"></div>
 
-    <!-- ==================== FOOTER ==================== -->
-    <div id="footer-wrapper">
-      <div class="container row">
-        <div class="footer-widgets-wrap">
-          <!-- Section Left: About FoxSA News -->
-          <div class="footer common-widget section" id="footer-sec1" name="Section (Left)">
-            <div class="widget HTML" id="HTML13">
-              <div class="widget-title">
-                <h3 class="title">About Us</h3>
-              </div>
-              <div class="widget-content">
-                <div class="about-widget">
-                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhe3VgBXy3KlnE98f_SreDbbja_7F_wuPPg_i1o51dr2aAVeS2dZFoL0TyA13bxQ4xpQ-rz1jjXGzzWuqultZ-aD6VZ6mP0tJ0x3NrAIKQztNZuoPpt4T1_iKsQaos_ybxOZmBBPLX0xT5-qn_y1V2QbCZDv9hbhrrioV-i3cG_q9SqANyTK5Zqo3Hb1UY1/w640-h212/FoxSA%20News%20Media.jpg" alt="FoxSA News" />
-                  <p>
-                    <strong>FoxSA News</strong> — media berita independen yang mengutamakan akurasi, kredibilitas, dan integritas di San Andreas.
-                  </p>
-                  <a href="#/post/2526320561083681754">Baca selengkapnya &#8594;</a>
-                </div>
-              </div>
+    <!-- ==================== MODERN DARK FOOTER (ANIMENETWORK STYLE) ==================== -->
+    <footer id="footer-wrapper" class="foxsa-dark-footer">
+      <div class="container">
+        <div class="foxsa-footer-main">
+          <div class="foxsa-footer-brand">
+            <a href="#/" class="footer-brand-logo">
+              <img alt="FoxSA News" src="https://blogger.googleusercontent.com/img/a/AVvXsEhv_ADWAS1S4vv_z_NoU2h_5vhIQ_SRh4OsG_6OT3fOsq8wRSvJbJk6WGn6W_a35WvDzWIz-r82OA9KFTVKl7XPnaHgDLI6w9nvBDnpZqLsZh6LOjkqepU7Fr3gQpOndO3J4xIwTU0zzqRu2sLdHnyWMdCnHDbu3ZdN6CiDEPTzD0xCboDe_PhNqtRDXL-_=s1600" />
+            </a>
+            <p class="footer-brand-desc">
+              FoxSA News — Independent News Network. Menyajikan liputan berita terkini, politik, kriminal, motorsport, dan peristiwa publik di seluruh San Andreas.
+            </p>
+            <div class="footer-copy-text">
+              &#169; 2026 <a href="#/">FoxSA News</a>. All Rights Reserved.
             </div>
           </div>
 
-          <!-- Section Center: Follow Us Widget -->
-          <div class="footer common-widget section" id="footer-sec2" name="Section (Center)">
-            <div class="widget HTML" id="HTML2">
-              <div class="widget-title">
-                <h3 class="title">Follow Us</h3>
-              </div>
-              <div class="widget-content">
-                <p style="font-size:13px;color:#555;line-height:1.6;margin:0 0 12px;">
-                  Bergabunglah bersama komunitas pembaca dan tim redaksi FoxSA News untuk informasi terkini seputar San Andreas:
-                </p>
-                <a href="https://discord.gg/KF6qETnr4j" target="_blank" rel="noopener" style="text-decoration:none; color:#F08D39; font-weight:600; display:inline-flex; align-items:center; gap:8px;">
-                  <img src="https://cdn-icons-png.flaticon.com/512/2111/2111370.png" width="20" alt="Discord" />
-                  <span>Join our Discord</span>
-                </a>
-              </div>
-            </div>
+          <div class="foxsa-footer-links">
+            <h4>Navigasi Cepat</h4>
+            <ul>
+              <li><a href="#/">Beranda Utama</a></li>
+              <li><a href="#/popular">Berita Terpopuler</a></li>
+              <li><a href="#/post/2526320561083681754">Tentang FoxSA News</a></li>
+              <li><a href="#/post/3689427128628530545">Rencana &amp; Pembaruan</a></li>
+              <li><a href="#/post/4080555137325759950">Open Recruitment</a></li>
+              <li><a href="#/admin">Portal Staff / Admin</a></li>
+            </ul>
           </div>
 
-          <!-- Section Right: Footer Popular Posts -->
-          <div class="footer common-widget section" id="footer-sec3" name="Section (Right)">
-            <div class="widget PopularPosts" id="PopularPosts2">
-              <div class="widget-title">
-                <h3 class="title">Popular Posts</h3>
-              </div>
-              <div class="widget-content">
-                <!-- Rendered dynamically by js/app.js -->
-              </div>
+          <div class="foxsa-footer-popular" id="PopularPosts2">
+            <h4>Berita Populer</h4>
+            <div class="widget-content">
+              <!-- Rendered dynamically by js/app.js -->
             </div>
           </div>
         </div>
       </div>
-
-      <div class="clearfix"></div>
-
-      <!-- Sub-Footer -->
-      <div id="sub-footer-wrapper">
-        <div class="container row">
-          <div class="menu-footer section" id="menu-footer" name="Footer Menu">
-            <div class="widget LinkList" id="LinkList76">
-              <div class="widget-content">
-                <ul>
-                  <li><a href="#/">Home</a></li>
-                  <li><a href="#/post/2526320561083681754">About</a></li>
-                  <li><a href="https://discord.gg/KF6qETnr4j" target="_blank" rel="noopener">Contact Us</a></li>
-                  <li><a href="#/admin">Staff Login</a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div class="copyright-area">
-            &#169; 2026 <a href="#/">FoxSA News</a>. Independent News Network. All Rights Reserved.
-          </div>
-        </div>
-      </div>
-    </div>
+    </footer>
 
   </div>
 
