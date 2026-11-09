@@ -18,7 +18,72 @@
   const AUTH_SESSION_KEY = 'foxsa_auth_session_v1';
   const VIEW_MODE_KEY = 'foxsa_news_view_mode_v1';
   const GITHUB_CONFIG_KEY = 'foxsa_github_sync_config';
-  const DEFAULT_AVATAR = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 440" width="400" height="440"><defs><linearGradient id="foxDefGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1e293b"/><stop offset="100%" stop-color="#090C1E"/></linearGradient></defs><rect width="400" height="440" fill="url(#foxDefGrad)"/><circle cx="200" cy="205" r="145" fill="#ffffff" fill-opacity="0.08"/><path d="M62 440 C66 334 118 294 200 294 C282 294 334 334 338 440 Z" fill="#172033"/><polygon points="162,294 238,294 216,440 184,440" fill="#ffffff"/><polygon points="192,306 208,306 214,420 200,438 186,420" fill="#F08D39"/><polygon points="189,294 211,294 207,312 193,312" fill="#F08D39"/><polygon points="160,294 192,388 142,440 116,320" fill="#090C1E"/><polygon points="240,294 208,388 258,440 284,320" fill="#090C1E"/><rect x="178" y="244" width="44" height="58" rx="16" fill="#f1c29b"/><rect x="146" y="112" width="108" height="146" rx="52" fill="#f1c29b"/><path d="M144 168 C140 118 166 94 200 94 C236 94 260 118 256 168 C248 138 230 126 200 126 C170 126 152 138 144 168 Z" fill="#27303f"/><circle cx="176" cy="184" r="5" fill="#1e293b"/><circle cx="224" cy="184" r="5" fill="#1e293b"/><path d="M184 222 Q200 232 216 222" stroke="#b87d56" stroke-width="3.5" stroke-linecap="round" fill="none"/></svg>`);
+  function getRandomExecutiveAvatarSvg(seed = 0) {
+    const palettes = [
+      // 0: Classic Executive Navy Suit & Orange Tie (Signature FoxSA)
+      { bg1: '#0f172a', bg2: '#1e293b', suit: '#1e293b', lapel: '#0f172a', tie: '#F08D39', tieKnot: '#ea580c', skin: '#f1c29b', hair: '#1e293b', glasses: false, pocketSquare: '#F08D39' },
+      // 1: Charcoal Black Executive Suit & Royal Sapphire Tie
+      { bg1: '#18181b', bg2: '#27272a', suit: '#18181b', lapel: '#09090b', tie: '#2563eb', tieKnot: '#1d4ed8', skin: '#f3c6a2', hair: '#3f3f46', glasses: false, pocketSquare: '#38bdf8' },
+      // 2: Distinguished Midnight Blue & Crimson Tie with Glasses
+      { bg1: '#0c192c', bg2: '#162b48', suit: '#0f233d', lapel: '#081424', tie: '#dc2626', tieKnot: '#b91c1c', skin: '#ecc098', hair: '#1e293b', glasses: true, pocketSquare: '#ffffff' },
+      // 3: Deep Emerald Green Suit & Warm Champagne Gold Tie
+      { bg1: '#06281e', bg2: '#0d3d2e', suit: '#0b3528', lapel: '#051f17', tie: '#fbbf24', tieKnot: '#f59e0b', skin: '#f2c5a0', hair: '#292524', glasses: false, pocketSquare: '#fbbf24' },
+      // 4: Royal Indigo Suit & Jade Green Silk Tie
+      { bg1: '#1e1b4b', bg2: '#312e81', suit: '#232057', lapel: '#141238', tie: '#10b981', tieKnot: '#059669', skin: '#ebb990', hair: '#1c1917', glasses: false, pocketSquare: '#34d399' },
+      // 5: Rich Burgundy Suit & Silver Tie with Executive Glasses
+      { bg1: '#2e0b16', bg2: '#4a1525', suit: '#3d101e', lapel: '#240811', tie: '#cbd5e1', tieKnot: '#94a3b8', skin: '#f4cbb0', hair: '#44403c', glasses: true, pocketSquare: '#cbd5e1' },
+      // 6: Slate Grey Double-Breasted Suit & Violet Purple Tie
+      { bg1: '#1e293b', bg2: '#334155', suit: '#273444', lapel: '#18202c', tie: '#8b5cf6', tieKnot: '#7c3aed', skin: '#f0c4a0', hair: '#171717', glasses: false, pocketSquare: '#a78bfa' },
+      // 7: Modern Jet Black Suit & Amber Flame Tie
+      { bg1: '#0a0a0c', bg2: '#1c1d22', suit: '#121318', lapel: '#070709', tie: '#f59e0b', tieKnot: '#d97706', skin: '#e8b894', hair: '#262626', glasses: false, pocketSquare: '#fbbf24' },
+      // 8: Warm Mocha Brown Suit & Cyan Blue Silk Tie with Glasses
+      { bg1: '#261914', bg2: '#3d2b22', suit: '#33231c', lapel: '#1f130e', tie: '#06b6d4', tieKnot: '#0891b2', skin: '#f3c7a5', hair: '#1c1917', glasses: true, pocketSquare: '#67e8f9' },
+      // 9: Premium Steel Navy Suit & Rose Pink Executive Tie
+      { bg1: '#0f172a', bg2: '#1e3a5f', suit: '#162842', lapel: '#0d1829', tie: '#f43f5e', tieKnot: '#e11d48', skin: '#f1c29b', hair: '#334155', glasses: false, pocketSquare: '#fda4af' }
+    ];
+    const idx = Math.abs(seed) % palettes.length;
+    const p = palettes[idx];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 440" width="400" height="440">
+      <defs>
+        <linearGradient id="execGrad${idx}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${p.bg1}"/>
+          <stop offset="100%" stop-color="${p.bg2}"/>
+        </linearGradient>
+      </defs>
+      <rect width="400" height="440" fill="url(#execGrad${idx})"/>
+      <circle cx="200" cy="200" r="140" fill="#ffffff" opacity="0.05"/>
+      <path d="M56 440 C58 332 114 292 200 292 C286 292 342 332 344 440 Z" fill="${p.suit}" stroke="#334155" stroke-width="1.5"/>
+      <polygon points="156,292 244,292 222,440 178,440" fill="#ffffff"/>
+      <polygon points="191,308 209,308 215,424 200,438 185,424" fill="${p.tie}"/>
+      <polygon points="189,294 211,294 207,314 193,314" fill="${p.tieKnot}"/>
+      <polygon points="156,292 194,396 150,440 116,330" fill="${p.lapel}"/>
+      <polygon points="244,292 206,396 250,440 284,330" fill="${p.lapel}"/>
+      ${p.pocketSquare ? `<polygon points="254,374 278,366 272,382 250,382" fill="${p.pocketSquare}"/>` : ''}
+      <polygon points="162,286 196,312 174,326 152,298" fill="#f8fafc"/>
+      <polygon points="238,286 204,312 226,326 248,298" fill="#f8fafc"/>
+      <rect x="176" y="242" width="48" height="60" rx="18" fill="${p.skin}"/>
+      <path d="M176 266 Q200 284 224 266 L224 288 L176 288 Z" fill="#d9a782" opacity="0.45"/>
+      <circle cx="136" cy="186" r="14" fill="${p.skin}"/>
+      <circle cx="264" cy="186" r="14" fill="${p.skin}"/>
+      <rect x="142" y="106" width="116" height="152" rx="56" fill="${p.skin}"/>
+      <path d="M140 162 C136 112 164 88 202 88 C242 88 266 114 260 162 C252 132 232 120 200 120 C168 120 148 134 140 162 Z" fill="${p.hair}"/>
+      <path d="M164 166 Q177 160 188 165" stroke="${p.hair}" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <path d="M212 165 Q223 160 236 166" stroke="${p.hair}" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <circle cx="176" cy="180" r="5.5" fill="#0f172a"/>
+      <circle cx="224" cy="180" r="5.5" fill="#0f172a"/>
+      ${p.glasses ? `
+        <rect x="158" y="168" width="36" height="24" rx="6" fill="none" stroke="#fbbf24" stroke-width="2.5"/>
+        <rect x="206" y="168" width="36" height="24" rx="6" fill="none" stroke="#fbbf24" stroke-width="2.5"/>
+        <line x1="194" y1="178" x2="206" y2="178" stroke="#fbbf24" stroke-width="2.5"/>
+      ` : ''}
+      <path d="M200 182 L196 204 L205 206" stroke="#c9956e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M182 222 Q200 234 218 222" stroke="#b87d56" stroke-width="3.8" stroke-linecap="round" fill="none"/>
+      <circle cx="246" cy="354" r="6" fill="#F08D39"/>
+    </svg>`;
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
+
+  const DEFAULT_AVATAR = getRandomExecutiveAvatarSvg(0);
 
   const DAYS_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const MONTHS_ID = [
@@ -318,6 +383,44 @@
       !String(acc.displayName || '').toLowerCase().includes('ligma')
     );
     delete cloned.profileFeedback;
+
+    // Initialize Admin Chats if not present
+    if (!Array.isArray(cloned.adminChats) || cloned.adminChats.length === 0) {
+      cloned.adminChats = [
+        {
+          id: 'chat_seed_1',
+          senderUsername: 'arthur',
+          senderName: 'Arthur Redfields',
+          senderRole: 'Chief Executive Officer',
+          senderAvatar: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEijelpjGHfXOoTKfqD1mokSIESF0WySrKkFx3EV9rhrMxaQHJmPSkWe7Lj9QbiFJQbVx7z2os7vSHs3TVJFg1nzGX2MTzdqBO1eO-gppMt99EfwrEBOG9BqW1ZrbkNcNNqd-k9pS8vHOItd_EF7yVe_MfaTvhN2EvXpcWmK7ZDpX94RY14/s200/In%20Edward%20Snowden%E2%80%99s%20New%20Memoir,%20the%20Disclosures%20This%20Time%20Are%20Personal%20(Published%202019).jpg',
+          message: 'Selamat bertugas kepada seluruh jajaran redaksi FoxSA News! Gunakan saluran chat ini untuk koordinasi penugasan berita harian dan liputan peristiwa aktual di San Andreas.',
+          timestamp: new Date(Date.now() - 3600000 * 6).toISOString()
+        },
+        {
+          id: 'chat_seed_2',
+          senderUsername: 'reinhardt',
+          senderName: 'Reinhardt Harrison',
+          senderRole: 'Commissioner',
+          senderAvatar: getCommissionerAvatarSvg(),
+          message: 'Selalu jaga independensi media, verifikasi keakuratan fakta di lapangan, dan junjung tinggi kode etik jurnalistik.',
+          timestamp: new Date(Date.now() - 3600000 * 3).toISOString()
+        },
+        {
+          id: 'chat_seed_3',
+          senderUsername: 'steven',
+          senderName: 'Steven Deluca',
+          senderRole: 'Journalism Intern',
+          senderAvatar: getRandomExecutiveAvatarSvg(3),
+          message: 'Siap Pak! Informasi pemantauan wilayah dan situasi terkini di Los Santos sedang kami himpun.',
+          timestamp: new Date(Date.now() - 3600000 * 1).toISOString()
+        }
+      ];
+    }
+
+    // Initialize Former Staff if not present
+    if (!Array.isArray(cloned.formerStaff) || cloned.formerStaff.length === 0) {
+      cloned.formerStaff = JSON.parse(JSON.stringify(FOXSA_FORMER_STAFF));
+    }
 
     // Clear out any old Blogger grey silhouettes from localStorage cache
     if (cloned.authors) {
@@ -1691,6 +1794,18 @@
           </div>
 
           <form id="foxsa-staff-register-form" class="foxsa-login-form">
+            <!-- Random Avatar Picker for Registration -->
+            <div class="foxsa-reg-avatar-card" style="display:flex;align-items:center;gap:14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+              <img id="reg-avatar-preview" src="${currentRegAvatar}" alt="Foto Profil" style="width:58px;height:58px;border-radius:50%;object-fit:cover;border:2px solid #F08D39;box-shadow:0 2px 8px rgba(0,0,0,0.08);background:#fff;" />
+              <div style="flex:1;">
+                <div style="font-weight:600;font-size:12.5px;color:#0f172a;margin-bottom:2px;">Foto Profil Jurnalis (Default Executive)</div>
+                <div style="font-size:11.5px;color:#64748b;margin-bottom:6px;">Karakter eksekutif acak disiapkan otomatis untuk akun Anda.</div>
+                <button type="button" class="foxsa-editor-btn" id="reg-btn-random-avatar" style="font-size:11.5px;padding:4px 10px;color:#ea580c;border-color:#fdba74;background:#fff;">
+                  <i class="fa-solid fa-dice"></i> Acak Foto Karakter
+                </button>
+              </div>
+            </div>
+
             <div class="foxsa-form-group">
               <label for="reg-username">Username Login (Tanpa spasi) *</label>
               <div class="foxsa-input-icon-wrap">
@@ -1785,6 +1900,15 @@
     // Toggle Password in Register
     const regPassInp = document.getElementById('reg-password');
     const regToggleBtn = document.getElementById('reg-toggle-pwd');
+    const regDiceBtn = document.getElementById('reg-btn-random-avatar');
+    if (regDiceBtn) {
+      regDiceBtn.addEventListener('click', () => {
+        currentRegAvatar = getRandomExecutiveAvatarSvg(Math.floor(Math.random() * 10));
+        const pImg = document.getElementById('reg-avatar-preview');
+        if (pImg) pImg.src = currentRegAvatar;
+        showToast('Karakter foto profil diacak!');
+      });
+    }
     if (regToggleBtn && regPassInp) {
       regToggleBtn.addEventListener('click', () => {
         const isPwd = regPassInp.type === 'password';
@@ -1896,7 +2020,7 @@
           status: 'pending',
           isAdmin: false,
           createdAt: new Date().toISOString(),
-          avatar: DEFAULT_AVATAR
+          avatar: currentRegAvatar || getRandomExecutiveAvatarSvg(Math.floor(Math.random() * 10))
         };
 
         state.data.staffAccounts.push(newAccount);
@@ -2419,6 +2543,11 @@
                       <button type="button" class="foxsa-editor-btn" style="color:#7c3aed;border-color:#ddd6fe;" data-edit-staff-avatar="${escapeHtml(acc.username)}" title="Ubah Foto Profil Staff">
                         <i class="fa-solid fa-image"></i> Foto
                       </button>
+                      ${acc.username !== 'admin' ? `
+                        <button type="button" class="foxsa-editor-btn" style="color:#d97706;border-color:#fde68a;" data-make-former-staff="${escapeHtml(acc.username)}" title="Purnatugaskan ke Former Staff / Alumni">
+                          <i class="fa-solid fa-graduation-cap"></i> Jadikan Former
+                        </button>
+                      ` : ''}
                     ` : ''}
                     <button type="button" class="foxsa-editor-btn" data-change-pwd="${escapeHtml(acc.username)}">
                       <i class="fa-solid fa-key"></i> Ubah Password
@@ -2433,6 +2562,67 @@
               `).join('')}
             </tbody>
           </table>
+        </div>
+
+        <!-- FORMER STAFF & ALUMNI MANAGEMENT SECTION -->
+        <div class="foxsa-former-staff-mgmt-box" style="margin-top:28px;margin-bottom:28px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+            <div>
+              <h4 style="margin:0;font-size:15px;color:#0f172a;display:flex;align-items:center;gap:8px;">
+                <i class="fa-solid fa-award" style="color:#d97706;"></i>
+                Daftar Anggota Purna Tugas &amp; Former Staff FoxSA (${(state.data.formerStaff || []).length})
+              </h4>
+              <p style="margin:4px 0 0;font-size:12px;color:#64748b;">
+                Jajaran alumni yang tampil di galeri publik <strong>#/profile/former-staff</strong>. High Staff dapat mengaktifkan kembali staf jika bergabung kembali.
+              </p>
+            </div>
+            ${isUserHighStaff ? `
+              <button type="button" class="foxsa-btn foxsa-btn-outline" id="btn-add-former-manual" style="padding:6px 14px;font-size:12px;">
+                <i class="fa-solid fa-user-plus"></i> + Tambah Alumni Manual
+              </button>
+            ` : ''}
+          </div>
+
+          <div class="foxsa-table-responsive">
+            <table class="foxsa-admin-table" style="background:#ffffff;">
+              <thead>
+                <tr>
+                  <th>Nama Alumni</th>
+                  <th>Jabatan Terakhir</th>
+                  <th>Kategori</th>
+                  <th>Masa Bakti</th>
+                  <th>Catatan &amp; Warisan</th>
+                  ${isUserHighStaff ? '<th>Aksi High Staff</th>' : ''}
+                </tr>
+              </thead>
+              <tbody>
+                ${(state.data.formerStaff || []).map(f => `
+                  <tr>
+                    <td>
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <img src="${escapeHtml(f.avatar || DEFAULT_AVATAR)}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid #cbd5e1;" onerror="this.src='${DEFAULT_AVATAR}'" />
+                        <strong>${escapeHtml(f.name)}</strong>
+                      </div>
+                    </td>
+                    <td><span class="foxsa-role-badge" style="background:#fef3c7;color:#b45309;border:1px solid #fde68a;">${escapeHtml(f.formerRole || f.badge || 'Former Staff')}</span></td>
+                    <td><span style="font-size:12px;text-transform:capitalize;color:#475569;">${escapeHtml(f.category || 'staff')}</span></td>
+                    <td style="font-size:12px;color:#64748b;white-space:nowrap;">${escapeHtml(f.period || '2025 – 2026')}</td>
+                    <td style="font-size:12px;color:#64748b;max-width:240px;"><em>"${escapeHtml(f.legacy || f.bio || '—')}"</em></td>
+                    ${isUserHighStaff ? `
+                      <td style="white-space:nowrap;">
+                        <button type="button" class="foxsa-editor-btn" style="color:#16a34a;border-color:#bbf7d0;" data-reactivate-former="${escapeHtml(f.id)}" title="Aktifkan Kembali ke Staf Aktif">
+                          <i class="fa-solid fa-arrow-rotate-left"></i> Aktifkan
+                        </button>
+                        <button type="button" class="foxsa-editor-btn" style="color:#dc2626;border-color:#fecaca;" data-delete-former="${escapeHtml(f.id)}" title="Hapus dari Hall of Fame">
+                          <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                      </td>
+                    ` : ''}
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         ${isUserHighStaff ? `
@@ -2729,6 +2919,9 @@
           <button type="button" class="foxsa-admin-tab ${state.adminTab === 'comments' ? 'active' : ''}" data-admin-tab="comments">
             <i class="fa-regular fa-comments"></i> Komentar (${totalComments})
           </button>
+          <button type="button" class="foxsa-admin-tab ${state.adminTab === 'chat' ? 'active' : ''}" data-admin-tab="chat">
+            <i class="fa-solid fa-comments"></i> Chat Redaksi ${(state.data.adminChats || []).length > 0 ? `<span class="foxsa-tab-badge" style="background:#F08D39;color:#fff;">${(state.data.adminChats || []).length}</span>` : ''}
+          </button>
           <button type="button" class="foxsa-admin-tab ${state.adminTab === 'profile' ? 'active' : ''}" data-admin-tab="profile">
             <i class="fa-solid fa-user-pen"></i> Profil Saya
           </button>
@@ -2818,6 +3011,216 @@
     }
   }
 
+
+  // =========================================================================
+  // MODALS FOR FORMER STAFF ASSIGNMENT (HIGH STAFF)
+  // =========================================================================
+  function openMakeFormerModal(acc) {
+    const existing = document.getElementById('foxsa-former-modal');
+    if (existing) existing.remove();
+
+    const defFormerRole = `Former ${acc.role || 'Staff'}`;
+    const defPeriod = '2025 – 2026';
+    const cleanRole = (acc.role || '').toLowerCase();
+    let defCategory = 'staff';
+    if (cleanRole.includes('chief') || cleanRole.includes('commissioner') || cleanRole.includes('director')) defCategory = 'leadership';
+    else if (cleanRole.includes('manager') || cleanRole.includes('producer') || cleanRole.includes('editor')) defCategory = 'management';
+
+    const modalHtml = `
+      <div id="foxsa-former-modal" class="foxsa-role-modal" style="display:flex;">
+        <div class="foxsa-role-modal-overlay" id="former-modal-overlay"></div>
+        <div class="foxsa-role-modal-box" style="max-width:520px;text-align:left;">
+          <div class="foxsa-role-modal-header" style="border-bottom:1px solid #e2e8f0;padding-bottom:12px;margin-bottom:14px;">
+            <h3 style="margin:0;font-size:16px;color:#090C1E;display:flex;align-items:center;gap:8px;">
+              <i class="fa-solid fa-graduation-cap" style="color:#d97706;"></i>
+              Purnatugaskan Staf: ${escapeHtml(acc.displayName)}
+            </h3>
+            <button type="button" class="foxsa-role-modal-close" id="former-modal-close-btn">&times;</button>
+          </div>
+          <form id="former-staff-submit-form">
+            <p style="font-size:12.5px;color:#64748b;margin:0 0 14px;line-height:1.5;">
+              Staf ini akan dipindahkan dari <strong>Staf Aktif</strong> ke <strong>Hall of Fame Former Staff &amp; Alumni</strong>. Posisi resminya di struktur organisasi FoxSA News akan menjadi <strong>[VACANT]</strong>.
+            </p>
+            <div class="foxsa-form-group" style="margin-bottom:12px;">
+              <label style="font-size:12px;font-weight:600;">Gelar / Jabatan Terakhir Purna Tugas *</label>
+              <input type="text" id="former-inp-role" class="foxsa-input" value="${escapeHtml(defFormerRole)}" required />
+            </div>
+            <div class="foxsa-form-row" style="margin-bottom:12px;">
+              <div class="foxsa-form-group">
+                <label style="font-size:12px;font-weight:600;">Masa Bakti / Periode *</label>
+                <input type="text" id="former-inp-period" class="foxsa-input" value="${escapeHtml(defPeriod)}" required />
+              </div>
+              <div class="foxsa-form-group">
+                <label style="font-size:12px;font-weight:600;">Kategori Galeri *</label>
+                <select id="former-inp-cat" class="foxsa-select">
+                  <option value="leadership" ${defCategory === 'leadership' ? 'selected' : ''}>Dewan Eksekutif (Leadership)</option>
+                  <option value="management" ${defCategory === 'management' ? 'selected' : ''}>Manajemen &amp; Supervisor</option>
+                  <option value="staff" ${defCategory === 'staff' ? 'selected' : ''}>Staf Lapangan &amp; Reporter</option>
+                </select>
+              </div>
+            </div>
+            <div class="foxsa-form-group" style="margin-bottom:18px;">
+              <label style="font-size:12px;font-weight:600;">Pesan Kesan / Warisan (Legacy Quote) *</label>
+              <textarea id="former-inp-legacy" class="foxsa-input" rows="3" required>Dedikasi dan kontribusi jurnalistik luar biasa dalam pembangunan divisi redaksi FoxSA News Agency.</textarea>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;">
+              <button type="button" class="foxsa-btn foxsa-btn-outline" id="former-modal-cancel-btn">Batal</button>
+              <button type="submit" class="foxsa-btn" style="background:#d97706;border-color:#d97706;">
+                <i class="fa-solid fa-check"></i> Simpan ke Former Staff
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modalEl = document.getElementById('foxsa-former-modal');
+    const closeBtn = document.getElementById('former-modal-close-btn');
+    const cancelBtn = document.getElementById('former-modal-cancel-btn');
+    const overlay = document.getElementById('former-modal-overlay');
+    const form = document.getElementById('former-staff-submit-form');
+
+    const closeModal = () => { if (modalEl) modalEl.remove(); };
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    if (overlay) overlay.addEventListener('click', closeModal);
+
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const roleVal = document.getElementById('former-inp-role').value.trim();
+        const periodVal = document.getElementById('former-inp-period').value.trim();
+        const catVal = document.getElementById('former-inp-cat').value;
+        const legacyVal = document.getElementById('former-inp-legacy').value.trim();
+
+        acc.isFormer = true;
+        acc.formerRole = roleVal;
+        acc.formerPeriod = periodVal;
+        acc.role = 'Former Staff';
+
+        const newFormerEntry = {
+          id: acc.username,
+          name: acc.displayName,
+          formerRole: roleVal,
+          category: catVal,
+          badge: roleVal.replace(/^Former\s*/i, '') || 'Alumni FoxSA',
+          period: periodVal,
+          avatar: acc.avatar || getRandomExecutiveAvatarSvg(2),
+          bio: acc.bio || `Purna tugas dari jabatan ${roleVal} FoxSA News Agency.`,
+          legacy: legacyVal,
+          authorName: acc.displayName
+        };
+
+        if (!Array.isArray(state.data.formerStaff)) state.data.formerStaff = [];
+        state.data.formerStaff = state.data.formerStaff.filter(f => f.id !== acc.username);
+        state.data.formerStaff.unshift(newFormerEntry);
+
+        saveDataToLocal(true);
+        closeModal();
+        renderAdminView();
+        showToast(`${acc.displayName} resmi purna tugas dan tercatat di Hall of Fame Former Staff!`);
+      });
+    }
+  }
+
+  function openAddFormerManualModal() {
+    const existing = document.getElementById('foxsa-former-modal');
+    if (existing) existing.remove();
+
+    const modalHtml = `
+      <div id="foxsa-former-modal" class="foxsa-role-modal" style="display:flex;">
+        <div class="foxsa-role-modal-overlay" id="former-modal-overlay"></div>
+        <div class="foxsa-role-modal-box" style="max-width:520px;text-align:left;">
+          <div class="foxsa-role-modal-header" style="border-bottom:1px solid #e2e8f0;padding-bottom:12px;margin-bottom:14px;">
+            <h3 style="margin:0;font-size:16px;color:#090C1E;display:flex;align-items:center;gap:8px;">
+              <i class="fa-solid fa-user-plus" style="color:#d97706;"></i>
+              Tambah Alumni / Former Staff Manual
+            </h3>
+            <button type="button" class="foxsa-role-modal-close" id="former-modal-close-btn">&times;</button>
+          </div>
+          <form id="former-manual-submit-form">
+            <div class="foxsa-form-group" style="margin-bottom:12px;">
+              <label style="font-size:12px;font-weight:600;">Nama Lengkap Tokoh Alumni *</label>
+              <input type="text" id="manual-former-name" class="foxsa-input" placeholder="Contoh: Jessica Roberts" required />
+            </div>
+            <div class="foxsa-form-group" style="margin-bottom:12px;">
+              <label style="font-size:12px;font-weight:600;">Jabatan / Gelar Kehormatan *</label>
+              <input type="text" id="manual-former-role" class="foxsa-input" placeholder="Contoh: Former Senior Anchor" required />
+            </div>
+            <div class="foxsa-form-row" style="margin-bottom:12px;">
+              <div class="foxsa-form-group">
+                <label style="font-size:12px;font-weight:600;">Masa Bakti / Periode *</label>
+                <input type="text" id="manual-former-period" class="foxsa-input" value="2025 – 2026" required />
+              </div>
+              <div class="foxsa-form-group">
+                <label style="font-size:12px;font-weight:600;">Kategori Galeri *</label>
+                <select id="manual-former-cat" class="foxsa-select">
+                  <option value="leadership">Dewan Eksekutif (Leadership)</option>
+                  <option value="management">Manajemen &amp; Supervisor</option>
+                  <option value="staff" selected>Staf Lapangan &amp; Reporter</option>
+                </select>
+              </div>
+            </div>
+            <div class="foxsa-form-group" style="margin-bottom:18px;">
+              <label style="font-size:12px;font-weight:600;">Warisan / Catatan Pengabdian *</label>
+              <textarea id="manual-former-legacy" class="foxsa-input" rows="2" placeholder="Catatan kontribusi jurnalistik di FoxSA News..." required></textarea>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;">
+              <button type="button" class="foxsa-btn foxsa-btn-outline" id="former-modal-cancel-btn">Batal</button>
+              <button type="submit" class="foxsa-btn" style="background:#d97706;border-color:#d97706;">
+                <i class="fa-solid fa-plus"></i> Tambah ke Hall of Fame
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modalEl = document.getElementById('foxsa-former-modal');
+    const closeBtn = document.getElementById('former-modal-close-btn');
+    const cancelBtn = document.getElementById('former-modal-cancel-btn');
+    const overlay = document.getElementById('former-modal-overlay');
+    const form = document.getElementById('former-manual-submit-form');
+
+    const closeModal = () => { if (modalEl) modalEl.remove(); };
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    if (overlay) overlay.addEventListener('click', closeModal);
+
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nameVal = document.getElementById('manual-former-name').value.trim();
+        const roleVal = document.getElementById('manual-former-role').value.trim();
+        const periodVal = document.getElementById('manual-former-period').value.trim();
+        const catVal = document.getElementById('manual-former-cat').value;
+        const legacyVal = document.getElementById('manual-former-legacy').value.trim();
+
+        const newEntry = {
+          id: nameVal.toLowerCase().replace(/\s+/g, '') + '_' + Date.now().toString(36),
+          name: nameVal,
+          formerRole: roleVal,
+          category: catVal,
+          badge: roleVal.replace(/^Former\s*/i, '') || 'Alumni FoxSA',
+          period: periodVal,
+          avatar: getRandomExecutiveAvatarSvg(Math.floor(Math.random() * 10)),
+          bio: `Alumni kehormatan FoxSA News Agency.`,
+          legacy: legacyVal,
+          authorName: nameVal
+        };
+
+        if (!Array.isArray(state.data.formerStaff)) state.data.formerStaff = [];
+        state.data.formerStaff.unshift(newEntry);
+        saveDataToLocal(true);
+        closeModal();
+        renderAdminView();
+        showToast(`${nameVal} berhasil ditambahkan ke Galeri Former Staff!`);
+      });
+    }
+  }
+
   function bindAdminEvents() {
     const mainEl = document.getElementById('main');
     if (!mainEl) return;
@@ -2886,6 +3289,151 @@
         showToast('Berita berhasil dihapus.');
       });
     });
+
+
+    // ---------------------------------------------------------------------
+    // CHAT REDAKSI EVENTS
+    // ---------------------------------------------------------------------
+    const chatForm = document.getElementById('foxsa-admin-chat-form');
+    const chatInput = document.getElementById('foxsa-chat-input');
+    const chatBox = document.getElementById('foxsa-chat-messages-container');
+
+    // Auto-scroll chat box to bottom
+    if (chatBox) {
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    if (chatForm && chatInput) {
+      chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        const newMsg = {
+          id: 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+          senderUsername: state.currentUser.username,
+          senderName: state.currentUser.displayName || state.currentUser.authorName || state.currentUser.username,
+          senderRole: state.currentUser.role || 'Staff Redaksi',
+          senderAvatar: state.currentUser.avatar || getRandomExecutiveAvatarSvg(0),
+          message: text,
+          timestamp: new Date().toISOString()
+        };
+
+        if (!Array.isArray(state.data.adminChats)) state.data.adminChats = [];
+        state.data.adminChats.push(newMsg);
+        saveDataToLocal(true);
+        renderAdminView();
+        showToast('Pesan redaksi berhasil dikirim!');
+      });
+    }
+
+    // Quick tag pills click
+    mainEl.querySelectorAll('[data-chat-tag]').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const tag = pill.getAttribute('data-chat-tag');
+        if (chatInput) {
+          chatInput.value = tag + ' ' + chatInput.value;
+          chatInput.focus();
+        }
+      });
+    });
+
+    // Delete single chat message
+    mainEl.querySelectorAll('[data-delete-chat]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-delete-chat');
+        if (!confirm('Hapus pesan koordinasi ini?')) return;
+        state.data.adminChats = (state.data.adminChats || []).filter(m => m.id !== id);
+        saveDataToLocal(true);
+        renderAdminView();
+        showToast('Pesan berhasil dihapus.');
+      });
+    });
+
+    // Clear all chat history (High Staff only)
+    const clearChatBtn = document.getElementById('btn-clear-chat-history');
+    if (clearChatBtn) {
+      clearChatBtn.addEventListener('click', () => {
+        if (!confirm('Yakin ingin membersihkan riwayat obrolan redaksi? Pesan akan direset ke seed default.')) return;
+        state.data.adminChats = [];
+        saveDataToLocal(true);
+        renderAdminView();
+        showToast('Riwayat obrolan redaksi telah dibersihkan.');
+      });
+    }
+
+    // ---------------------------------------------------------------------
+    // FORMER STAFF MANAGEMENT EVENTS (HIGH STAFF)
+    // ---------------------------------------------------------------------
+    mainEl.querySelectorAll('[data-make-former-staff]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const username = btn.getAttribute('data-make-former-staff');
+        const acc = (state.data.staffAccounts || []).find(a => a.username === username);
+        if (!acc) return;
+        openMakeFormerModal(acc);
+      });
+    });
+
+    mainEl.querySelectorAll('[data-reactivate-former]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const formerId = btn.getAttribute('data-reactivate-former');
+        const f = (state.data.formerStaff || []).find(x => x.id === formerId);
+        if (!f) return;
+        if (!confirm(`Aktifkan kembali "${f.name}" sebagai Staf Aktif FoxSA News?`)) return;
+
+        // Restore in staffAccounts if present
+        let acc = (state.data.staffAccounts || []).find(a => a.username === formerId || a.displayName === f.name);
+        const restoredRole = (f.formerRole || 'Staff Reporter').replace(/^Former\s*/i, '') || 'Staff Reporter';
+
+        if (acc) {
+          acc.isFormer = false;
+          acc.role = restoredRole;
+          acc.status = 'approved';
+        } else {
+          // Re-create staff account
+          const newAcc = {
+            username: f.id || f.name.toLowerCase().replace(/\s+/g, ''),
+            password: 'foxsa' + Math.floor(1000 + Math.random() * 9000),
+            displayName: f.name,
+            authorName: f.name,
+            role: restoredRole,
+            status: 'approved',
+            isAdmin: false,
+            isFormer: false,
+            avatar: f.avatar || getRandomExecutiveAvatarSvg(1)
+          };
+          if (!state.data.staffAccounts) state.data.staffAccounts = [];
+          state.data.staffAccounts.push(newAcc);
+        }
+
+        // Remove from formerStaff list
+        state.data.formerStaff = (state.data.formerStaff || []).filter(x => x.id !== formerId);
+        saveDataToLocal(true);
+        renderAdminView();
+        showToast(`${f.name} berhasil diaktifkan kembali ke Staf Aktif (${restoredRole})!`);
+      });
+    });
+
+    mainEl.querySelectorAll('[data-delete-former]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const formerId = btn.getAttribute('data-delete-former');
+        const f = (state.data.formerStaff || []).find(x => x.id === formerId);
+        if (!f) return;
+        if (!confirm(`Hapus "${f.name}" dari daftar Former Staff & Hall of Fame?`)) return;
+        state.data.formerStaff = (state.data.formerStaff || []).filter(x => x.id !== formerId);
+        saveDataToLocal(true);
+        renderAdminView();
+        showToast(`${f.name} dihapus dari daftar Former Staff.`);
+      });
+    });
+
+    const addFormerManualBtn = document.getElementById('btn-add-former-manual');
+    if (addFormerManualBtn) {
+      addFormerManualBtn.addEventListener('click', () => {
+        openAddFormerManualModal();
+      });
+    }
+
 
     // VISUAL EDITOR EVENTS
     const editorForm = document.getElementById('foxsa-post-editor-form');
@@ -3510,7 +4058,7 @@
           role,
           status: 'approved',
           isAdmin: false,
-          avatar: DEFAULT_AVATAR
+          avatar: getRandomExecutiveAvatarSvg(Math.floor(Math.random() * 10))
         });
 
         if (!state.data.authors[displayName]) {
@@ -3932,59 +4480,7 @@
   // =========================================================================
 
   function getDefaultTeamAvatarSvg(variantIndex = 0) {
-    const palettes = [
-      { bg1: '#dce8f5', bg2: '#c8d9ed', suit: '#1e293b', lapel: '#0f172a', tie: '#F08D39', skin: '#f1c29b', hair: '#27303f' },
-      { bg1: '#fce6d4', bg2: '#f7d3b8', suit: '#172033', lapel: '#090C1E', tie: '#3b82f6', skin: '#f3c6a2', hair: '#4a3525' },
-      { bg1: '#daf2ee', bg2: '#c2e8e2', suit: '#222b3d', lapel: '#111827', tie: '#e11d48', skin: '#ecc098', hair: '#1f242d' },
-      { bg1: '#e6e8f8', bg2: '#d3d7f2', suit: '#1b2436', lapel: '#0b1120', tie: '#10b981', skin: '#f2c5a0', hair: '#382c22' }
-    ];
-    const p = palettes[Math.abs(variantIndex) % palettes.length];
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 440" width="400" height="440">
-      <defs>
-        <linearGradient id="bgGrad${variantIndex}" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="${p.bg1}"/>
-          <stop offset="100%" stop-color="${p.bg2}"/>
-        </linearGradient>
-      </defs>
-      <rect width="400" height="440" fill="url(#bgGrad${variantIndex})"/>
-      <circle cx="200" cy="210" r="150" fill="#ffffff" fill-opacity="0.28"/>
-      <!-- Suit Shoulders & Torso -->
-      <path d="M62 440 C66 334 118 294 200 294 C282 294 334 334 338 440 Z" fill="${p.suit}"/>
-      <!-- White Dress Shirt -->
-      <polygon points="162,294 238,294 216,440 184,440" fill="#ffffff"/>
-      <!-- Tie -->
-      <polygon points="192,306 208,306 214,420 200,438 186,420" fill="${p.tie}"/>
-      <polygon points="189,294 211,294 207,312 193,312" fill="${p.tie}"/>
-      <!-- Suit Lapels -->
-      <polygon points="160,294 192,388 142,440 116,320" fill="${p.lapel}"/>
-      <polygon points="240,294 208,388 258,440 284,320" fill="${p.lapel}"/>
-      <!-- Shirt Collar -->
-      <polygon points="162,286 196,312 174,326 152,298" fill="#f8fafc"/>
-      <polygon points="238,286 204,312 226,326 248,298" fill="#f8fafc"/>
-      <!-- Neck -->
-      <rect x="176" y="242" width="48" height="60" rx="18" fill="${p.skin}"/>
-      <path d="M176 266 Q200 284 224 266 L224 288 L176 288 Z" fill="#d9a782" opacity="0.45"/>
-      <!-- Ears -->
-      <circle cx="136" cy="186" r="14" fill="${p.skin}"/>
-      <circle cx="264" cy="186" r="14" fill="${p.skin}"/>
-      <!-- Head -->
-      <rect x="142" y="106" width="116" height="152" rx="56" fill="${p.skin}"/>
-      <!-- Hair -->
-      <path d="M140 162 C136 112 164 88 202 88 C242 88 266 114 260 162 C252 132 232 120 200 120 C168 120 148 134 140 162 Z" fill="${p.hair}"/>
-      <!-- Eyebrows -->
-      <path d="M164 166 Q177 160 188 165" stroke="${p.hair}" stroke-width="4" stroke-linecap="round" fill="none"/>
-      <path d="M212 165 Q223 160 236 166" stroke="${p.hair}" stroke-width="4" stroke-linecap="round" fill="none"/>
-      <!-- Eyes -->
-      <circle cx="176" cy="180" r="5.5" fill="#1e293b"/>
-      <circle cx="224" cy="180" r="5.5" fill="#1e293b"/>
-      <!-- Nose -->
-      <path d="M200 182 L196 204 L205 206" stroke="#c9956e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <!-- Confident Smile -->
-      <path d="M182 222 Q200 235 218 222" stroke="#b87d56" stroke-width="3.8" stroke-linecap="round" fill="none"/>
-      <!-- FoxSA Lapel Pin -->
-      <circle cx="246" cy="354" r="6" fill="#F08D39"/>
-    </svg>`;
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    return getRandomExecutiveAvatarSvg(variantIndex);
   }
 
   function getCommissionerAvatarSvg() {
@@ -4325,6 +4821,143 @@ const LEADER_QUOTES = {
     }
   ];
 
+
+  // =========================================================================
+  // DYNAMIC TEAM STRUCTURE & ROSTER TIERS RESOLUTION
+  // =========================================================================
+  const OFFICIAL_ROSTER_TIERS = [
+    {
+      tierKey: 'boc',
+      tierName: 'BOARD OF COMMISSIONERS',
+      pillClass: 'red',
+      pillText: 'Supervisory Council',
+      icon: 'fa-crown',
+      slots: [
+        {
+          num: '',
+          title: 'Board of Commissioners',
+          matchRoles: ['board of commissioners', 'commissioner'],
+          defaultDiscord: '797879523726983198'
+        }
+      ]
+    },
+    {
+      tierKey: 'bod',
+      tierName: 'BOARD OF DIRECTORS',
+      pillClass: 'purple',
+      pillText: 'Executive Leadership',
+      icon: 'fa-shield-halved',
+      slots: [
+        { num: '01', title: 'Chief Executive Officer', matchRoles: ['chief executive officer', 'ceo'], defaultDiscord: '797879523726983198' },
+        { num: '02', title: 'Chief Operational Officer', matchRoles: ['chief operational officer', 'chief operating officer', 'coo'] },
+        { num: '03', title: 'Vice President', matchRoles: ['vice president', 'vp'] }
+      ]
+    },
+    {
+      tierKey: 'management',
+      tierName: 'OPERATIONAL MANAGEMENT',
+      pillClass: 'blue',
+      pillText: 'Department Leads',
+      icon: 'fa-briefcase',
+      slots: [
+        { num: '04', title: 'General Manager', matchRoles: ['general manager', 'gm'] },
+        { num: '05', title: 'Executive Producer', matchRoles: ['executive producer'] }
+      ]
+    },
+    {
+      tierKey: 'supervisor',
+      tierName: 'SUPERVISOR TEAM',
+      pillClass: 'teal',
+      pillText: 'Field & Production Leads',
+      icon: 'fa-clapperboard',
+      slots: [
+        { num: '06', title: 'Managing Editor', matchRoles: ['managing editor'] },
+        { num: '07', title: 'Senior Producer', matchRoles: ['senior producer'] },
+        { num: '08', title: 'Line Producer', matchRoles: ['line producer'], defaultDiscord: '797879523726983198' }
+      ]
+    },
+    {
+      tierKey: 'staff',
+      tierName: 'OPERATIONAL STAFF',
+      pillClass: 'green',
+      pillText: 'Newsroom & Field Journalists',
+      icon: 'fa-microphone-lines',
+      slots: [
+        { num: '09', title: 'Head Reporter', matchRoles: ['head reporter'] },
+        { num: '10', title: 'Senior Reporter', matchRoles: ['senior reporter'] },
+        { num: '11', title: 'Staff Reporter', matchRoles: ['staff reporter'] },
+        { num: '12', title: 'Junior Reporter', matchRoles: ['junior reporter'] },
+        { num: '13', title: 'Journalism Intern', matchRoles: ['journalism intern', 'intern'], defaultDiscord: '1302277024425185380', allowMultiple: true }
+      ]
+    }
+  ];
+
+  function getActiveTeamMembersFromAccounts() {
+    const accounts = (state.data && state.data.staffAccounts) || [];
+    const authorsMap = (state.data && state.data.authors) || {};
+
+    const hasArthur = accounts.some(a => a.username === 'arthur' && a.status === 'approved' && !a.isFormer);
+    const activeStaff = accounts.filter(a => {
+      if (a.status !== 'approved' && a.status !== undefined && a.approved === false) return false;
+      if (a.isFormer) return false;
+      if (a.username === 'admin' && hasArthur) return false;
+      return true;
+    });
+
+    return activeStaff.map((acc, idx) => {
+      const authorObj = (acc.authorName && authorsMap[acc.authorName]) || {};
+      const rInfo = getRoleInfo(acc.role);
+
+      let dept = 'staff';
+      const cleanRole = (acc.role || '').toLowerCase();
+      if (cleanRole.includes('commissioner')) dept = 'boc';
+      else if (cleanRole.includes('chief') || cleanRole.includes('president') || cleanRole.includes('director')) dept = 'bod';
+      else if (cleanRole.includes('manager') || cleanRole.includes('executive producer')) dept = 'management';
+      else if (cleanRole.includes('producer') || cleanRole.includes('editor')) dept = 'supervisor';
+      else dept = 'staff';
+
+      let avatar = '';
+      if (acc.avatar && isCustomAvatar(acc.avatar)) {
+        avatar = acc.avatar.trim();
+      } else if (authorObj.avatar && isCustomAvatar(authorObj.avatar)) {
+        avatar = authorObj.avatar.trim();
+      } else {
+        avatar = (dept === 'boc') ? getCommissionerAvatarSvg() : getRandomExecutiveAvatarSvg(idx);
+      }
+
+      return {
+        id: acc.username,
+        username: acc.username,
+        name: acc.displayName || acc.authorName || acc.username,
+        role: acc.role || 'Staff Redaksi',
+        dept,
+        badge: rInfo.name,
+        avatar,
+        discordId: acc.discordId || (acc.username === 'steven' ? '1302277024425185380' : '797879523726983198'),
+        bio: acc.bio || authorObj.bio || 'Staf redaksi FoxSA News Agency dengan integritas jurnalisme tinggi.',
+        quote: acc.quote || (LEADER_QUOTES[acc.username] || 'Menyajikan informasi akurat dan kredibel untuk masyarakat San Andreas.'),
+        account: acc
+      };
+    });
+  }
+
+  function formatChatTime(dateStr) {
+    if (!dateStr) return '';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return '';
+      const now = new Date();
+      const isToday = d.toDateString() === now.toDateString();
+      const timeStr = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+      if (isToday) return `Hari ini, ${timeStr}`;
+      const day = d.getDate();
+      const month = MONTHS_ID[d.getMonth()] ? MONTHS_ID[d.getMonth()].slice(0, 3) : '';
+      return `${day} ${month}, ${timeStr}`;
+    } catch (e) {
+      return '';
+    }
+  }
+
   function renderProfileView(subtab) {
     document.body.className = 'item';
     const mainEl = document.getElementById('main');
@@ -4339,17 +4972,9 @@ const LEADER_QUOTES = {
     // TAB 1: OVERVIEW & ACTIVE TEAM SHOWCASE
     // =========================================================================
     if (activeTab === 'overview') {
-      const commissionerRaw = FOXSA_TEAM_MEMBERS.find(m => m.dept === 'boc');
-      const commissioner = commissionerRaw ? getMemberEffectiveData(commissionerRaw, 0) : null;
-      const featuredExecs = FOXSA_TEAM_MEMBERS.filter(m => m.dept === 'bod').map((m, i) => getMemberEffectiveData(m, i + 1));
-      const leaders = (commissioner ? [commissioner] : []).concat(featuredExecs);
-      const crewMembers = FOXSA_TEAM_MEMBERS.filter(m => m.dept !== 'bod' && m.dept !== 'boc').map((m, i) => getMemberEffectiveData(m, i + 2));
-
-      // Resolve active officers for 13-tier Official Member Roster board dynamically from accounts
-      const rReinhardt = getMemberEffectiveData({ id: 'reinhardt', name: 'Reinhardt Harrison', role: 'Board of Commissioners', dept: 'boc' }, 0);
-      const rArthur = getMemberEffectiveData({ id: 'arthur', name: 'Arthur Redfields', role: 'Chief Executive Officer', dept: 'bod' }, 1);
-      const rPark = getMemberEffectiveData({ id: 'park', name: 'Park Young-Hwan', role: 'Line Producer', dept: 'supervisor' }, 2);
-      const rSteven = getMemberEffectiveData({ id: 'steven', name: 'Steven Deluca', role: 'Journalism Intern', dept: 'staff' }, 3);
+      const allActiveStaff = getActiveTeamMembersFromAccounts();
+      const leaders = allActiveStaff.filter(m => m.dept === 'boc' || m.dept === 'bod');
+      const crewMembers = allActiveStaff.filter(m => m.dept !== 'boc' && m.dept !== 'bod');
 
       bodyHtml = `
         <div class="foxsa-profile-section">
@@ -4498,222 +5123,70 @@ const LEADER_QUOTES = {
               </div>
 
               <div class="roster-tier-list">
-                <!-- TIER: BOARD OF COMMISSIONERS -->
-                <div class="roster-tier-block tier-commissioner">
-                  <div class="roster-tier-label">
-                    <span class="tier-icon"><i class="fa-solid fa-crown"></i></span>
-                    <h4>BOARD OF COMMISSIONERS</h4>
-                    <span class="tier-pill red">Supervisory Council</span>
+                ${isHighStaff(state.currentUser) ? `
+                  <div class="roster-admin-manage-bar" style="margin-bottom:18px;background:rgba(240,141,57,0.08);border:1px dashed #F08D39;border-radius:10px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                    <span style="font-size:12.5px;color:#9a3412;">
+                      <i class="fa-solid fa-user-shield" style="color:#ea580c;"></i>
+                      <strong>Mode High Staff:</strong> Posisi kosong di bawah ini otomatis terisi saat anggota mendaftar/di-ACC dan diberi role di Panel Admin.
+                    </span>
+                    <a href="#/admin" class="foxsa-btn" style="padding:5px 12px;font-size:12px;text-decoration:none;">
+                      <i class="fa-solid fa-users-gear"></i> Kelola Struktur &amp; Akun Staf
+                    </a>
                   </div>
-                  <div class="roster-tier-grid">
-                    <div class="roster-card active">
-                      <div class="roster-card-head">
-                        <span class="roster-pos-title">Board of Commissioners</span>
-                        <span class="roster-status-badge active"><i class="fa-solid fa-circle-check"></i> Active</span>
-                      </div>
-                      <div class="roster-officer-row">
-                        <div class="roster-avatar-box">
-                          <img src="${rReinhardt.avatar}" alt="${escapeHtml(rReinhardt.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
-                        </div>
-                        <div class="roster-officer-info">
-                          <div class="roster-officer-name">${escapeHtml(rReinhardt.name)}</div>
-                          <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@${escapeHtml(rReinhardt.discordId)}&gt;</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                ` : ''}
 
-                <!-- TIER: BOARD OF DIRECTORS -->
-                <div class="roster-tier-block tier-directors">
-                  <div class="roster-tier-label">
-                    <span class="tier-icon"><i class="fa-solid fa-shield-halved"></i></span>
-                    <h4>BOARD OF DIRECTORS</h4>
-                    <span class="tier-pill purple">Executive Leadership</span>
-                  </div>
-                  <div class="roster-tier-grid">
-                    <div class="roster-card active">
-                      <div class="roster-card-head">
-                        <span class="roster-pos-num">01</span>
-                        <span class="roster-pos-title">Chief Executive Officer</span>
-                        <span class="roster-status-badge active"><i class="fa-solid fa-circle-check"></i> Active</span>
+                ${OFFICIAL_ROSTER_TIERS.map(tier => {
+                  return `
+                    <div class="roster-tier-block tier-${tier.tierKey}">
+                      <div class="roster-tier-label">
+                        <span class="tier-icon"><i class="fa-solid ${tier.icon}"></i></span>
+                        <h4>${tier.tierName}</h4>
+                        <span class="tier-pill ${tier.pillClass}">${tier.pillText}</span>
                       </div>
-                      <div class="roster-officer-row">
-                        <div class="roster-avatar-box">
-                          <img src="${rArthur.avatar}" alt="${escapeHtml(rArthur.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
-                        </div>
-                        <div class="roster-officer-info">
-                          <div class="roster-officer-name">${escapeHtml(rArthur.name)}</div>
-                          <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@${escapeHtml(rArthur.discordId)}&gt;</div>
-                        </div>
-                      </div>
-                    </div>
+                      <div class="roster-tier-grid">
+                        ${tier.slots.map(slot => {
+                          const matchedMembers = allActiveStaff.filter(m => {
+                            const cleanR = (m.role || '').toLowerCase();
+                            return slot.matchRoles.some(mr => cleanR.includes(mr));
+                          });
 
-                    <div class="roster-card vacant">
-                      <div class="roster-card-head">
-                        <span class="roster-pos-num">02</span>
-                        <span class="roster-pos-title">Chief Operational Officer</span>
-                        <span class="roster-status-badge vacant">VACANT</span>
-                      </div>
-                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
-                      <div class="roster-vacant-note">Posisi Terbuka untuk Promosi</div>
-                    </div>
-
-                    <div class="roster-card vacant">
-                      <div class="roster-card-head">
-                        <span class="roster-pos-num">03</span>
-                        <span class="roster-pos-title">Vice President</span>
-                        <span class="roster-status-badge vacant">VACANT</span>
-                      </div>
-                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
-                      <div class="roster-vacant-note">Posisi Terbuka untuk Promosi</div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- TIER: OPERATIONAL MANAGEMENT -->
-                <div class="roster-tier-block tier-management">
-                  <div class="roster-tier-label">
-                    <span class="tier-icon"><i class="fa-solid fa-briefcase"></i></span>
-                    <h4>OPERATIONAL MANAGEMENT</h4>
-                    <span class="tier-pill blue">Department Leads</span>
-                  </div>
-                  <div class="roster-tier-grid">
-                    <div class="roster-card vacant">
-                      <div class="roster-card-head">
-                        <span class="roster-pos-num">04</span>
-                        <span class="roster-pos-title">General Manager</span>
-                        <span class="roster-status-badge vacant">VACANT</span>
-                      </div>
-                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
-                      <div class="roster-vacant-note">Open Position</div>
-                    </div>
-
-                    <div class="roster-card vacant">
-                      <div class="roster-card-head">
-                        <span class="roster-pos-num">05</span>
-                        <span class="roster-pos-title">Executive Producer</span>
-                        <span class="roster-status-badge vacant">VACANT</span>
-                      </div>
-                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
-                      <div class="roster-vacant-note">Open Position</div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- TIER: SUPERVISOR TEAM -->
-                <div class="roster-tier-block tier-supervisor">
-                  <div class="roster-tier-label">
-                    <span class="tier-icon"><i class="fa-solid fa-clapperboard"></i></span>
-                    <h4>SUPERVISOR TEAM</h4>
-                    <span class="tier-pill teal">Field &amp; Production Leads</span>
-                  </div>
-                  <div class="roster-tier-grid">
-                    <div class="roster-card vacant">
-                      <div class="roster-card-head">
-                        <span class="roster-pos-num">06</span>
-                        <span class="roster-pos-title">Managing Editor</span>
-                        <span class="roster-status-badge vacant">VACANT</span>
-                      </div>
-                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
-                      <div class="roster-vacant-note">Open Position</div>
-                    </div>
-
-                    <div class="roster-card vacant">
-                      <div class="roster-card-head">
-                        <span class="roster-pos-num">07</span>
-                        <span class="roster-pos-title">Senior Producer</span>
-                        <span class="roster-status-badge vacant">VACANT</span>
-                      </div>
-                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
-                      <div class="roster-vacant-note">Open Position</div>
-                    </div>
-
-                    <div class="roster-card active">
-                      <div class="roster-card-head">
-                        <span class="roster-pos-num">08</span>
-                        <span class="roster-pos-title">Line Producer</span>
-                        <span class="roster-status-badge active"><i class="fa-solid fa-circle-check"></i> Active</span>
-                      </div>
-                      <div class="roster-officer-row">
-                        <div class="roster-avatar-box">
-                          <img src="${rPark.avatar}" alt="${escapeHtml(rPark.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
-                        </div>
-                        <div class="roster-officer-info">
-                          <div class="roster-officer-name">${escapeHtml(rPark.name)}</div>
-                          <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@${escapeHtml(rPark.discordId)}&gt;</div>
-                        </div>
+                          if (matchedMembers.length > 0) {
+                            return matchedMembers.map(member => `
+                              <div class="roster-card active">
+                                <div class="roster-card-head">
+                                  ${slot.num ? `<span class="roster-pos-num">${slot.num}</span>` : ''}
+                                  <span class="roster-pos-title">${escapeHtml(slot.title)}</span>
+                                  <span class="roster-status-badge active"><i class="fa-solid fa-circle-check"></i> Active</span>
+                                </div>
+                                <div class="roster-officer-row">
+                                  <div class="roster-avatar-box">
+                                    <img src="${member.avatar}" alt="${escapeHtml(member.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
+                                  </div>
+                                  <div class="roster-officer-info">
+                                    <div class="roster-officer-name">${escapeHtml(member.name)}</div>
+                                    <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@${escapeHtml(member.discordId || slot.defaultDiscord || 'Discord Terhubung')}&gt;</div>
+                                  </div>
+                                </div>
+                              </div>
+                            `).join('');
+                          } else {
+                            return `
+                              <div class="roster-card vacant">
+                                <div class="roster-card-head">
+                                  ${slot.num ? `<span class="roster-pos-num">${slot.num}</span>` : ''}
+                                  <span class="roster-pos-title">${escapeHtml(slot.title)}</span>
+                                  <span class="roster-status-badge vacant">VACANT</span>
+                                </div>
+                                <div class="roster-officer-name vacant">— Belum Terisi —</div>
+                                <div class="roster-vacant-note">Posisi Terbuka untuk Promosi / Pendaftaran</div>
+                              </div>
+                            `;
+                          }
+                        }).join('')}
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                <!-- TIER: OPERATIONAL STAFF -->
-                <div class="roster-tier-block tier-staff">
-                  <div class="roster-tier-label">
-                    <span class="tier-icon"><i class="fa-solid fa-microphone"></i></span>
-                    <h4>OPERATIONAL STAFF</h4>
-                    <span class="tier-pill green">Newsroom Reporters &amp; Crew</span>
-                  </div>
-                  <div class="roster-tier-grid">
-                    <div class="roster-card vacant">
-                      <div class="roster-card-head">
-                        <span class="roster-pos-num">09</span>
-                        <span class="roster-pos-title">Head Reporter</span>
-                        <span class="roster-status-badge vacant">VACANT</span>
-                      </div>
-                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
-                      <div class="roster-vacant-note">Open Position</div>
-                    </div>
-
-                    <div class="roster-card vacant">
-                      <div class="roster-card-head">
-                        <span class="roster-pos-num">10</span>
-                        <span class="roster-pos-title">Senior Reporter</span>
-                        <span class="roster-status-badge vacant">VACANT</span>
-                      </div>
-                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
-                      <div class="roster-vacant-note">Open Position</div>
-                    </div>
-
-                    <div class="roster-card vacant">
-                      <div class="roster-card-head">
-                        <span class="roster-pos-num">11</span>
-                        <span class="roster-pos-title">Staff Reporter</span>
-                        <span class="roster-status-badge vacant">VACANT</span>
-                      </div>
-                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
-                      <div class="roster-vacant-note">Open Position</div>
-                    </div>
-
-                    <div class="roster-card vacant">
-                      <div class="roster-card-head">
-                        <span class="roster-pos-num">12</span>
-                        <span class="roster-pos-title">Junior Reporter</span>
-                        <span class="roster-status-badge vacant">VACANT</span>
-                      </div>
-                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
-                      <div class="roster-vacant-note">Open Position</div>
-                    </div>
-
-                    <div class="roster-card active">
-                      <div class="roster-card-head">
-                        <span class="roster-pos-num">13</span>
-                        <span class="roster-pos-title">Journalism Intern</span>
-                        <span class="roster-status-badge active"><i class="fa-solid fa-circle-check"></i> Active</span>
-                      </div>
-                      <div class="roster-officer-row">
-                        <div class="roster-avatar-box">
-                          <img src="${rSteven.avatar}" alt="${escapeHtml(rSteven.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
-                        </div>
-                        <div class="roster-officer-info">
-                          <div class="roster-officer-name">${escapeHtml(rSteven.name)}</div>
-                          <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@${escapeHtml(rSteven.discordId)}&gt;</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  `;
+                }).join('')}
               </div>
 
               <div class="roster-board-footer">
@@ -4757,9 +5230,12 @@ const LEADER_QUOTES = {
     // TAB: FORMER STAFF & ALUMNI (BAGIAN KHUSUS FORMER STAFF FOXSA)
     // =========================================================================
     else if (activeTab === 'former-staff' || activeTab === 'alumni') {
-      const leadershipFormer = FOXSA_FORMER_STAFF.filter(f => f.category === 'leadership');
-      const mgmtFormer = FOXSA_FORMER_STAFF.filter(f => f.category === 'management' || f.category === 'supervisor');
-      const staffFormer = FOXSA_FORMER_STAFF.filter(f => f.category === 'staff');
+      const formerList = (state.data && Array.isArray(state.data.formerStaff) && state.data.formerStaff.length > 0)
+        ? state.data.formerStaff
+        : FOXSA_FORMER_STAFF;
+      const leadershipFormer = formerList.filter(f => f.category === 'leadership');
+      const mgmtFormer = formerList.filter(f => f.category === 'management' || f.category === 'supervisor');
+      const staffFormer = formerList.filter(f => f.category === 'staff');
 
       bodyHtml = `
         <div class="foxsa-profile-section">
@@ -4771,7 +5247,7 @@ const LEADER_QUOTES = {
               Penghormatan dan apresiasi setinggi-tingginya bagi para pendiri, mantan pimpinan eksekutif, manajer, supervisor, dan staf jurnalis yang telah menorehkan karya jurnalistik terbaik di San Andreas. Terima kasih atas dedikasi, integritas, dan semangat kekeluargaan yang telah kalian wariskan bagi FoxSA News Agency.
             </p>
             <div class="alumni-stats-bar">
-              <span class="alumni-stat"><i class="fa-solid fa-users"></i> <strong>11</strong> Tokoh Kehormatan</span>
+              <span class="alumni-stat"><i class="fa-solid fa-users"></i> <strong>${formerList.length}</strong> Tokoh Kehormatan</span>
               <span class="alumni-stat"><i class="fa-solid fa-calendar-check"></i> <strong>Sejak 2025</strong> Jejak Sejarah</span>
               <span class="alumni-stat"><i class="fa-solid fa-newspaper"></i> <strong>Arsip Liputan</strong> Tetap Tersimpan</span>
             </div>
