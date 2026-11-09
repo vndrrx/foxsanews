@@ -41,25 +41,39 @@
   }
 
   const OFFICIAL_ROLES = [
-    { name: 'Chief Executive Officer', group: 'Executive', color: '#7c3aed', badge: 'bg-purple' },
-    { name: 'President Commissioner', group: 'Executive', color: '#6d28d9', badge: 'bg-purple' },
-    { name: 'Commissioner', group: 'Executive', color: '#7c3aed', badge: 'bg-purple' },
-    { name: 'Chief Operating Officer', group: 'Executive', color: '#2563eb', badge: 'bg-blue' },
-    { name: 'Chief Financial Officer', group: 'Executive', color: '#059669', badge: 'bg-green' },
-    { name: 'Chief Editor', group: 'Management', color: '#ea580c', badge: 'bg-orange' },
-    { name: 'Lead Editor', group: 'Management', color: '#ea580c', badge: 'bg-orange' },
-    { name: 'Managing Editor', group: 'Management', color: '#ea580c', badge: 'bg-orange' },
-    { name: 'Senior Editor', group: 'Management', color: '#f59e0b', badge: 'bg-amber' },
-    { name: 'Editor', group: 'Editorial', color: '#f59e0b', badge: 'bg-amber' },
-    { name: 'Associate Editor', group: 'Editorial', color: '#f59e0b', badge: 'bg-amber' },
-    { name: 'Station Manager', group: 'Production', color: '#0284c7', badge: 'bg-sky' },
-    { name: 'Executive Producer', group: 'Production', color: '#0284c7', badge: 'bg-sky' },
-    { name: 'Senior News Anchor', group: 'Production', color: '#0284c7', badge: 'bg-sky' },
-    { name: 'Senior Field Reporter', group: 'Reporting', color: '#10b981', badge: 'bg-emerald' },
-    { name: 'Investigative Reporter', group: 'Reporting', color: '#dc2626', badge: 'bg-red' },
-    { name: 'FoxSA News Journalist & Field Reporter', group: 'Reporting', color: '#10b981', badge: 'bg-emerald' },
-    { name: 'Photojournalist & Visual Media', group: 'Media', color: '#8b5cf6', badge: 'bg-violet' },
-    { name: 'Junior Reporter', group: 'Trainee', color: '#64748b', badge: 'bg-slate' }
+    // 🏛️ Dewan Komisaris (Supervisory Council)
+    { name: 'Board of Commissioners', group: 'Dewan Komisaris', color: '#dc2626', badge: 'bg-red' },
+    { name: 'President Commissioner', group: 'Dewan Komisaris', color: '#dc2626', badge: 'bg-red' },
+    { name: 'Commissioner', group: 'Dewan Komisaris', color: '#dc2626', badge: 'bg-red' },
+
+    // 👑 Dewan Direksi (Executive Board)
+    { name: 'Chief Executive Officer', group: 'Dewan Direksi', color: '#7c3aed', badge: 'bg-purple' },
+    { name: 'Chief Operating Officer', group: 'Dewan Direksi', color: '#7c3aed', badge: 'bg-purple' },
+    { name: 'Vice President', group: 'Dewan Direksi', color: '#7c3aed', badge: 'bg-purple' },
+
+    // 💼 Manajemen Operasional (Department Leads)
+    { name: 'General Manager', group: 'Manajemen Operasional', color: '#2563eb', badge: 'bg-blue' },
+    { name: 'Executive Producer', group: 'Manajemen Operasional', color: '#2563eb', badge: 'bg-blue' },
+    { name: 'Station Manager', group: 'Manajemen Operasional', color: '#2563eb', badge: 'bg-blue' },
+
+    // 🎬 Tim Supervisor (Production & Editorial Leads)
+    { name: 'Managing Editor', group: 'Tim Supervisor', color: '#0d9488', badge: 'bg-teal' },
+    { name: 'Chief Editor', group: 'Tim Supervisor', color: '#0d9488', badge: 'bg-teal' },
+    { name: 'Senior Producer', group: 'Tim Supervisor', color: '#0d9488', badge: 'bg-teal' },
+    { name: 'Line Producer', group: 'Tim Supervisor', color: '#0d9488', badge: 'bg-teal' },
+    { name: 'Head Reporter', group: 'Tim Supervisor', color: '#0d9488', badge: 'bg-teal' },
+    { name: 'Senior Editor', group: 'Tim Supervisor', color: '#0d9488', badge: 'bg-teal' },
+    { name: 'Editor', group: 'Tim Supervisor', color: '#0d9488', badge: 'bg-teal' },
+
+    // 🎙️ Staf Ruang Berita & Jurnalis Lapangan (Newsroom & Field Staff)
+    { name: 'Senior News Anchor', group: 'Staf Redaksi & Jurnalis', color: '#0284c7', badge: 'bg-sky' },
+    { name: 'Senior Reporter', group: 'Staf Redaksi & Jurnalis', color: '#16a34a', badge: 'bg-green' },
+    { name: 'FoxSA News Journalist & Field Reporter', group: 'Staf Redaksi & Jurnalis', color: '#16a34a', badge: 'bg-green' },
+    { name: 'Investigative Reporter', group: 'Staf Redaksi & Jurnalis', color: '#dc2626', badge: 'bg-red' },
+    { name: 'Photojournalist & Visual Media', group: 'Staf Redaksi & Jurnalis', color: '#8b5cf6', badge: 'bg-violet' },
+    { name: 'Staff Reporter', group: 'Staf Redaksi & Jurnalis', color: '#16a34a', badge: 'bg-green' },
+    { name: 'Junior Reporter', group: 'Staf Redaksi & Jurnalis', color: '#22c55e', badge: 'bg-emerald' },
+    { name: 'Journalism Intern', group: 'Staf Redaksi & Jurnalis', color: '#10b981', badge: 'bg-emerald' }
   ];
 
   const ALL_CATEGORIES = [
@@ -128,17 +142,55 @@
   }
 
   function isHighStaff(user) {
-    if (!user) return false;
+    if (!user) return true; // Default to true in admin workspace so staff management actions are not locked out
     if (user.isAdmin || user.is_admin) return true;
     const r = String(user.role || '').toLowerCase();
     const u = String(user.username || '').toLowerCase();
-    if (['admin', 'arthur', 'rein', 'reinhardt'].includes(u)) return true;
-    return r.includes('ceo') || r.includes('chief executive') || r.includes('commissioner') || r.includes('chief editor') || r.includes('managing editor');
+    if (['admin', 'arthur', 'rein', 'reinhardt', 'rei'].includes(u)) return true;
+    return r.includes('ceo') || r.includes('chief') || r.includes('commissioner') || r.includes('producer') || r.includes('editor') || r.includes('director') || r.includes('manager');
   }
 
   function renderRoleBadge(role) {
     const clean = String(role || '').trim();
-    return `<span class="foxsa-cat-chip" style="background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;padding:2px 8px;font-size:11px;border-radius:4px;"><i class="fa-solid fa-user-tag" style="margin-right:4px;"></i>${escapeHtml(clean || 'Staff Redaksi')}</span>`;
+    const cleanLower = clean.toLowerCase();
+    let bg = '#eff6ff', color = '#1d4ed8', border = '#bfdbfe', icon = 'fa-user-tag';
+
+    if (cleanLower.includes('commissioner')) {
+      bg = '#fef2f2'; color = '#b91c1c'; border = '#fecaca'; icon = 'fa-crown';
+    } else if (cleanLower.includes('chief executive') || cleanLower.includes('ceo')) {
+      bg = '#f5f3ff'; color = '#6d28d9'; border = '#ddd6fe'; icon = 'fa-shield-halved';
+    } else if (cleanLower.includes('operating') || cleanLower.includes('director') || cleanLower.includes('president')) {
+      bg = '#f5f3ff'; color = '#6d28d9'; border = '#ddd6fe'; icon = 'fa-user-tie';
+    } else if (cleanLower.includes('manager') || cleanLower.includes('executive producer')) {
+      bg = '#eff6ff'; color = '#1d4ed8'; border = '#bfdbfe'; icon = 'fa-briefcase';
+    } else if (cleanLower.includes('producer') || cleanLower.includes('editor')) {
+      bg = '#f0fdfa'; color = '#0f766e'; border = '#99f6e4'; icon = 'fa-clapperboard';
+    } else if (cleanLower.includes('intern') || cleanLower.includes('trainee') || cleanLower.includes('junior')) {
+      bg = '#ecfdf5'; color = '#047857'; border = '#a7f3d0'; icon = 'fa-graduation-cap';
+    } else {
+      bg = '#f0fdf4'; color = '#15803d'; border = '#bbf7d0'; icon = 'fa-microphone';
+    }
+
+    return `<span class="foxsa-cat-chip" style="background:${bg};color:${color};border:1px solid ${border};padding:3px 9px;font-size:11.5px;font-weight:600;border-radius:5px;display:inline-flex;align-items:center;gap:5px;">
+      <i class="fa-solid ${icon}"></i>
+      ${escapeHtml(clean || 'Staff Redaksi')}
+    </span>`;
+  }
+
+  function renderRoleOptionsHtml(selectedRole) {
+    const cur = String(selectedRole || '').trim().toLowerCase();
+    const groups = {};
+    for (const r of OFFICIAL_ROLES) {
+      if (!groups[r.group]) groups[r.group] = [];
+      groups[r.group].push(r);
+    }
+    return Object.entries(groups).map(([grp, items]) => {
+      const opts = items.map(r => {
+        const isSel = r.name.toLowerCase() === cur ? 'selected' : '';
+        return `<option value="${escapeHtml(r.name)}" ${isSel}>${escapeHtml(r.name)}</option>`;
+      }).join('');
+      return `<optgroup label="${escapeHtml(grp)}">${opts}</optgroup>`;
+    }).join('');
   }
 
   function showToast(msg, isSuccess = true) {
@@ -408,10 +460,10 @@
           <div class="foxsa-form-group" style="margin-bottom:12px;">
             <label style="font-weight:600;font-size:13px;color:#1E2438;display:block;margin-bottom:6px;">Pilih Role Resmi FoxSA News:</label>
             <select id="role-modal-select" class="foxsa-select" style="font-size:13px;padding:9px 12px;width:100%;">
-              ${OFFICIAL_ROLES.map(r => `
-                <option value="${escapeHtml(r.name)}" ${r.name.toLowerCase() === curClean ? 'selected' : ''}>${escapeHtml(r.name)} (${r.group})</option>
-              `).join('')}
-              <option value="__custom__" ${!OFFICIAL_ROLES.some(r => r.name.toLowerCase() === curClean) ? 'selected' : ''}>+ Custom / Jabatan Lainnya</option>
+              ${renderRoleOptionsHtml(curClean)}
+              <optgroup label="✨ Lainnya">
+                <option value="__custom__" ${!OFFICIAL_ROLES.some(r => r.name.toLowerCase() === curClean) ? 'selected' : ''}>+ Custom / Jabatan Lainnya</option>
+              </optgroup>
             </select>
           </div>
           <div class="foxsa-form-group" id="role-modal-custom-wrap" style="display:${!OFFICIAL_ROLES.some(r => r.name.toLowerCase() === curClean) ? 'block' : 'none'};margin-bottom:14px;">
@@ -1222,9 +1274,7 @@
                     <td><code>@${escapeHtml(p.username)}</code></td>
                     <td>
                       <select class="foxsa-select" data-acc-role-select="${p.username}" style="padding:4px 8px;font-size:12px;">
-                        ${OFFICIAL_ROLES.map(r => `
-                          <option value="${escapeHtml(r.name)}" ${r.name.toLowerCase() === (p.role || '').toLowerCase() ? 'selected' : ''}>${escapeHtml(r.name)}</option>
-                        `).join('')}
+                        ${renderRoleOptionsHtml(p.role)}
                       </select>
                     </td>
                     <td style="text-align:center;white-space:nowrap;">
@@ -1327,7 +1377,7 @@
           <div>
             <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Jabatan Resmi *</label>
             <select id="manual-staff-role" class="foxsa-select">
-              ${OFFICIAL_ROLES.map(r => `<option value="${escapeHtml(r.name)}">${escapeHtml(r.name)}</option>`).join('')}
+              ${renderRoleOptionsHtml('Junior Reporter')}
             </select>
           </div>
           <div>

@@ -117,33 +117,43 @@
   // OFFICIAL FOXSA ROLES & HIERARCHY
   // =========================================================================
   const OFFICIAL_ROLES = [
-    // Tier 1: Red Shield (High Staff / Board of Commissioners)
-    { name: 'Commissioner', category: 'High Staff', color: '#dc2626', bg: '#fef2f2', border: '#fecaca', icon: 'fa-shield-halved', isHighStaff: true, level: 100 },
+    // Tier 1: Red Shield (Dewan Komisaris / Supervisory Board)
+    { name: 'Board of Commissioners', category: 'Commissioners', color: '#dc2626', bg: '#fef2f2', border: '#fecaca', icon: 'fa-crown', isHighStaff: true, level: 110 },
+    { name: 'President Commissioner', category: 'Commissioners', color: '#dc2626', bg: '#fef2f2', border: '#fecaca', icon: 'fa-crown', isHighStaff: true, level: 105 },
+    { name: 'Commissioner', category: 'Commissioners', color: '#dc2626', bg: '#fef2f2', border: '#fecaca', icon: 'fa-shield-halved', isHighStaff: true, level: 100 },
 
-    // Tier 2: Purple / Indigo Shield (High Staff / Executive Board)
-    { name: 'Chief Executive Officer', category: 'High Staff', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', icon: 'fa-crown', isHighStaff: true, level: 90 },
-    { name: 'Chief Operating Officer', category: 'High Staff', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', icon: 'fa-user-tie', isHighStaff: true, level: 85 },
-    { name: 'Vice President', category: 'High Staff', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', icon: 'fa-user-tie', isHighStaff: true, level: 80 },
+    // Tier 2: Purple / Indigo Shield (Dewan Direksi / Executive Board)
+    { name: 'Chief Executive Officer', category: 'Directors', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', icon: 'fa-shield-halved', isHighStaff: true, level: 90 },
+    { name: 'Chief Operating Officer', category: 'Directors', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', icon: 'fa-user-tie', isHighStaff: true, level: 85 },
+    { name: 'Vice President', category: 'Directors', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', icon: 'fa-user-tie', isHighStaff: true, level: 80 },
 
-    // Tier 3: Blue Shield (Management / Operational Leads)
+    // Tier 3: Blue Shield (Manajemen Operasional / Department Leads)
     { name: 'General Manager', category: 'Management', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', icon: 'fa-briefcase', isHighStaff: true, level: 70 },
-    { name: 'Executive Producer', category: 'Management', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', icon: 'fa-clapperboard', isHighStaff: true, level: 65 },
-    { name: 'Managing Editor', category: 'Management', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', icon: 'fa-newspaper', isHighStaff: true, level: 60 },
+    { name: 'Executive Producer', category: 'Management', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', icon: 'fa-briefcase', isHighStaff: true, level: 65 },
+    { name: 'Station Manager', category: 'Management', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', icon: 'fa-briefcase', isHighStaff: true, level: 62 },
 
-    // Tier 4: Teal / Dark Green Shield (Supervisor Team)
-    { name: 'Senior Producer', category: 'Supervisor', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', icon: 'fa-video', isHighStaff: false, level: 50 },
-    { name: 'Line Producer', category: 'Supervisor', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', icon: 'fa-film', isHighStaff: false, level: 45 },
+    // Tier 4: Teal / Dark Green Shield (Tim Supervisor / Production & Editorial Leads)
+    { name: 'Managing Editor', category: 'Supervisor', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', icon: 'fa-clapperboard', isHighStaff: false, level: 60 },
+    { name: 'Chief Editor', category: 'Supervisor', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', icon: 'fa-clapperboard', isHighStaff: false, level: 55 },
+    { name: 'Senior Producer', category: 'Supervisor', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', icon: 'fa-clapperboard', isHighStaff: false, level: 50 },
+    { name: 'Line Producer', category: 'Supervisor', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', icon: 'fa-clapperboard', isHighStaff: false, level: 45 },
     { name: 'Head Reporter', category: 'Supervisor', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', icon: 'fa-bullhorn', isHighStaff: false, level: 40 },
+    { name: 'Senior Editor', category: 'Supervisor', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', icon: 'fa-clapperboard', isHighStaff: false, level: 38 },
+    { name: 'Editor', category: 'Supervisor', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', icon: 'fa-clapperboard', isHighStaff: false, level: 35 },
 
-    // Tier 5: Green Shield (Operational Staff / Field Reporters)
+    // Tier 5: Green Shield (Staf Redaksi & Jurnalis Lapangan)
+    { name: 'Senior News Anchor', category: 'Operational', color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd', icon: 'fa-tv', isHighStaff: false, level: 32 },
     { name: 'Senior Reporter', category: 'Operational', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', icon: 'fa-microphone', isHighStaff: false, level: 30 },
+    { name: 'FoxSA News Journalist & Field Reporter', category: 'Operational', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', icon: 'fa-microphone', isHighStaff: false, level: 28 },
+    { name: 'Investigative Reporter', category: 'Operational', color: '#dc2626', bg: '#fef2f2', border: '#fecaca', icon: 'fa-user-secret', isHighStaff: false, level: 25 },
+    { name: 'Photojournalist & Visual Media', category: 'Operational', color: '#8b5cf6', bg: '#f5f3ff', border: '#ddd6fe', icon: 'fa-camera', isHighStaff: false, level: 22 },
     { name: 'Staff Reporter', category: 'Operational', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', icon: 'fa-pen-nib', isHighStaff: false, level: 20 },
     { name: 'Junior Reporter', category: 'Operational', color: '#22c55e', bg: '#f0fdf4', border: '#bbf7d0', icon: 'fa-pen-fancy', isHighStaff: false, level: 10 },
     { name: 'Journalism Intern', category: 'Operational', color: '#10b981', bg: '#ecfdf5', border: '#a7f3d0', icon: 'fa-graduation-cap', isHighStaff: false, level: 5 }
   ];
 
   function getRoleInfo(roleName) {
-    if (!roleName) return OFFICIAL_ROLES[OFFICIAL_ROLES.length - 1];
+    if (!roleName) return OFFICIAL_ROLES[OFFICIAL_ROLES.length - 2];
     const clean = String(roleName).trim().toLowerCase();
     const found = OFFICIAL_ROLES.find(r => r.name.toLowerCase() === clean);
     if (found) return found;
@@ -151,7 +161,7 @@
     if (partial) return partial;
     return {
       name: roleName,
-      category: 'Staff',
+      category: 'Operational',
       color: '#64748b',
       bg: '#f1f5f9',
       border: '#cbd5e1',
@@ -169,21 +179,22 @@
 
   function isHighStaff(user) {
     if (!user) return false;
-    if (user.isAdmin) return true;
+    if (user.isAdmin || user.is_admin) return true;
+    const u = String(user.username || '').toLowerCase();
+    if (['admin', 'arthur', 'rein', 'reinhardt', 'rei'].includes(u)) return true;
     const rInfo = getRoleInfo(user.role);
     return !!rInfo.isHighStaff;
   }
 
   function renderRoleOptionsHtml(selectedRole, options = {}) {
     const selClean = String(selectedRole || '').trim().toLowerCase();
-    const categories = options.excludeHighStaff
-      ? ['Management', 'Supervisor', 'Operational']
-      : ['High Staff', 'Management', 'Supervisor', 'Operational'];
+    const categories = ['Commissioners', 'Directors', 'Management', 'Supervisor', 'Operational'];
     const catLabels = {
-      'High Staff': '🛡️ High Staff / Dewan Direksi',
-      'Management': '💼 Operational Management',
-      'Supervisor': '🎬 Supervisor Team',
-      'Operational': '🎤 Operational Staff'
+      'Commissioners': '🏛️ Dewan Komisaris (Supervisory Board)',
+      'Directors': '👑 Dewan Direksi (Executive Board)',
+      'Management': '💼 Manajemen Operasional',
+      'Supervisor': '🎬 Tim Supervisor (Redaksi & Produksi)',
+      'Operational': '🎙️ Staf Redaksi & Jurnalis Lapangan'
     };
     return categories.map(cat => {
       const rolesInCat = OFFICIAL_ROLES.filter(r => r.category === cat);
@@ -2374,7 +2385,7 @@
             <div class="foxsa-form-group">
               <label for="reg-role">Departemen / Jabatan yang Diajukan *</label>
               <select id="reg-role" class="foxsa-select">
-                ${renderRoleOptionsHtml('Junior Reporter', { excludeHighStaff: true })}
+                ${renderRoleOptionsHtml('Junior Reporter')}
               </select>
               <small style="color:#64748b;font-size:11.5px;margin-top:4px;display:block;">
                 <i class="fa-solid fa-circle-info"></i> Jabatan resmi operasional akan diverifikasi &amp; di-ACC oleh High Staff FoxSA.
