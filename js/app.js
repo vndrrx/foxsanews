@@ -372,13 +372,30 @@
     // Remove the 3 non-news company profile/roadmap/recruitment posts even if cached in localStorage
     cloned.posts = cloned.posts.filter(p => !NON_NEWS_LEGACY_POST_IDS.includes(String(p.id)));
 
-    if (!Array.isArray(cloned.staffAccounts) || cloned.staffAccounts.length === 0) {
-      cloned.staffAccounts = JSON.parse(JSON.stringify(DEFAULT_STAFF_ACCOUNTS));
+    if (!Array.isArray(cloned.staffAccounts)) {
+      cloned.staffAccounts = [];
     }
     cloned.staffAccounts = cloned.staffAccounts.filter(acc =>
       !String(acc.username || '').toLowerCase().includes('ligma') &&
       !String(acc.displayName || '').toLowerCase().includes('ligma')
     );
+    // Guarantee that all official baseline roster accounts exist with approved status
+    DEFAULT_STAFF_ACCOUNTS.forEach(defAcc => {
+      const idx = cloned.staffAccounts.findIndex(
+        a => String(a.username || '').toLowerCase().trim() === defAcc.username.toLowerCase()
+      );
+      if (idx === -1) {
+        cloned.staffAccounts.push(JSON.parse(JSON.stringify(defAcc)));
+      } else {
+        const acc = cloned.staffAccounts[idx];
+        if (!acc.status) acc.status = 'approved';
+        if (defAcc.isAdmin && !acc.isAdmin) acc.isAdmin = true;
+        if (!acc.role) acc.role = defAcc.role;
+        if (!acc.password) acc.password = defAcc.password;
+        if (!acc.displayName) acc.displayName = defAcc.displayName;
+        if (!acc.authorName) acc.authorName = defAcc.authorName;
+      }
+    });
     delete cloned.profileFeedback;
 
     // Initialize Admin Chats if not present
@@ -502,10 +519,17 @@
       }
       const parsed = JSON.parse(raw);
       if (parsed && parsed.username) {
+        const cleanSavedUser = String(parsed.username).toLowerCase().trim().replace(/^@+/, '');
         const matched = (state.data.staffAccounts || []).find(
-          a => a.username.toLowerCase() === String(parsed.username).toLowerCase()
+          a => String(a.username || '').toLowerCase().trim() === cleanSavedUser
         );
-        state.currentUser = matched || null;
+        // Only keep session if account is approved and not former
+        if (matched && matched.status === 'approved' && !matched.isFormer) {
+          state.currentUser = matched;
+        } else {
+          state.currentUser = null;
+          localStorage.removeItem(AUTH_SESSION_KEY);
+        }
       }
     } catch (e) {
       state.currentUser = null;
@@ -514,15 +538,31 @@
   }
 
   function loginStaff(username, password) {
-    const cleanUser = String(username || '').trim().toLowerCase();
-    const cleanPass = String(password || '');
-    const account = (state.data.staffAccounts || []).find(
-      a => a.username.toLowerCase() === cleanUser && a.password === cleanPass
-    );
+    const cleanUser = String(username || '').trim().toLowerCase().replace(/^@+/, '');
+    const rawPass = String(password || '');
+    const cleanPass = rawPass.trim();
+
+    if (!cleanUser || !cleanPass) {
+      return { success: false, reason: 'empty_credentials' };
+    }
+
+    const account = (state.data.staffAccounts || []).find(a => {
+      const accUser = String(a.username || '').toLowerCase().trim();
+      const accDisplay = String(a.displayName || '').toLowerCase().trim();
+      const accAuthor = String(a.authorName || '').toLowerCase().trim();
+      const userMatches = (accUser === cleanUser) || (accDisplay === cleanUser) || (accAuthor === cleanUser);
+      if (!userMatches) return false;
+
+      const accPass = String(a.password || '');
+      const passMatches = (accPass === rawPass) || (accPass.trim() === cleanPass);
+      return passMatches;
+    });
+
     if (!account) return { success: false, reason: 'invalid_credentials' };
     if (account.status === 'pending') {
       return { success: false, reason: 'pending_approval', account };
     }
+
     state.currentUser = account;
     localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({
       username: account.username,
@@ -538,6 +578,11 @@
     localStorage.removeItem(AUTH_SESSION_KEY);
     updateHeaderStaffBadge();
     showToast('Anda telah keluar dari sesi Staff FoxSA.');
+    if (window.location.hash !== '#/login') {
+      window.location.hash = '#/login';
+    } else {
+      renderStaffLoginView('login');
+    }
   }
 
   function updateHeaderStaffBadge() {
@@ -545,20 +590,20 @@
     const footerStaffLink = document.getElementById('footer-staff-link');
     if (staffBtn) {
       const labelSpan = staffBtn.querySelector('.staff-btn-label');
+      staffBtn.style.display = 'inline-flex';
+      staffBtn.href = '#/admin';
       if (state.currentUser) {
-        staffBtn.style.display = 'inline-flex';
         if (labelSpan) labelSpan.textContent = `Panel (${state.currentUser.displayName.split(' ')[0]})`;
         staffBtn.classList.add('is-logged-in');
         staffBtn.title = `Login sebagai ${state.currentUser.displayName} (${state.currentUser.role})`;
       } else {
-        // Hanya bisa diakses oleh staff/admin, sembunyikan dari pembaca umum
-        staffBtn.style.display = 'none';
+        if (labelSpan) labelSpan.textContent = 'Staff Login';
         staffBtn.classList.remove('is-logged-in');
-        staffBtn.title = 'Login khusus Redaksi & Staff FoxSA';
+        staffBtn.title = 'Portal Redaksi & Staff FoxSA (Klik untuk Login)';
       }
     }
     if (footerStaffLink) {
-      footerStaffLink.style.display = state.currentUser ? 'block' : 'none';
+      footerStaffLink.style.display = 'block';
     }
     rebuildMobileDrawerMenu();
   }
@@ -1720,6 +1765,8 @@
     const mainEl = document.getElementById('main');
     if (!mainEl) return;
 
+    let currentRegAvatar = getRandomExecutiveAvatarSvg(Math.floor(Math.random() * 10));
+
     // Detect if register is requested via route or parameter
     const currentTab = (initialTab || (state.currentRoute && state.currentRoute.param === 'register')) ? 'register' : 'login';
 
@@ -1776,6 +1823,34 @@
               <a href="#/" class="foxsa-login-back-link">
                 <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda Berita
               </a>
+            </div>
+
+            <div class="foxsa-login-quick-helper">
+              <div class="foxsa-quick-helper-label">
+                <i class="fa-solid fa-bolt" style="color:#F08D39;"></i> Akun Roster Resmi FoxSA News (Klik untuk isi cepat):
+              </div>
+              <div class="foxsa-quick-chips">
+                <button type="button" class="foxsa-quick-chip" data-quick-user="arthur" data-quick-pass="arthurfoxsa" title="Klik untuk isi Arthur Redfields (CEO)">
+                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEijelpjGHfXOoTKfqD1mokSIESF0WySrKkFx3EV9rhrMxaQHJmPSkWe7Lj9QbiFJQbVx7z2os7vSHs3TVJFg1nzGX2MTzdqBO1eO-gppMt99EfwrEBOG9BqW1ZrbkNcNNqd-k9pS8vHOItd_EF7yVe_MfaTvhN2EvXpcWmK7ZDpX94RY14/s200/In%20Edward%20Snowden%E2%80%99s%20New%20Memoir,%20the%20Disclosures%20This%20Time%20Are%20Personal%20(Published%202019).jpg" class="quick-chip-avatar" alt="Arthur" />
+                  <span>Arthur (CEO)</span>
+                </button>
+                <button type="button" class="foxsa-quick-chip" data-quick-user="admin" data-quick-pass="foxsa2026" title="Klik untuk isi Admin Master">
+                  <i class="fa-solid fa-user-shield" style="color:#F08D39;font-size:12px;"></i>
+                  <span>Admin Master</span>
+                </button>
+                <button type="button" class="foxsa-quick-chip" data-quick-user="reinhardt" data-quick-pass="reinhardt2026" title="Klik untuk isi Reinhardt Harrison (Commissioner)">
+                  <i class="fa-solid fa-crown" style="color:#d97706;font-size:12px;"></i>
+                  <span>Reinhardt (BOC)</span>
+                </button>
+                <button type="button" class="foxsa-quick-chip" data-quick-user="park" data-quick-pass="parkyounghwan" title="Klik untuk isi Park Young-Hwan (Producer)">
+                  <i class="fa-solid fa-clapperboard" style="color:#0284c7;font-size:12px;"></i>
+                  <span>Park (Producer)</span>
+                </button>
+                <button type="button" class="foxsa-quick-chip" data-quick-user="steven" data-quick-pass="stevendeluca" title="Klik untuk isi Steven Deluca (Intern)">
+                  <i class="fa-solid fa-id-badge" style="color:#059669;font-size:12px;"></i>
+                  <span>Steven (Intern)</span>
+                </button>
+              </div>
             </div>
           </form>
         </div>
@@ -1915,6 +1990,29 @@
       });
     }
 
+    // Quick Login Helper Chips click handler
+    mainEl.querySelectorAll('[data-quick-user]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const u = chip.getAttribute('data-quick-user');
+        const p = chip.getAttribute('data-quick-pass');
+        if (loginUserInp) loginUserInp.value = u;
+        if (passInp) passInp.value = p;
+        if (loginErrBox) loginErrBox.style.display = 'none';
+        showToast(`Akun @${u} dipilih! Klik Masuk ke Panel Redaksi.`);
+      });
+    });
+
+    if (loginUserInp) {
+      loginUserInp.addEventListener('input', () => {
+        if (loginErrBox) loginErrBox.style.display = 'none';
+      });
+    }
+    if (passInp) {
+      passInp.addEventListener('input', () => {
+        if (loginErrBox) loginErrBox.style.display = 'none';
+      });
+    }
+
     // Handle Login Submit
     const loginForm = document.getElementById('foxsa-staff-login-form');
     const loginUserInp = document.getElementById('login-username');
@@ -1923,10 +2021,17 @@
     if (loginForm) {
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const res = loginStaff(loginUserInp.value, passInp.value);
+        const userVal = loginUserInp ? loginUserInp.value : '';
+        const passVal = passInp ? passInp.value : '';
+        const res = loginStaff(userVal, passVal);
         if (res && res.success) {
           showToast(`Selamat datang, ${state.currentUser.displayName}!`);
-          renderAdminView();
+          state.adminTab = 'posts';
+          if (window.location.hash === '#/admin') {
+            renderAdminView();
+          } else {
+            window.location.hash = '#/admin';
+          }
         } else if (res && res.reason === 'pending_approval') {
           if (loginErrBox) {
             loginErrBox.style.display = 'flex';
@@ -2063,6 +2168,10 @@
     if (!state.currentUser) {
       renderStaffLoginView();
       return;
+    }
+
+    if (state.currentRoute && ['posts', 'editor', 'comments', 'chat', 'profile', 'staff'].includes(state.currentRoute.param)) {
+      state.adminTab = state.currentRoute.param;
     }
 
     document.body.className = 'item';
@@ -5856,12 +5965,14 @@ const LEADER_QUOTES = {
       }
     });
 
-    // Add Staff Portal link at the bottom of mobile menu only if logged in
+    // Add Staff Portal link at the bottom of mobile menu (always accessible)
+    const staffLi = document.createElement('li');
     if (state.currentUser) {
-      const staffLi = document.createElement('li');
-      staffLi.innerHTML = `<a href="#/admin" class="admin-nav-btn"><i class="fa-solid fa-user-shield"></i> Panel (${escapeHtml(state.currentUser.displayName.split(' ')[0])})</a>`;
-      clonedUl.appendChild(staffLi);
+      staffLi.innerHTML = `<a href="#/admin" class="admin-nav-btn"><i class="fa-solid fa-user-shield"></i> Panel Redaksi (${escapeHtml(state.currentUser.displayName.split(' ')[0])})</a>`;
+    } else {
+      staffLi.innerHTML = `<a href="#/admin" class="admin-nav-btn" style="background:#090C1E;color:#ffffff;"><i class="fa-solid fa-right-to-bracket" style="color:#F08D39;"></i> Login Portal Redaksi</a>`;
     }
+    clonedUl.appendChild(staffLi);
 
     mobileMenuContainer.appendChild(clonedUl);
   }
