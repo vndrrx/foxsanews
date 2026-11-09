@@ -250,17 +250,23 @@
 
   function updateHeaderStaffBadge() {
     const staffBtn = document.getElementById('header-staff-btn');
+    const footerStaffLink = document.getElementById('footer-staff-link');
     if (staffBtn) {
       const labelSpan = staffBtn.querySelector('.staff-btn-label');
       if (state.currentUser) {
+        staffBtn.style.display = 'inline-flex';
         if (labelSpan) labelSpan.textContent = `Panel (${state.currentUser.displayName.split(' ')[0]})`;
         staffBtn.classList.add('is-logged-in');
         staffBtn.title = `Login sebagai ${state.currentUser.displayName} (${state.currentUser.role})`;
       } else {
-        if (labelSpan) labelSpan.textContent = 'Staff Login';
+        // Hanya bisa diakses oleh staff/admin, sembunyikan dari pembaca umum
+        staffBtn.style.display = 'none';
         staffBtn.classList.remove('is-logged-in');
         staffBtn.title = 'Login khusus Redaksi & Staff FoxSA';
       }
+    }
+    if (footerStaffLink) {
+      footerStaffLink.style.display = state.currentUser ? 'block' : 'none';
     }
     rebuildMobileDrawerMenu();
   }
@@ -619,6 +625,9 @@
     if (action === 'author' && param) return { view: 'author', param };
     if (action === 'search') return { view: 'search', param: param || '' };
     if (action === 'admin') return { view: 'admin', param: param || 'posts' };
+    if (action === 'login') return { view: 'admin', param: 'login' };
+    if (action === 'register') return { view: 'admin', param: 'register' };
+    if (action === 'staff') return { view: 'admin', param: 'staff' };
     return { view: 'home', param: null };
   }
 
@@ -1369,85 +1378,167 @@
   // 7. STAFF LOGIN & SIMPLIFIED ZERO-HTML VISUAL ARTICLE EDITOR
   // =========================================================================
 
-  function renderStaffLoginView() {
+  function renderStaffLoginView(initialTab) {
     document.body.className = 'item';
     const mainEl = document.getElementById('main');
     if (!mainEl) return;
 
-    const accounts = state.data.staffAccounts || [];
+    // Detect if register is requested via route or parameter
+    const currentTab = (initialTab || (state.currentRoute && state.currentRoute.param === 'register')) ? 'register' : 'login';
 
     mainEl.innerHTML = `
       <div class="foxsa-login-card">
-        <div class="foxsa-login-header">
-          <div class="foxsa-login-badge">
-            <i class="fa-solid fa-user-shield"></i> PORTAL REDAKSI FOXSA NEWS
-          </div>
-          <h2>Login Khusus Staff &amp; Admin</h2>
-          <p>Halaman ini dikhususkan bagi Jurnalis, Editor, dan Staff Redaksi FoxSA News untuk menulis berita serta mengelola komentar.</p>
+        <div class="foxsa-auth-tabs">
+          <button type="button" class="foxsa-auth-tab ${currentTab === 'login' ? 'active' : ''}" id="auth-tab-btn-login">
+            <i class="fa-solid fa-right-to-bracket"></i> Masuk Staff
+          </button>
+          <button type="button" class="foxsa-auth-tab ${currentTab === 'register' ? 'active' : ''}" id="auth-tab-btn-register">
+            <i class="fa-solid fa-user-plus"></i> Registrasi Anggota
+          </button>
         </div>
 
-        <form id="foxsa-staff-login-form" class="foxsa-login-form">
-          <div class="foxsa-form-group">
-            <label for="login-quick-account">Pilih Nama Staff Cepat (Opsional)</label>
-            <select id="login-quick-account" class="foxsa-select">
-              <option value="">-- Pilih Akun Staff atau Ketik Username Manual --</option>
-              ${accounts.map(acc => `
-                <option value="${escapeHtml(acc.username)}">${escapeHtml(acc.displayName)} — (${escapeHtml(acc.role)})</option>
-              `).join('')}
-            </select>
-          </div>
-
-          <div class="foxsa-form-group">
-            <label for="login-username">Username Staff / Admin *</label>
-            <div class="foxsa-input-icon-wrap">
-              <i class="fa-solid fa-user"></i>
-              <input type="text" id="login-username" class="foxsa-input" placeholder="Contoh: admin, arthur, clarissa, shen" autocomplete="username" required />
+        <!-- TAB LOGIN -->
+        <div id="foxsa-auth-panel-login" style="display:${currentTab === 'login' ? 'block' : 'none'};">
+          <div class="foxsa-login-header">
+            <img src="assets/logo/foxsa-icon.jpg" class="foxsa-login-logo" alt="FoxSA News" />
+            <div class="foxsa-login-badge">
+              <i class="fa-solid fa-shield-halved"></i> PORTAL REDAKSI FOXSA
             </div>
+            <h2>Login Staff &amp; Admin</h2>
+            <p>Halaman khusus jurnalis, editor, dan staf redaksi FoxSA News untuk publikasi berita dan kelola portal.</p>
           </div>
 
-          <div class="foxsa-form-group">
-            <label for="login-password">Password *</label>
-            <div class="foxsa-input-icon-wrap">
-              <i class="fa-solid fa-lock"></i>
-              <input type="password" id="login-password" class="foxsa-input" placeholder="Masukkan password staff..." autocomplete="current-password" required />
-              <button type="button" class="foxsa-pwd-toggle" id="login-toggle-pwd" aria-label="Tampilkan Password">
-                <i class="fa-regular fa-eye"></i>
+          <form id="foxsa-staff-login-form" class="foxsa-login-form">
+            <div class="foxsa-form-group">
+              <label for="login-username">Username Staff / Admin *</label>
+              <div class="foxsa-input-icon-wrap">
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="login-username" class="foxsa-input" placeholder="Masukkan username staff..." autocomplete="username" required />
+              </div>
+            </div>
+
+            <div class="foxsa-form-group">
+              <label for="login-password">Password *</label>
+              <div class="foxsa-input-icon-wrap">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="login-password" class="foxsa-input" placeholder="Masukkan password staff..." autocomplete="current-password" required />
+                <button type="button" class="foxsa-pwd-toggle" id="login-toggle-pwd" aria-label="Tampilkan Password">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div id="login-error-msg" class="foxsa-login-error" style="display:none;">
+              <i class="fa-solid fa-triangle-exclamation"></i> Username atau Password salah! Periksa kembali akun staff Anda.
+            </div>
+
+            <div class="foxsa-login-actions">
+              <button type="submit" class="foxsa-btn foxsa-btn-full">
+                <i class="fa-solid fa-right-to-bracket"></i> Masuk ke Panel Redaksi
               </button>
+              <a href="#/" class="foxsa-login-back-link">
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda Berita
+              </a>
             </div>
+          </form>
+        </div>
+
+        <!-- TAB REGISTRASI ANGGOTA -->
+        <div id="foxsa-auth-panel-register" style="display:${currentTab === 'register' ? 'block' : 'none'};">
+          <div class="foxsa-login-header">
+            <img src="assets/logo/foxsa-icon.jpg" class="foxsa-login-logo" alt="FoxSA News" />
+            <div class="foxsa-login-badge" style="background:rgba(16, 185, 129, 0.14);color:#059669;">
+              <i class="fa-solid fa-id-card"></i> PENDAFTARAN ANGGOTA
+            </div>
+            <h2>Registrasi Anggota Baru</h2>
+            <p>Khusus calon jurnalis &amp; staf yang telah diterima di tim redaksi FoxSA News Agency.</p>
           </div>
 
-          <div id="login-error-msg" class="foxsa-login-error" style="display:none;">
-            <i class="fa-solid fa-triangle-exclamation"></i> Username atau Password salah! Silakan periksa kembali.
-          </div>
+          <form id="foxsa-staff-register-form" class="foxsa-login-form">
+            <div class="foxsa-form-group">
+              <label for="reg-username">Username Login (Tanpa spasi) *</label>
+              <div class="foxsa-input-icon-wrap">
+                <i class="fa-solid fa-at"></i>
+                <input type="text" id="reg-username" class="foxsa-input" placeholder="Contoh: kevin (huruf kecil &amp; angka)" autocomplete="username" required />
+              </div>
+            </div>
 
-          <div class="foxsa-login-actions">
-            <button type="submit" class="foxsa-btn foxsa-btn-full">
-              <i class="fa-solid fa-right-to-bracket"></i> Masuk ke Panel Redaksi
-            </button>
-            <a href="#/" class="foxsa-btn foxsa-btn-outline foxsa-btn-full" style="text-decoration:none;">
-              <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda Berita
-            </a>
-          </div>
-        </form>
+            <div class="foxsa-form-group">
+              <label for="reg-name">Nama Lengkap IC / Reporter *</label>
+              <div class="foxsa-input-icon-wrap">
+                <i class="fa-solid fa-signature"></i>
+                <input type="text" id="reg-name" class="foxsa-input" placeholder="Contoh: Kevin Salvatore" required />
+              </div>
+            </div>
+
+            <div class="foxsa-form-group">
+              <label for="reg-role">Departemen / Jabatan Awal *</label>
+              <select id="reg-role" class="foxsa-select">
+                <option value="Junior Staff | Journalist">Junior Staff | Journalist</option>
+                <option value="Operational Staff">Operational Staff</option>
+                <option value="Photographer / Cameraman">Photographer / Cameraman</option>
+                <option value="Supervisor Team">Supervisor Team</option>
+                <option value="Reporter Trainee">Reporter Trainee</option>
+              </select>
+            </div>
+
+            <div class="foxsa-form-group">
+              <label for="reg-password">Password Baru *</label>
+              <div class="foxsa-input-icon-wrap">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="reg-password" class="foxsa-input" placeholder="Minimal 4 karakter..." autocomplete="new-password" required />
+                <button type="button" class="foxsa-pwd-toggle" id="reg-toggle-pwd" aria-label="Tampilkan Password">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="foxsa-form-group">
+              <label for="reg-confirm-password">Konfirmasi Password *</label>
+              <div class="foxsa-input-icon-wrap">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="reg-confirm-password" class="foxsa-input" placeholder="Ulangi password..." autocomplete="new-password" required />
+              </div>
+            </div>
+
+            <div id="reg-error-msg" class="foxsa-login-error" style="display:none;"></div>
+
+            <div class="foxsa-login-actions">
+              <button type="submit" class="foxsa-btn foxsa-btn-full" style="background:#090C1E;border-color:#090C1E;">
+                <i class="fa-solid fa-user-check"></i> Selesaikan Registrasi
+              </button>
+              <a href="#/" class="foxsa-login-back-link">
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda Berita
+              </a>
+            </div>
+          </form>
+        </div>
       </div>
     `;
 
-    const quickSelect = document.getElementById('login-quick-account');
-    const userInp = document.getElementById('login-username');
-    const passInp = document.getElementById('login-password');
-    const togglePwdBtn = document.getElementById('login-toggle-pwd');
-    const errBox = document.getElementById('login-error-msg');
-    const form = document.getElementById('foxsa-staff-login-form');
+    const tabBtnLogin = document.getElementById('auth-tab-btn-login');
+    const tabBtnRegister = document.getElementById('auth-tab-btn-register');
+    const panelLogin = document.getElementById('foxsa-auth-panel-login');
+    const panelRegister = document.getElementById('foxsa-auth-panel-register');
 
-    if (quickSelect) {
-      quickSelect.addEventListener('change', () => {
-        if (quickSelect.value) {
-          userInp.value = quickSelect.value;
-          passInp.focus();
-        }
+    if (tabBtnLogin && tabBtnRegister) {
+      tabBtnLogin.addEventListener('click', () => {
+        tabBtnLogin.classList.add('active');
+        tabBtnRegister.classList.remove('active');
+        panelLogin.style.display = 'block';
+        panelRegister.style.display = 'none';
+      });
+      tabBtnRegister.addEventListener('click', () => {
+        tabBtnRegister.classList.add('active');
+        tabBtnLogin.classList.remove('active');
+        panelRegister.style.display = 'block';
+        panelLogin.style.display = 'none';
       });
     }
 
+    // Toggle Password in Login
+    const passInp = document.getElementById('login-password');
+    const togglePwdBtn = document.getElementById('login-toggle-pwd');
     if (togglePwdBtn && passInp) {
       togglePwdBtn.addEventListener('click', () => {
         const isPwd = passInp.type === 'password';
@@ -1456,18 +1547,113 @@
       });
     }
 
-    if (form) {
-      form.addEventListener('submit', (e) => {
+    // Toggle Password in Register
+    const regPassInp = document.getElementById('reg-password');
+    const regToggleBtn = document.getElementById('reg-toggle-pwd');
+    if (regToggleBtn && regPassInp) {
+      regToggleBtn.addEventListener('click', () => {
+        const isPwd = regPassInp.type === 'password';
+        regPassInp.type = isPwd ? 'text' : 'password';
+        regToggleBtn.innerHTML = isPwd ? '<i class="fa-regular fa-eye-slash"></i>' : '<i class="fa-regular fa-eye"></i>';
+      });
+    }
+
+    // Handle Login Submit
+    const loginForm = document.getElementById('foxsa-staff-login-form');
+    const loginUserInp = document.getElementById('login-username');
+    const loginErrBox = document.getElementById('login-error-msg');
+
+    if (loginForm) {
+      loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const ok = loginStaff(userInp.value, passInp.value);
+        const ok = loginStaff(loginUserInp.value, passInp.value);
         if (ok) {
           showToast(`Selamat datang, ${state.currentUser.displayName}!`);
           renderAdminView();
         } else {
-          if (errBox) errBox.style.display = 'flex';
+          if (loginErrBox) loginErrBox.style.display = 'flex';
           passInp.value = '';
           passInp.focus();
         }
+      });
+    }
+
+    // Handle Register Submit
+    const regForm = document.getElementById('foxsa-staff-register-form');
+    const regUserInp = document.getElementById('reg-username');
+    const regNameInp = document.getElementById('reg-name');
+    const regRoleSelect = document.getElementById('reg-role');
+    const regConfirmInp = document.getElementById('reg-confirm-password');
+    const regErrBox = document.getElementById('reg-error-msg');
+
+    if (regForm) {
+      regForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = regUserInp.value.trim().toLowerCase().replace(/\s+/g, '');
+        const displayName = regNameInp.value.trim();
+        const role = regRoleSelect.value.trim() || 'Junior Staff | Journalist';
+        const password = regPassInp.value.trim();
+        const confirmPassword = regConfirmInp.value.trim();
+
+        if (regErrBox) regErrBox.style.display = 'none';
+
+        if (!username || !displayName || !password) {
+          if (regErrBox) {
+            regErrBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Harap lengkapi semua kolom pendaftaran!';
+            regErrBox.style.display = 'flex';
+          }
+          return;
+        }
+
+        if (password.length < 4) {
+          if (regErrBox) {
+            regErrBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Password minimal terdiri dari 4 karakter!';
+            regErrBox.style.display = 'flex';
+          }
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          if (regErrBox) {
+            regErrBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Konfirmasi password tidak cocok!';
+            regErrBox.style.display = 'flex';
+          }
+          return;
+        }
+
+        const accounts = state.data.staffAccounts || [];
+        if (accounts.some(a => a.username.toLowerCase() === username)) {
+          if (regErrBox) {
+            regErrBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Username tersebut sudah digunakan. Gunakan username lain.';
+            regErrBox.style.display = 'flex';
+          }
+          return;
+        }
+
+        const newAccount = {
+          username,
+          password,
+          displayName,
+          authorName: displayName,
+          role,
+          isAdmin: false,
+          avatar: DEFAULT_AVATAR
+        };
+
+        state.data.staffAccounts.push(newAccount);
+        if (!state.data.authors[displayName]) {
+          state.data.authors[displayName] = {
+            name: displayName,
+            avatar: DEFAULT_AVATAR,
+            bio: role,
+            profileUrl: `#/author/${encodeURIComponent(displayName)}`
+          };
+        }
+
+        saveDataToLocal(true);
+        loginStaff(username, password);
+        showToast(`Selamat datang di tim redaksi FoxSA News, ${displayName}!`);
+        renderAdminView();
       });
     }
   }
@@ -1524,7 +1710,17 @@
                       ${(p.comments && p.comments.length > 0) ? `<span class="foxsa-badge" style="background:#e0f2fe;color:#0369a1;"><i class="fa-regular fa-comment"></i> ${p.comments.length}</span>` : ''}
                     </div>
                   </td>
-                  <td>${escapeHtml(p.author)}</td>
+                  <td>
+                    <div style="font-weight:600;color:#090C1E;">${escapeHtml(p.author)}</div>
+                    <div style="margin-top:4px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                      <span class="foxsa-badge" style="font-size:10.5px;">${escapeHtml(p.authorBio || 'Staff FoxSA')}</span>
+                      ${state.currentUser.isAdmin ? `
+                        <button type="button" class="foxsa-role-badge-btn" data-set-post-role="${escapeHtml(p.id)}" title="Ubah Jabatan/Role Penulis Artikel Ini">
+                          <i class="fa-solid fa-user-gear"></i> Set Role
+                        </button>
+                      ` : ''}
+                    </div>
+                  </td>
                   <td style="white-space:nowrap;">${escapeHtml(formatDateID(p.published))}</td>
                   <td style="text-align:center;">
                     <button type="button" class="foxsa-editor-btn" data-toggle-pop="${escapeHtml(p.id)}" title="Tampilkan di Most Popular">
@@ -1702,43 +1898,52 @@
             </div>
           </div>
 
-          <!-- LANGKAH 4: IDENTITAS JURNALIS & WAKTU PUBLIKASI -->
-          <div class="foxsa-editor-step-card">
-            <div class="step-card-badge">4. Identitas Jurnalis &amp; Publikasi</div>
-            <div class="foxsa-form-row">
-              <div class="foxsa-form-group">
-                <label>Pilih Jurnalis / Penulis Tersimpan</label>
-                <select id="post-author-preset" class="foxsa-select">
-                  ${authorNames.map(name => `<option value="${escapeHtml(name)}" ${name === authorVal ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}
-                  <option value="__custom__">+ Tulis Nama Jurnalis Baru...</option>
-                </select>
+          ${state.currentUser.isAdmin ? `
+            <!-- PENGATURAN REDAKSI & JABATAN PENULIS (KHUSUS ADMIN) -->
+            <div class="foxsa-editor-step-card foxsa-admin-override-card">
+              <div class="step-card-badge" style="background:#090C1E;color:#F08D39;">
+                <i class="fa-solid fa-user-shield"></i> Pengaturan Penulis &amp; Jabatan (Khusus Admin)
               </div>
-              <div class="foxsa-form-group">
-                <label>Nama Penulis / Reporter *</label>
-                <input type="text" id="post-author-input" class="foxsa-input" value="${escapeHtml(authorVal)}" required />
-              </div>
-              <div class="foxsa-form-group">
-                <label>Tanggal &amp; Waktu Publikasi</label>
-                <input type="datetime-local" id="post-date-input" class="foxsa-input" value="${escapeHtml(dateVal)}" />
+              <p style="font-size:12px;color:#64748b;margin:6px 0 14px;">Admin dapat menentukan nama jurnalis yang memposting berita ini dan mengubah jabatan resminya.</p>
+              <div class="foxsa-form-row" style="margin-bottom:0;">
+                <div class="foxsa-form-group">
+                  <label>Pilih Penulis Berita</label>
+                  <select id="post-author-select" class="foxsa-select">
+                    ${(state.data.staffAccounts || []).map(acc => {
+                      const name = acc.authorName || acc.displayName;
+                      const isSelected = name.toLowerCase() === authorVal.toLowerCase();
+                      return `<option value="${escapeHtml(name)}" data-role="${escapeHtml(acc.role || '')}" data-avatar="${escapeHtml(acc.avatar || DEFAULT_AVATAR)}" ${isSelected ? 'selected' : ''}>${escapeHtml(acc.displayName)} (${escapeHtml(acc.role)})</option>`;
+                    }).join('')}
+                    <option value="__custom__" ${!(state.data.staffAccounts || []).some(a => (a.authorName || a.displayName).toLowerCase() === authorVal.toLowerCase()) ? 'selected' : ''}>+ Tulis Nama Penulis Lainnya...</option>
+                  </select>
+                </div>
+                <div class="foxsa-form-group" id="post-author-custom-group" style="display:${!(state.data.staffAccounts || []).some(a => (a.authorName || a.displayName).toLowerCase() === authorVal.toLowerCase()) ? 'block' : 'none'};">
+                  <label>Nama Penulis Custom *</label>
+                  <input type="text" id="post-author-custom-input" class="foxsa-input" value="${escapeHtml(authorVal)}" placeholder="Nama Penulis..." />
+                </div>
+                <div class="foxsa-form-group">
+                  <label>Role / Jabatan Penulis Ini *</label>
+                  <input type="text" id="post-author-role-input" class="foxsa-input" value="${escapeHtml(authorBioVal)}" placeholder="Contoh: Senior Staff | Field Reporter, Chief Editor" required />
+                </div>
               </div>
             </div>
+          ` : `
+            <!-- INFORMASI PENULIS OTOMATIS (UNTUK STAFF) -->
+            <div class="foxsa-staff-author-preview" style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;margin:18px 0 10px;">
+              <img src="${escapeHtml(state.currentUser.avatar || DEFAULT_AVATAR)}" alt="${escapeHtml(state.currentUser.displayName)}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;" onerror="this.src='${DEFAULT_AVATAR}'" />
+              <div>
+                <div style="font-size:11.5px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;">Identitas Jurnalis</div>
+                <strong style="color:#090C1E;font-size:14px;">${escapeHtml(state.currentUser.authorName || state.currentUser.displayName)}</strong>
+                <span class="foxsa-badge" style="margin-left:6px;">${escapeHtml(state.currentUser.role || 'Jurnalis FoxSA')}</span>
+              </div>
+            </div>
+          `}
 
-            <div class="foxsa-form-row" style="margin-bottom:0;">
-              <div class="foxsa-form-group">
-                <label>Jabatan / Bio Singkat Penulis</label>
-                <input type="text" id="post-author-bio-input" class="foxsa-input" value="${escapeHtml(authorBioVal)}" placeholder="Contoh: Senior Staff | Field Reporter" />
-              </div>
-              <div class="foxsa-form-group">
-                <label>URL Foto Profil Penulis</label>
-                <input type="text" id="post-author-avatar-input" class="foxsa-input" value="${escapeHtml(authorAvatarVal)}" placeholder="https://..." />
-              </div>
-              <div class="foxsa-form-group" style="justify-content:center;">
-                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:18px;font-size:13px;">
-                  <input type="checkbox" id="post-popular-input" ${popularChecked ? 'checked' : ''} style="width:16px;height:16px;" />
-                  <span>🔥 Tampilkan di Berita Terpopuler</span>
-                </label>
-              </div>
-            </div>
+          <div style="margin: 14px 0 16px;">
+            <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13.5px;font-weight:600;color:#1E2438;">
+              <input type="checkbox" id="post-popular-input" ${popularChecked ? 'checked' : ''} style="width:17px;height:17px;accent-color:#F08D39;" />
+              <span>🔥 Tampilkan di Berita Terpopuler</span>
+            </label>
           </div>
 
           <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:18px;">
@@ -1841,6 +2046,9 @@
                     </button>
                   </td>
                   <td style="white-space:nowrap;">
+                    <button type="button" class="foxsa-editor-btn" style="color:#0284c7;border-color:#bae6fd;" data-edit-staff-role="${escapeHtml(acc.username)}">
+                      <i class="fa-solid fa-id-badge"></i> Set Role
+                    </button>
                     <button type="button" class="foxsa-editor-btn" data-change-pwd="${escapeHtml(acc.username)}">
                       <i class="fa-solid fa-key"></i> Ubah Password
                     </button>
@@ -1854,6 +2062,12 @@
               `).join('')}
             </tbody>
           </table>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+          <button type="button" class="foxsa-btn foxsa-btn-outline" id="btn-copy-register-link">
+            <i class="fa-solid fa-link"></i> Salin Link Registrasi Anggota Baru
+          </button>
         </div>
 
         <div class="foxsa-comment-form">
@@ -2356,24 +2570,27 @@
         });
       }
 
-      const presetSelect = document.getElementById('post-author-preset');
-      const authorInput = document.getElementById('post-author-input');
-      const bioInput = document.getElementById('post-author-bio-input');
-      const avatarInput = document.getElementById('post-author-avatar-input');
+      // Author selection logic for Admin
+      const authorSelect = document.getElementById('post-author-select');
+      const authorCustomGroup = document.getElementById('post-author-custom-group');
+      const authorCustomInput = document.getElementById('post-author-custom-input');
+      const authorRoleInput = document.getElementById('post-author-role-input');
 
-      if (presetSelect) {
-        presetSelect.addEventListener('change', () => {
-          const val = presetSelect.value;
-          if (val !== '__custom__' && state.data.authors[val]) {
-            const a = state.data.authors[val];
-            authorInput.value = a.name;
-            bioInput.value = a.bio || '';
-            avatarInput.value = a.avatar || DEFAULT_AVATAR;
-          } else if (val === '__custom__') {
-            authorInput.value = '';
-            bioInput.value = 'FoxSA News Journalist';
-            avatarInput.value = DEFAULT_AVATAR;
-            authorInput.focus();
+      if (authorSelect) {
+        authorSelect.addEventListener('change', () => {
+          const val = authorSelect.value;
+          if (val === '__custom__') {
+            if (authorCustomGroup) authorCustomGroup.style.display = 'block';
+            if (authorCustomInput) {
+              authorCustomInput.focus();
+            }
+          } else {
+            if (authorCustomGroup) authorCustomGroup.style.display = 'none';
+            const opt = authorSelect.options[authorSelect.selectedIndex];
+            const role = opt ? opt.getAttribute('data-role') : '';
+            if (authorRoleInput && role) {
+              authorRoleInput.value = role;
+            }
           }
         });
       }
@@ -2400,22 +2617,60 @@
       editorForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const title = document.getElementById('post-title-input').value.trim();
-        const author = document.getElementById('post-author-input').value.trim() || 'FoxSA News';
-        const authorBio = document.getElementById('post-author-bio-input').value.trim();
-        const authorAvatar = document.getElementById('post-author-avatar-input').value.trim() || DEFAULT_AVATAR;
         const labels = state.selectedEditorLabels.length > 0 ? [...state.selectedEditorLabels] : ['News'];
-        const dateRaw = document.getElementById('post-date-input').value;
-        const publishedIso = dateRaw ? new Date(dateRaw).toISOString() : new Date().toISOString();
-        const popular = document.getElementById('post-popular-input').checked;
+        const popular = document.getElementById('post-popular-input') ? document.getElementById('post-popular-input').checked : false;
         let featuredImage = document.getElementById('post-image-input').value.trim();
         let content = serializeVisualEditorToCleanHtml(visualCanvas);
+
+        let author = '';
+        let authorBio = '';
+        let authorAvatar = DEFAULT_AVATAR;
+
+        if (state.currentUser && state.currentUser.isAdmin) {
+          const aSelect = document.getElementById('post-author-select');
+          const aCustom = document.getElementById('post-author-custom-input');
+          const aRole = document.getElementById('post-author-role-input');
+
+          if (aSelect && aSelect.value === '__custom__') {
+            author = (aCustom && aCustom.value.trim()) || 'FoxSA News';
+          } else if (aSelect && aSelect.value) {
+            author = aSelect.value;
+          } else {
+            author = state.currentUser.authorName || state.currentUser.displayName;
+          }
+
+          authorBio = (aRole && aRole.value.trim()) || 'Chief Editor / Super Admin';
+
+          const opt = aSelect ? aSelect.options[aSelect.selectedIndex] : null;
+          authorAvatar = (opt && opt.getAttribute('data-avatar')) || (state.data.authors[author] && state.data.authors[author].avatar) || DEFAULT_AVATAR;
+
+          // If the author matches a registered staff account, update that staff's role in the system
+          const matchedStaff = (state.data.staffAccounts || []).find(
+            a => (a.authorName && a.authorName.toLowerCase() === author.toLowerCase()) ||
+                 (a.displayName && a.displayName.toLowerCase() === author.toLowerCase())
+          );
+          if (matchedStaff) {
+            matchedStaff.role = authorBio;
+          }
+        } else if (state.currentUser) {
+          author = state.currentUser.authorName || state.currentUser.displayName;
+          authorBio = state.currentUser.role || 'Jurnalis FoxSA News';
+          authorAvatar = state.currentUser.avatar || DEFAULT_AVATAR;
+        } else {
+          author = 'FoxSA News';
+          authorBio = 'Tim Redaksi FoxSA News';
+          authorAvatar = DEFAULT_AVATAR;
+        }
 
         state.data.authors[author] = {
           name: author,
           avatar: authorAvatar,
-          bio: authorBio || 'FoxSA News Journalist',
-          profileUrl: `#/author/${author}`
+          bio: authorBio,
+          profileUrl: `#/author/${encodeURIComponent(author)}`
         };
+
+        const existingPost = state.editingPostId ? state.data.posts.find(p => p.id === state.editingPostId) : null;
+        const publishedIso = existingPost && existingPost.published ? existingPost.published : new Date().toISOString();
 
         // If user provided a featuredImage and content doesn't have an <img> yet, prepend it cleanly
         if (featuredImage && !/<img\b/i.test(content)) {
@@ -2492,7 +2747,78 @@
       });
     });
 
+    // Set Author Role from Post List (Admin)
+    mainEl.querySelectorAll('[data-set-post-role]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const postId = btn.getAttribute('data-set-post-role');
+        const post = state.data.posts.find(p => p.id === postId);
+        if (!post) return;
+        const currentRole = post.authorBio || '';
+        const newRole = prompt(`Ubah Jabatan / Role untuk "${post.author}" pada artikel ini:`, currentRole);
+        if (newRole && newRole.trim()) {
+          const trimmedRole = newRole.trim();
+          post.authorBio = trimmedRole;
+          if (state.data.authors[post.author]) {
+            state.data.authors[post.author].bio = trimmedRole;
+          }
+          // Update matching staff account if exists
+          const matchedAcc = (state.data.staffAccounts || []).find(
+            a => (a.authorName && a.authorName.toLowerCase() === post.author.toLowerCase()) ||
+                 (a.displayName && a.displayName.toLowerCase() === post.author.toLowerCase())
+          );
+          if (matchedAcc) {
+            matchedAcc.role = trimmedRole;
+          }
+          saveDataToLocal(true);
+          renderAdminView();
+          showToast(`Jabatan ${post.author} berhasil diubah menjadi "${trimmedRole}"!`);
+        }
+      });
+    });
+
     // Staff Management Tab Events
+    mainEl.querySelectorAll('[data-edit-staff-role]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const username = btn.getAttribute('data-edit-staff-role');
+        const acc = (state.data.staffAccounts || []).find(a => a.username === username);
+        if (!acc) return;
+        const newRole = prompt(`Masukkan Jabatan / Role baru untuk "${acc.displayName}" (${acc.username}):`, acc.role);
+        if (newRole && newRole.trim()) {
+          const trimmedRole = newRole.trim();
+          acc.role = trimmedRole;
+          if (state.data.authors[acc.authorName]) {
+            state.data.authors[acc.authorName].bio = trimmedRole;
+          }
+          // Also update all posts by this author
+          state.data.posts.forEach(p => {
+            if ((p.author || '').toLowerCase() === (acc.authorName || '').toLowerCase() ||
+                (p.author || '').toLowerCase() === (acc.displayName || '').toLowerCase()) {
+              p.authorBio = trimmedRole;
+            }
+          });
+          saveDataToLocal(true);
+          renderAdminView();
+          showToast(`Jabatan ${acc.displayName} berhasil diubah menjadi "${trimmedRole}"!`);
+        }
+      });
+    });
+
+    const copyRegBtn = document.getElementById('btn-copy-register-link');
+    if (copyRegBtn) {
+      copyRegBtn.addEventListener('click', () => {
+        const regUrl = `${window.location.origin}${window.location.pathname}#/register`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(regUrl).then(() => {
+            showToast('Link registrasi anggota berhasil disalin ke clipboard!');
+          }).catch(() => {
+            prompt('Salin link registrasi berikut untuk dibagikan ke anggota baru:', regUrl);
+          });
+        } else {
+          prompt('Salin link registrasi berikut untuk dibagikan ke anggota baru:', regUrl);
+        }
+      });
+    }
+
     mainEl.querySelectorAll('[data-show-staff-pwd]').forEach(btn => {
       btn.addEventListener('click', () => {
         const tr = btn.closest('tr');
@@ -3814,10 +4140,12 @@
       }
     });
 
-    // Add Staff Portal link at the bottom of mobile menu
-    const staffLi = document.createElement('li');
-    staffLi.innerHTML = `<a href="#/admin" class="admin-nav-btn"><i class="fa-solid fa-user-shield"></i> ${state.currentUser ? `Panel (${escapeHtml(state.currentUser.displayName.split(' ')[0])})` : 'Staff Login'}</a>`;
-    clonedUl.appendChild(staffLi);
+    // Add Staff Portal link at the bottom of mobile menu only if logged in
+    if (state.currentUser) {
+      const staffLi = document.createElement('li');
+      staffLi.innerHTML = `<a href="#/admin" class="admin-nav-btn"><i class="fa-solid fa-user-shield"></i> Panel (${escapeHtml(state.currentUser.displayName.split(' ')[0])})</a>`;
+      clonedUl.appendChild(staffLi);
+    }
 
     mobileMenuContainer.appendChild(clonedUl);
   }
