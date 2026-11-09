@@ -12385,3 +12385,324 @@ body.leader-modal-open {
   border: 1px solid #fde68a;
 }
 
+
+
+/* ==========================================================================
+   COMPREHENSIVE ANDROID & MOBILE OPTIMIZATIONS (RESPONSIVE & TEXT JUSTIFY)
+   ========================================================================== */
+
+/* Prevent horizontal page wobble / unwanted horizontal scroll on Android */
+html, body {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+}
+
+/* Comprehensive Text Justify for Android & Mobile */
+@media screen and (max-width: 768px) {
+  .post-body,
+  .post-body p,
+  .item-post-inner,
+  .item-post-inner p,
+  .foxsa-clean-prose,
+  .foxsa-clean-prose p,
+  .post-snippet,
+  .binduz-card-desc,
+  .foxsa-profile-about-text p,
+  .profile-value-box p,
+  .leader-member-lead,
+  .leader-member-quote,
+  .alumni-hero-lead,
+  .alumni-bio,
+  .alumni-legacy-quote span,
+  .div-card p,
+  .rec-intro-box p,
+  .rec-detail-block p,
+  .rec-step-card p {
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    text-align-last: left !important;
+    hyphens: auto !important;
+    -webkit-hyphens: auto !important;
+    word-break: normal !important;
+  }
+}
+
+/* 13-Tier Official Member Roster on Android */
+@media screen and (max-width: 768px) {
+  .foxsa-roster-board {
+    border-radius: 12px;
+    margin-top: 24px;
+  }
+  .roster-board-header {
+    padding: 18px 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .roster-header-brand h3 {
+    font-size: 19px;
+  }
+  .roster-motto {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .roster-tier-list {
+    padding: 14px 10px;
+    gap: 14px;
+  }
+  .roster-tier-block {
+    padding: 14px 12px;
+    border-radius: 10px;
+  }
+  .roster-tier-label {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .roster-tier-label h4 {
+    font-size: 13.5px;
+  }
+  .roster-tier-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+  .roster-card {
+    padding: 12px 14px;
+  }
+  .roster-officer-row {
+    gap: 12px;
+  }
+  .roster-avatar-box img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+  }
+  .roster-officer-name {
+    font-size: 14px;
+    margin-bottom: 0;
+  }
+  .roster-board-footer {
+    padding: 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .roster-join-btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  .roster-admin-manage-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+  }
+  .roster-admin-manage-bar .foxsa-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+}
+
+/* Admin Tabs & Panel on Android */
+@media screen and (max-width: 768px) {
+  .foxsa-admin-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 4px 0 8px;
+    gap: 8px;
+  }
+  .foxsa-admin-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .foxsa-admin-tab {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 8px 13px;
+    font-size: 11.5px;
+  }
+  .foxsa-staff-logged-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+  }
+  .foxsa-staff-logged-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .foxsa-staff-logged-actions .foxsa-btn {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 11.5px;
+    box-sizing: border-box;
+  }
+}
+
+/* Admin Chat on Android */
+@media screen and (max-width: 768px) {
+  .foxsa-chat-header-bar {
+    padding: 12px 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .foxsa-chat-messages-container {
+    padding: 14px 10px;
+    max-height: 380px;
+    min-height: 240px;
+    gap: 12px;
+  }
+  .foxsa-chat-msg-row {
+    max-width: 92%;
+    gap: 8px;
+  }
+  .foxsa-chat-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  .foxsa-chat-bubble {
+    font-size: 12.5px;
+    padding: 8px 12px;
+    border-radius: 10px;
+  }
+  .foxsa-chat-quick-tags {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 8px 10px;
+    gap: 6px;
+  }
+  .foxsa-chat-quick-tags::-webkit-scrollbar {
+    display: none;
+  }
+  .foxsa-chat-tag-pill {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 10.5px;
+  }
+  .foxsa-chat-input-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .foxsa-chat-input-row textarea {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 13px;
+  }
+  .foxsa-chat-input-row button[type="submit"] {
+    width: 100%;
+    height: 40px;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+}
+
+/* Modals on Mobile & Android */
+@media screen and (max-width: 680px) {
+  .foxsa-modal-overlay {
+    padding: 10px !important;
+  }
+  .foxsa-modal-card {
+    max-width: 95vw !important;
+    max-height: 88vh !important;
+    overflow-y: auto !important;
+    margin: auto !important;
+    border-radius: 12px !important;
+  }
+  .foxsa-modal-header {
+    padding: 12px 14px !important;
+  }
+  .foxsa-modal-body {
+    padding: 14px !important;
+  }
+  .foxsa-modal-footer {
+    padding: 10px 14px !important;
+  }
+  .foxsa-modal-body .foxsa-form-row {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+}
+
+/* Leadership Grid on Android (No awkward displacements) */
+@media screen and (max-width: 600px) {
+  .foxsa-meet-team-wrap {
+    padding: 0 4px;
+  }
+  .leader-member-hero-text {
+    padding: 22px 14px 90px;
+  }
+  .leader-member-title {
+    font-size: 26px;
+  }
+  .leader-member-subtitle {
+    font-size: 13px;
+  }
+  .leader-member-grid {
+    margin-top: -70px;
+    gap: 20px 10px;
+    padding: 0 4px 20px;
+  }
+  .leader-member-card {
+    width: 100% !important;
+    max-width: 290px !important;
+    margin: 0 auto;
+    transform: none !important;
+  }
+  .leader-member-card:nth-child(n) {
+    transform: none !important;
+  }
+  .leader-member-photo {
+    aspect-ratio: 4 / 4.2;
+  }
+}
+
+/* Profile Sub-tabs Scrollable Strip */
+@media screen and (max-width: 768px) {
+  .foxsa-profile-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .foxsa-profile-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .foxsa-profile-tab {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+  .foxsa-profile-intro-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+  .foxsa-profile-values-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .alumni-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .alumni-stats-bar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+}
+

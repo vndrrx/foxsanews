@@ -218,10 +218,7 @@
           <div class="foxsa-form-group" style="margin-bottom:12px;">
             <label style="font-weight:600;font-size:13px;color:#1E2438;display:block;margin-bottom:6px;">Pilih Role Resmi FoxSA News:</label>
             <select id="role-modal-select" class="foxsa-select" style="font-size:13px;padding:9px 12px;width:100%;">
-              ${OFFICIAL_ROLES.map(r => {
-                const isSel = r.name.toLowerCase() === curRoleClean;
-                return `<option value="${escapeHtml(r.name)}" ${isSel ? 'selected' : ''}>${escapeHtml(r.name)} [${escapeHtml(r.category)}]</option>`;
-              }).join('')}
+              ${renderRoleOptionsHtml(currentRole)}
               <option value="__custom__" ${!OFFICIAL_ROLES.some(r => r.name.toLowerCase() === curRoleClean) ? 'selected' : ''}>+ Custom / Jabatan Lainnya</option>
             </select>
           </div>
@@ -898,7 +895,8 @@
     const param = decodeURIComponent(parts.slice(1).join('/'));
 
     if (action === 'profile') {
-      const sub = (param || 'overview').toLowerCase().trim();
+      let sub = (param || 'overview').toLowerCase().trim();
+      if (sub === 'roadmap') sub = 'overview';
       return { view: 'profile', param: sub };
     }
     if (action === 'post' && param) {
@@ -907,7 +905,7 @@
         return { view: 'profile', param: 'overview' };
       }
       if (param === '3689427128628530545' || param === 'rencana-pengembangan-pembaruan-foxsa') {
-        return { view: 'profile', param: 'roadmap' };
+        return { view: 'profile', param: 'overview' };
       }
       if (param === '4080555137325759950' || param === 'open-recruitment-foxsa-news') {
         return { view: 'profile', param: 'recruitment' };
@@ -5035,7 +5033,7 @@ const LEADER_QUOTES = {
     const mainEl = document.getElementById('main');
     if (!mainEl) return;
 
-    const validTabs = ['overview', 'former-staff', 'alumni', 'divisions', 'roadmap', 'recruitment'];
+    const validTabs = ['overview', 'former-staff', 'alumni', 'divisions', 'recruitment'];
     const activeTab = validTabs.includes(subtab) ? subtab : 'overview';
 
     let bodyHtml = '';
@@ -5540,73 +5538,6 @@ const LEADER_QUOTES = {
       `;
     }
 
-    // TAB 3: ROADMAP & PROGRAM KERJA
-    else if (activeTab === 'roadmap') {
-      bodyHtml = `
-        <div class="foxsa-profile-section">
-          <div class="foxsa-org-header" style="margin-bottom:24px;">
-            <span class="foxsa-profile-kicker"><i class="fa-solid fa-road"></i> RENCANA STRATEGIS 2026</span>
-            <h3 class="foxsa-profile-section-title">Roadmap &amp; Program Kerja FoxSA News Agency</h3>
-            <p class="foxsa-profile-lead">Langkah terukur FoxSA News dalam memperluas jangkauan penyiaran, meningkatkan kompetensi staf redaksi, dan memperkuat kemitraan dengan instansi pemerintahan serta aparat di San Andreas.</p>
-          </div>
-
-          <div class="foxsa-roadmap-timeline">
-            <!-- Phase 1 -->
-            <div class="roadmap-step-card">
-              <div class="step-num-badge">01</div>
-              <div class="step-content">
-                <div class="step-meta">
-                  <span class="step-status completed"><i class="fa-solid fa-check"></i> SELESAI</span>
-                  <span class="step-phase">FASE I • KONSOLIDASI &amp; SISTEM WEB</span>
-                </div>
-                <h4>Peluncuran Portal Berita Digital &amp; CMS Redaksi</h4>
-                <p>Pembangunan website modern dengan tata letak editorial Kreeti &amp; AnimeNetwork, sistem autentikasi staf, editor visual ramah pengguna, serta dokumentasi arsip berita.</p>
-              </div>
-            </div>
-
-            <!-- Phase 2 -->
-            <div class="roadmap-step-card">
-              <div class="step-num-badge">02</div>
-              <div class="step-content">
-                <div class="step-meta">
-                  <span class="step-status in-progress"><i class="fa-solid fa-arrows-rotate fa-spin"></i> BERJALAN</span>
-                  <span class="step-phase">FASE II • REKRUTMEN &amp; TALENTA BARU</span>
-                </div>
-                <h4>Open Recruitment Akbar &amp; FoxSA Academy</h4>
-                <p>Membuka seleksi terbuka bagi calon jurnalis, juru kamera, dan produser penyiaran dengan kurikulum pelatihan etika jurnalisme dan keselamatan peliputan lapangan.</p>
-              </div>
-            </div>
-
-            <!-- Phase 3 -->
-            <div class="roadmap-step-card">
-              <div class="step-num-badge">03</div>
-              <div class="step-content">
-                <div class="step-meta">
-                  <span class="step-status upcoming"><i class="fa-regular fa-clock"></i> MENDATANG</span>
-                  <span class="step-phase">FASE III • EKSPANSI PENYIARAN</span>
-                </div>
-                <h4>Mobil Siaran Luar Ruang (OB Van) &amp; Studio Live Baru</h4>
-                <p>Pengadaan armada siaran langsung berkecepatan tinggi untuk meliput peristiwa berskala besar, konferensi pers kejaksaan, kejuaraan balap, serta festival musik di San Andreas.</p>
-              </div>
-            </div>
-
-            <!-- Phase 4 -->
-            <div class="roadmap-step-card">
-              <div class="step-num-badge">04</div>
-              <div class="step-content">
-                <div class="step-meta">
-                  <span class="step-status upcoming"><i class="fa-regular fa-clock"></i> MENDATANG</span>
-                  <span class="step-phase">FASE IV • SINERGI KOTA &amp; KEMITRAAN</span>
-                </div>
-                <h4>Kemitraan Jurnalistik LSPD, LSFD &amp; Pemerintah Kota</h4>
-                <p>Membangun kerja sama resmi penyampaian peringatan dini bahaya, imbauan kamtibmas, serta transparansi penegakan hukum bagi seluruh warga negara.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
     // TAB 4: OPEN RECRUITMENT
     else if (activeTab === 'recruitment') {
       bodyHtml = `
@@ -5755,9 +5686,6 @@ const LEADER_QUOTES = {
           </a>
           <a href="#/profile/divisions" class="foxsa-profile-tab ${activeTab === 'divisions' ? 'is-active' : ''}">
             <i class="fa-solid fa-tower-broadcast"></i> Divisi Media &amp; Radio
-          </a>
-          <a href="#/profile/roadmap" class="foxsa-profile-tab ${activeTab === 'roadmap' ? 'is-active' : ''}">
-            <i class="fa-solid fa-rocket"></i> Program &amp; Rencana
           </a>
           <a href="#/profile/recruitment" class="foxsa-profile-tab ${activeTab === 'recruitment' ? 'is-active' : ''}">
             <i class="fa-solid fa-bullhorn"></i> Open Recruitment
