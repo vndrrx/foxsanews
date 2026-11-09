@@ -109,14 +109,16 @@
     return !!rInfo.isHighStaff;
   }
 
-  function renderRoleOptionsHtml(selectedRole) {
+  function renderRoleOptionsHtml(selectedRole, options = {}) {
     const selClean = String(selectedRole || '').trim().toLowerCase();
-    const categories = ['High Staff', 'Management', 'Supervisor', 'Operational'];
+    const categories = options.excludeHighStaff
+      ? ['Management', 'Supervisor', 'Operational']
+      : ['High Staff', 'Management', 'Supervisor', 'Operational'];
     const catLabels = {
-      'High Staff': '🛡️ High Staff (Red & Purple)',
-      'Management': '💼 Operational Management (Blue)',
-      'Supervisor': '🎬 Supervisor Team (Teal)',
-      'Operational': '🎤 Operational Staff (Green)'
+      'High Staff': '🛡️ High Staff / Dewan Direksi',
+      'Management': '💼 Operational Management',
+      'Supervisor': '🎬 Supervisor Team',
+      'Operational': '🎤 Operational Staff'
     };
     return categories.map(cat => {
       const rolesInCat = OFFICIAL_ROLES.filter(r => r.category === cat);
@@ -129,20 +131,84 @@
     }).join('');
   }
 
-  function promptSelectRole(title, defaultRole) {
-    const roleListStr = OFFICIAL_ROLES.map((r, i) => `${i + 1}. ${r.name} [${r.category}]`).join('\n');
-    const input = prompt(
-      `${title}\n\nPilih nomor urut (1-${OFFICIAL_ROLES.length}) atau ketik nama role resmi:\n${roleListStr}`,
-      defaultRole || 'Junior Reporter'
-    );
-    if (!input) return null;
-    const num = parseInt(input.trim(), 10);
-    if (!isNaN(num) && num >= 1 && num <= OFFICIAL_ROLES.length) {
-      return OFFICIAL_ROLES[num - 1].name;
-    }
-    const found = OFFICIAL_ROLES.find(r => r.name.toLowerCase() === input.trim().toLowerCase());
-    if (found) return found.name;
-    return input.trim();
+  function openRoleChooserModal({ title, currentRole, onSave }) {
+    const existing = document.getElementById('foxsa-role-modal');
+    if (existing) existing.remove();
+
+    const curRoleClean = (currentRole || '').trim().toLowerCase();
+    const modal = document.createElement('div');
+    modal.id = 'foxsa-role-modal';
+    modal.className = 'foxsa-modal-overlay';
+    modal.innerHTML = `
+      <div class="foxsa-modal-card">
+        <div class="foxsa-modal-header">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-user-tag" style="color:#F08D39;font-size:18px;"></i>
+            <h4 style="margin:0;font-size:16px;color:#090C1E;font-family:'Poppins',sans-serif;">Pilih Jabatan / Role</h4>
+          </div>
+          <button type="button" class="foxsa-modal-close" id="role-modal-close" aria-label="Tutup">&times;</button>
+        </div>
+        <div class="foxsa-modal-body">
+          <p style="margin:0 0 14px;font-size:13px;color:#64748b;line-height:1.5;">${escapeHtml(title)}</p>
+          <div class="foxsa-form-group" style="margin-bottom:12px;">
+            <label style="font-weight:600;font-size:13px;color:#1E2438;display:block;margin-bottom:6px;">Pilih Role Resmi FoxSA News:</label>
+            <select id="role-modal-select" class="foxsa-select" style="font-size:13px;padding:9px 12px;width:100%;">
+              ${OFFICIAL_ROLES.map(r => {
+                const isSel = r.name.toLowerCase() === curRoleClean;
+                return `<option value="${escapeHtml(r.name)}" ${isSel ? 'selected' : ''}>${escapeHtml(r.name)} [${escapeHtml(r.category)}]</option>`;
+              }).join('')}
+              <option value="__custom__" ${!OFFICIAL_ROLES.some(r => r.name.toLowerCase() === curRoleClean) ? 'selected' : ''}>+ Custom / Jabatan Lainnya</option>
+            </select>
+          </div>
+          <div class="foxsa-form-group" id="role-modal-custom-wrap" style="display:${!OFFICIAL_ROLES.some(r => r.name.toLowerCase() === curRoleClean) ? 'block' : 'none'};margin-bottom:14px;">
+            <label style="font-weight:600;font-size:12.5px;color:#475569;display:block;margin-bottom:4px;">Jabatan Custom:</label>
+            <input type="text" id="role-modal-custom-input" class="foxsa-input" value="${escapeHtml(currentRole || '')}" placeholder="Ketik nama jabatan custom..." style="width:100%;font-size:13px;" />
+          </div>
+        </div>
+        <div class="foxsa-modal-footer">
+          <button type="button" class="foxsa-btn foxsa-btn-outline" id="role-modal-cancel" style="padding:8px 16px;font-size:13px;">Batal</button>
+          <button type="button" class="foxsa-btn" id="role-modal-save" style="padding:8px 18px;font-size:13px;"><i class="fa-solid fa-check"></i> Simpan Role</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const sel = modal.querySelector('#role-modal-select');
+    const customWrap = modal.querySelector('#role-modal-custom-wrap');
+    const customInp = modal.querySelector('#role-modal-custom-input');
+    const closeBtn = modal.querySelector('#role-modal-close');
+    const cancelBtn = modal.querySelector('#role-modal-cancel');
+    const saveBtn = modal.querySelector('#role-modal-save');
+
+    sel.addEventListener('change', () => {
+      if (sel.value === '__custom__') {
+        customWrap.style.display = 'block';
+        customInp.focus();
+      } else {
+        customWrap.style.display = 'none';
+      }
+    });
+
+    const closeModal = () => modal.remove();
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    saveBtn.addEventListener('click', () => {
+      let chosen = sel.value;
+      if (chosen === '__custom__') {
+        chosen = (customInp.value || '').trim();
+      }
+      if (!chosen) {
+        showToast('Pilih atau ketik nama role terlebih dahulu.');
+        return;
+      }
+      closeModal();
+      onSave(chosen);
+    });
   }
 
   const DEFAULT_STAFF_ACCOUNTS = [
@@ -752,8 +818,49 @@
   }
 
   // =========================================================================
-  // 4. HERO SHOWCASE (KREETI BREAKING NEWS + 3-COL GRID + 4-COL FEATURED)
+  // 4. HERO SHOWCASE (BINDUZ NEWSPAPER MEGA HERO & SUB-CARDS)
   // =========================================================================
+
+  let binduzTickerIndex = 0;
+  let binduzTickerTimer = null;
+
+  function updateBinduzTicker() {
+    const track = document.getElementById('binduz-ticker-content');
+    if (!track) return;
+    const posts = (state.data && state.data.posts) || [];
+    if (posts.length === 0) return;
+
+    const trending = posts.filter(p => p.popular).concat(posts.filter(p => !p.popular));
+
+    const renderTickerItem = (idx) => {
+      const p = trending[idx % trending.length];
+      track.innerHTML = `<a href="${getPostHref(p)}" class="binduz-ticker-item">${escapeHtml(p.title)}</a>`;
+    };
+
+    renderTickerItem(binduzTickerIndex);
+
+    if (!binduzTickerTimer) {
+      binduzTickerTimer = setInterval(() => {
+        binduzTickerIndex = (binduzTickerIndex + 1) % trending.length;
+        renderTickerItem(binduzTickerIndex);
+      }, 4500);
+
+      const prevBtn = document.getElementById('ticker-prev');
+      const nextBtn = document.getElementById('ticker-next');
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          binduzTickerIndex = (binduzTickerIndex - 1 + trending.length) % trending.length;
+          renderTickerItem(binduzTickerIndex);
+        });
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          binduzTickerIndex = (binduzTickerIndex + 1) % trending.length;
+          renderTickerItem(binduzTickerIndex);
+        });
+      }
+    }
+  }
 
   function renderHeroShowcase() {
     const heroSection = document.getElementById('foxsa-hero-showcase');
@@ -762,122 +869,80 @@
     // Show full Hero Showcase ONLY on main Home view
     if (state.currentRoute.view !== 'home' || !state.data || !state.data.posts || state.data.posts.length === 0) {
       heroSection.style.display = 'none';
-      clearInterval(state.tickerTimer);
       return;
     }
 
     heroSection.style.display = 'block';
     const posts = state.data.posts;
 
-    // 1. Main Headline (Newest news article, skip "All About FoxSA" overview if there's a newer or news post)
+    // Update Top Ticker Bar
+    updateBinduzTicker();
+
+    // 1. Main Headline
     const newsPosts = posts.filter(p => p.id !== '2526320561083681754');
     const mainPost = newsPosts[0] || posts[0];
 
-    // 2. Editor's Picks (Next 3 posts)
-    const editorPicks = posts.filter(p => p.id !== mainPost.id).slice(0, 3);
-    const topPick = editorPicks[0] || mainPost;
-    const subPicks = editorPicks.slice(1, 3);
-
-    // 3. Trending Now (Up to 5 popular/recent posts with numbered badges 1-5)
-    let trendingPosts = posts.filter(p => p.popular);
-    if (trendingPosts.length < 5) {
-      const others = posts.filter(p => !trendingPosts.includes(p));
-      trendingPosts = trendingPosts.concat(others);
-    }
-    trendingPosts = trendingPosts.slice(0, 5);
+    // 2. Floating Sub-Cards (Next 2 stories in bottom right)
+    const remainingPosts = posts.filter(p => p.id !== mainPost.id);
+    const subCards = remainingPosts.slice(0, 2);
 
     const mainTag = (mainPost.labels && mainPost.labels[0]) || 'News';
-    const topPickTag = (topPick.labels && topPick.labels[0]) || 'News';
+    const thumb = mainPost.featuredImage || state.data.siteInfo.aboutBanner;
+    const authorAvatar = (state.data.authors && state.data.authors[mainPost.author] && state.data.authors[mainPost.author].avatar) || 'assets/logo/foxsa-icon.jpg';
 
     heroSection.innerHTML = `
       <div class="container">
-        <!-- 3-COLUMN HERO MAGAZINE GRID (KREETI STYLE) -->
-        <div class="kreeti-hero-grid">
-          <!-- Left Column: Editor's Picks -->
-          <div class="kreeti-col kreeti-col-picks">
-            <div class="kreeti-sec-heading">
-              <span class="heading-line"></span>
-              <h3>Editor's Picks</h3>
-            </div>
+        <!-- BINDUZ IMMERSIVE HERO SHOWCASE -->
+        <div class="binduz-hero-card">
+          <div class="binduz-hero-bg-wrap">
+            <img class="binduz-hero-bg" src="${escapeHtml(thumb)}" alt="${escapeHtml(mainPost.title)}" />
+          </div>
+          <div class="binduz-hero-overlay"></div>
 
-            <div class="kreeti-pick-featured">
-              <a href="${getPostHref(topPick)}" class="pick-featured-link">
-                <img src="${escapeHtml(topPick.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(topPick.title)}" loading="lazy" />
-                <div class="pick-featured-overlay">
-                  <div class="kreeti-badges">
-                    <span class="k-badge-time"><i class="fa-regular fa-clock"></i> ${getReadingTime(topPick.content)}</span>
-                    <span class="k-badge-cat">${escapeHtml(topPickTag)}</span>
-                  </div>
-                  <h4>${escapeHtml(topPick.title)}</h4>
-                </div>
-              </a>
-            </div>
-
-            <div class="kreeti-pick-list">
-              ${subPicks.map(sp => `
-                <div class="kreeti-pick-text-card">
-                  <div class="pick-meta-line">
-                    <span class="pick-read"><i class="fa-regular fa-clock"></i> ${getReadingTime(sp.content)}</span>
-                    <a href="#/label/${encodeURIComponent((sp.labels && sp.labels[0]) || 'News')}" class="pick-cat">${escapeHtml((sp.labels && sp.labels[0]) || 'News')}</a>
-                  </div>
-                  <h4><a href="${getPostHref(sp)}">${escapeHtml(sp.title)}</a></h4>
-                </div>
-              `).join('')}
+          <!-- Top Right Weather / City Info -->
+          <div class="binduz-hero-weather">
+            <div class="binduz-weather-icon"><i class="fa-solid fa-cloud-sun"></i></div>
+            <div class="binduz-weather-text">
+              <div class="binduz-weather-temp">Los Santos 24°C / 75°F</div>
+              <div class="binduz-weather-city">San Andreas Network 24/7</div>
             </div>
           </div>
 
-          <!-- Center Column: Main News -->
-          <div class="kreeti-col kreeti-col-main">
-            <div class="kreeti-sec-heading">
-              <span class="heading-line"></span>
-              <h3>Headline Utama</h3>
+          <!-- Main Hero Content (Bottom Left) -->
+          <div class="binduz-hero-story">
+            <div class="binduz-story-meta-top">
+              <span class="binduz-cat-pill">${escapeHtml(mainTag)}</span>
+              <span class="binduz-story-date"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(mainPost.published))}</span>
             </div>
-
-            <div class="kreeti-main-hero-card">
-              <a href="${getPostHref(mainPost)}" class="main-hero-link">
-                <img src="${escapeHtml(mainPost.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(mainPost.title)}" />
-                <div class="main-hero-overlay">
-                  <div class="kreeti-badges">
-                    <span class="k-badge-icon"><i class="fa-solid fa-bolt"></i></span>
-                    <span class="k-badge-time">${getReadingTime(mainPost.content)}</span>
-                    <span class="k-badge-cat">${escapeHtml(mainTag)}</span>
-                  </div>
-                  <h2>${escapeHtml(mainPost.title)}</h2>
-                  <p class="main-hero-excerpt">${escapeHtml(stripHtmlToSnippet(mainPost.content, 120))}</p>
-                  <div class="main-hero-meta">
-                    <span><i class="fa-regular fa-user"></i> ${escapeHtml(mainPost.author)}</span>
-                    <span>•</span>
-                    <span><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(mainPost.published))}</span>
-                    <span>•</span>
-                    <span><i class="fa-regular fa-comments"></i> ${(mainPost.comments || []).length} Komentar</span>
-                  </div>
-                </div>
-              </a>
+            <h1 class="binduz-story-title">
+              <a href="${getPostHref(mainPost)}">${escapeHtml(mainPost.title)}</a>
+            </h1>
+            <div class="binduz-story-author-row">
+              <img src="${escapeHtml(authorAvatar)}" class="binduz-author-avatar" alt="${escapeHtml(mainPost.author)}" onerror="this.src='${DEFAULT_AVATAR}'" />
+              <span class="binduz-author-name">By <strong>${escapeHtml(mainPost.author)}</strong></span>
+              <span class="binduz-meta-sep">•</span>
+              <span class="binduz-meta-stat"><i class="fa-regular fa-eye"></i> 2.4k</span>
+              <span class="binduz-meta-sep">•</span>
+              <span class="binduz-meta-stat"><i class="fa-regular fa-comment"></i> ${(mainPost.comments || []).length}</span>
             </div>
           </div>
 
-          <!-- Right Column: Trending Now -->
-          <div class="kreeti-col kreeti-col-trending">
-            <div class="kreeti-sec-heading">
-              <span class="heading-line"></span>
-              <h3>Trending Now</h3>
-            </div>
-
-            <div class="kreeti-trending-list">
-              ${trendingPosts.map((tp, idx) => `
-                <a href="${getPostHref(tp)}" class="kreeti-trending-item">
-                  <div class="trending-thumb-wrap">
-                    <img src="${escapeHtml(tp.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(tp.title)}" loading="lazy" />
-                    <span class="trending-rank-badge">${idx + 1}</span>
+          <!-- Floating Sub-Cards (Bottom Right) -->
+          ${subCards.length > 0 ? `
+            <div class="binduz-hero-floating-cards">
+              ${subCards.map(sc => `
+                <a href="${getPostHref(sc)}" class="binduz-floating-card">
+                  <div class="binduz-float-thumb">
+                    <img src="${escapeHtml(sc.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(sc.title)}" />
                   </div>
-                  <div class="trending-item-info">
-                    <h4>${escapeHtml(tp.title)}</h4>
-                    <span class="trending-item-date">${escapeHtml(formatDateID(tp.published))}</span>
+                  <div class="binduz-float-info">
+                    <span class="binduz-float-date"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(sc.published))}</span>
+                    <h4 class="binduz-float-title">${escapeHtml(sc.title)}</h4>
                   </div>
                 </a>
               `).join('')}
             </div>
-          </div>
+          ` : ''}
         </div>
       </div>
     `;
@@ -964,6 +1029,236 @@
     `;
   }
 
+  function buildBinduzTrendingSectionHtml(posts) {
+    if (!posts || posts.length === 0) return '';
+    const labelCounts = getLabelCounts();
+    const topCategories = Object.keys(labelCounts).slice(0, 5);
+
+    const mainStory = posts[1] || posts[0];
+    const stackedStories = posts.slice(2, 5);
+    if (stackedStories.length === 0 && posts.length > 0) {
+      stackedStories.push(posts[0]);
+    }
+
+    const hubCategories = Object.keys(labelCounts).slice(0, 4);
+
+    return `
+      <section class="binduz-trending-section">
+        <div class="binduz-sec-header">
+          <div class="binduz-sec-title-wrap">
+            <h3 class="binduz-sec-title">Trending News</h3>
+            <span class="binduz-red-line"></span>
+          </div>
+          <div class="binduz-sec-tabs">
+            <a href="#/" class="binduz-sec-tab-pill active">All</a>
+            ${topCategories.map(c => `<a href="#/label/${encodeURIComponent(c)}" class="binduz-sec-tab-pill">${escapeHtml(c)}</a>`).join('')}
+          </div>
+        </div>
+
+        <div class="binduz-trending-grid">
+          <!-- Col 1: Big Featured Story -->
+          <a href="${getPostHref(mainStory)}" class="binduz-trend-main-card">
+            <img src="${escapeHtml(mainStory.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(mainStory.title)}" loading="lazy" />
+            <div class="binduz-trend-main-overlay"></div>
+            <div class="binduz-trend-main-content">
+              <span class="binduz-cat-pill">${escapeHtml((mainStory.labels && mainStory.labels[0]) || 'News')}</span>
+              <span style="color:#cbd5e1;font-size:11.5px;margin-left:8px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(mainStory.published))}</span>
+              <h4 class="binduz-trend-main-title">${escapeHtml(mainStory.title)}</h4>
+            </div>
+          </a>
+
+          <!-- Col 2: Stacked Mini News (3 items) -->
+          <div class="binduz-trend-stacked-list">
+            ${stackedStories.map(p => `
+              <a href="${getPostHref(p)}" class="binduz-mini-card">
+                <div class="binduz-mini-thumb">
+                  <img src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(p.title)}" loading="lazy" />
+                </div>
+                <div class="binduz-mini-body">
+                  <span class="binduz-mini-tag">${escapeHtml((p.labels && p.labels[0]) || 'News')}</span>
+                  <span class="binduz-mini-date"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(p.published))}</span>
+                  <h5 class="binduz-mini-title">${escapeHtml(p.title)}</h5>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+
+          <!-- Col 3: Categories Hub -->
+          <div class="binduz-categories-hub">
+            ${hubCategories.map(cat => {
+              const count = labelCounts[cat] || 1;
+              const postWithCat = posts.find(p => (p.labels || []).includes(cat)) || posts[0];
+              const bgImg = (postWithCat && postWithCat.featuredImage) || state.data.siteInfo.aboutBanner;
+              return `
+                <a href="#/label/${encodeURIComponent(cat)}" class="binduz-cat-tile">
+                  <img src="${escapeHtml(bgImg)}" alt="${escapeHtml(cat)}" loading="lazy" />
+                  <span>${escapeHtml(cat)}</span>
+                  <span class="cat-count">${count} Berita</span>
+                </a>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function buildBinduzFeaturedSectionHtml(posts) {
+    if (!posts || posts.length === 0) return '';
+    const featPrimary = posts[3] || posts[0];
+    const featDark = posts.slice(4, 6);
+    if (featDark.length === 0) {
+      featDark.push(posts[0]);
+      if (posts.length > 1) featDark.push(posts[1]);
+    }
+
+    return `
+      <section class="binduz-featured-section">
+        <div class="binduz-sec-header">
+          <div class="binduz-sec-title-wrap">
+            <h3 class="binduz-sec-title">Featured</h3>
+            <span class="binduz-red-line"></span>
+          </div>
+          <div class="binduz-sec-tabs">
+            <button type="button" class="binduz-ticker-btn" style="width:28px;height:28px;background:#f1f5f9;color:#090C1E;" title="Sebelumnya"><i class="fa-solid fa-chevron-left"></i></button>
+            <button type="button" class="binduz-ticker-btn" style="width:28px;height:28px;background:#f1f5f9;color:#090C1E;" title="Selanjutnya"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="binduz-featured-grid">
+          <!-- Col 1: Primary Featured Card -->
+          <a href="${getPostHref(featPrimary)}" class="binduz-feat-primary-card">
+            <div class="binduz-feat-primary-thumb">
+              <img src="${escapeHtml(featPrimary.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(featPrimary.title)}" loading="lazy" />
+            </div>
+            <div class="binduz-feat-primary-body">
+              <div>
+                <span class="binduz-cat-pill">${escapeHtml((featPrimary.labels && featPrimary.labels[0]) || 'News')}</span>
+                <span style="color:#94a3b8;font-size:11.5px;margin-left:8px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(featPrimary.published))}</span>
+              </div>
+              <h4 class="binduz-feat-primary-title">${escapeHtml(featPrimary.title)}</h4>
+              <p class="binduz-feat-primary-snippet">${escapeHtml(stripHtmlToSnippet(featPrimary.content, 120))}</p>
+            </div>
+          </a>
+
+          <!-- Col 2: 2 Stacked Dark Luxury Cards -->
+          <div class="binduz-feat-dark-stacked">
+            ${featDark.map(p => `
+              <a href="${getPostHref(p)}" class="binduz-dark-card">
+                <img src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(p.title)}" loading="lazy" />
+                <div class="binduz-dark-card-content">
+                  <div>
+                    <span class="binduz-cat-pill" style="background:#e11d48;">${escapeHtml((p.labels && p.labels[0]) || 'News')}</span>
+                    <span style="color:#cbd5e1;font-size:11px;margin-left:8px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(p.published))}</span>
+                  </div>
+                  <h4 class="binduz-dark-title">${escapeHtml(p.title)}</h4>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+
+          <!-- Col 3: Social & Community Feed Widget -->
+          <div class="binduz-social-widget">
+            <a href="https://discord.gg/rVeaKGzhyy" target="_blank" rel="noopener" class="binduz-social-box discord">
+              <div class="social-left">
+                <i class="fa-brands fa-discord"></i>
+                <div>
+                  <div class="social-title">Discord FoxSA</div>
+                  <div class="social-sub">15,000+ Komunitas</div>
+                </div>
+              </div>
+              <span class="social-btn-pill">Gabung</span>
+            </a>
+
+            <div class="binduz-social-box radio">
+              <div class="social-left">
+                <i class="fa-solid fa-radio"></i>
+                <div>
+                  <div class="social-title">FoxSA FM 98.4</div>
+                  <div class="social-sub">Live San Andreas Audio</div>
+                </div>
+              </div>
+              <span class="social-btn-pill"><i class="fa-solid fa-circle" style="color:#4ade80;font-size:8px;"></i> ON AIR</span>
+            </div>
+
+            <a href="#/profile/recruitment" class="binduz-social-box recruitment">
+              <div class="social-left">
+                <i class="fa-solid fa-newspaper" style="color:#F08D39;"></i>
+                <div>
+                  <div class="social-title">Open Recruitment</div>
+                  <div class="social-sub">Jurnalis &amp; Tim Redaksi</div>
+                </div>
+              </div>
+              <span class="social-btn-pill" style="background:#F08D39;color:#090C1E;">Daftar</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function buildBinduzCategoriesSectionHtml(visiblePosts, hasMore, filteredPostsCount) {
+    const labelCounts = getLabelCounts();
+    const topCategories = Object.keys(labelCounts).slice(0, 6);
+
+    const cardsHtml = visiblePosts.map(post => {
+      const tag = (post.labels && post.labels[0]) || 'News';
+      const postHref = getPostHref(post);
+      const thumb = post.featuredImage || state.data.siteInfo.aboutBanner;
+
+      return `
+        <a href="${postHref}" class="binduz-grid-card">
+          <div class="binduz-grid-thumb">
+            <img src="${escapeHtml(thumb)}" alt="${escapeHtml(post.title)}" loading="lazy" />
+          </div>
+          <div class="binduz-grid-body">
+            <div class="binduz-grid-meta">
+              <span class="binduz-cat-pill">${escapeHtml(tag)}</span>
+              <span style="color:#94a3b8;font-size:11px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(post.published))}</span>
+            </div>
+            <h4 class="binduz-grid-title">${escapeHtml(post.title)}</h4>
+            <div class="binduz-grid-author">
+              <i class="fa-regular fa-user"></i> ${escapeHtml(post.author)}
+            </div>
+          </div>
+        </a>
+      `;
+    }).join('');
+
+    const paginationHtml = hasMore
+      ? `<div class="blog-pager" id="blog-pager" style="margin-top:20px;">
+           <a class="blog-pager-older-link load-more" href="javascript:void(0)" id="foxsa-load-more-btn">
+             Muat Berita Lainnya (${filteredPostsCount - visiblePosts.length} lagi)
+           </a>
+         </div>`
+      : (visiblePosts.length > 0
+          ? `<div class="blog-pager" id="blog-pager" style="margin-top:20px;">
+               <span class="no-more load-more" style="display:inline-block;">Semua Berita Telah Ditampilkan</span>
+             </div>`
+          : '');
+
+    return `
+      <section class="binduz-categories-section">
+        <div class="binduz-sec-header">
+          <div class="binduz-sec-title-wrap">
+            <h3 class="binduz-sec-title">Categories</h3>
+            <span class="binduz-red-line"></span>
+          </div>
+          <div class="binduz-sec-tabs">
+            <a href="#/" class="binduz-sec-tab-pill active">Semua</a>
+            ${topCategories.map(c => `<a href="#/label/${encodeURIComponent(c)}" class="binduz-sec-tab-pill">${escapeHtml(c)}</a>`).join('')}
+          </div>
+        </div>
+
+        <div class="binduz-categories-grid">
+          ${cardsHtml}
+        </div>
+
+        ${paginationHtml}
+      </section>
+    `;
+  }
+
   function renderListView() {
     document.body.className = 'index home';
     const mainEl = document.getElementById('main');
@@ -973,6 +1268,27 @@
     const filteredPosts = getFilteredPosts();
     const visiblePosts = filteredPosts.slice(0, state.visiblePostsCount);
     const hasMore = filteredPosts.length > visiblePosts.length;
+
+    // IF HOME VIEW: Render the complete Binduz 3-sections homepage
+    if (view === 'home') {
+      mainEl.innerHTML = `
+        <div class="widget Blog" id="Blog1">
+          ${buildBinduzTrendingSectionHtml(state.data.posts)}
+          ${buildBinduzFeaturedSectionHtml(state.data.posts)}
+          ${buildBinduzCategoriesSectionHtml(visiblePosts, hasMore, filteredPosts.length)}
+        </div>
+      `;
+
+      const loadMoreBtn = document.getElementById('foxsa-load-more-btn');
+      if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          state.visiblePostsCount += 8;
+          renderListView();
+        });
+      }
+      return;
+    }
 
     let filterMessageHtml = '';
     if (view === 'label') {
@@ -1582,10 +1898,10 @@
             <div class="foxsa-form-group">
               <label for="reg-role">Departemen / Jabatan yang Diajukan *</label>
               <select id="reg-role" class="foxsa-select">
-                ${renderRoleOptionsHtml('Junior Reporter')}
+                ${renderRoleOptionsHtml('Junior Reporter', { excludeHighStaff: true })}
               </select>
               <small style="color:#64748b;font-size:11.5px;margin-top:4px;display:block;">
-                <i class="fa-solid fa-circle-info"></i> Jabatan resmi akan diverifikasi &amp; di-ACC oleh High Staff FoxSA.
+                <i class="fa-solid fa-circle-info"></i> Jabatan resmi operasional akan diverifikasi &amp; di-ACC oleh High Staff FoxSA.
               </small>
             </div>
 
@@ -3008,25 +3324,28 @@
         const post = state.data.posts.find(p => p.id === postId);
         if (!post) return;
         const currentRole = post.authorBio || '';
-        const newRole = promptSelectRole(`Ubah Jabatan / Role Penulis untuk artikel "${post.title}" (${post.author}):`, currentRole);
-        if (newRole && newRole.trim()) {
-          const trimmedRole = newRole.trim();
-          post.authorBio = trimmedRole;
-          if (state.data.authors[post.author]) {
-            state.data.authors[post.author].bio = trimmedRole;
+        openRoleChooserModal({
+          title: `Pilih Jabatan / Role Penulis untuk artikel "${post.title}" (${post.author}):`,
+          currentRole,
+          onSave: (chosenRole) => {
+            const trimmedRole = chosenRole.trim();
+            post.authorBio = trimmedRole;
+            if (state.data.authors[post.author]) {
+              state.data.authors[post.author].bio = trimmedRole;
+            }
+            // Update matching staff account if exists
+            const matchedAcc = (state.data.staffAccounts || []).find(
+              a => (a.authorName && a.authorName.toLowerCase() === post.author.toLowerCase()) ||
+                   (a.displayName && a.displayName.toLowerCase() === post.author.toLowerCase())
+            );
+            if (matchedAcc) {
+              matchedAcc.role = trimmedRole;
+            }
+            saveDataToLocal(true);
+            renderAdminView();
+            showToast(`Jabatan ${post.author} berhasil diubah menjadi "${trimmedRole}"!`);
           }
-          // Update matching staff account if exists
-          const matchedAcc = (state.data.staffAccounts || []).find(
-            a => (a.authorName && a.authorName.toLowerCase() === post.author.toLowerCase()) ||
-                 (a.displayName && a.displayName.toLowerCase() === post.author.toLowerCase())
-          );
-          if (matchedAcc) {
-            matchedAcc.role = trimmedRole;
-          }
-          saveDataToLocal(true);
-          renderAdminView();
-          showToast(`Jabatan ${post.author} berhasil diubah menjadi "${trimmedRole}"!`);
-        }
+        });
       });
     });
 
@@ -3078,24 +3397,27 @@
         const username = btn.getAttribute('data-edit-staff-role');
         const acc = (state.data.staffAccounts || []).find(a => a.username === username);
         if (!acc) return;
-        const newRole = promptSelectRole(`Ubah Jabatan / Role resmi untuk "${acc.displayName}" (@${acc.username}):`, acc.role);
-        if (newRole && newRole.trim()) {
-          const trimmedRole = newRole.trim();
-          acc.role = trimmedRole;
-          if (state.data.authors[acc.authorName || acc.displayName]) {
-            state.data.authors[acc.authorName || acc.displayName].bio = trimmedRole;
-          }
-          // Also update all posts by this author
-          state.data.posts.forEach(p => {
-            if ((p.author || '').toLowerCase() === (acc.authorName || '').toLowerCase() ||
-                (p.author || '').toLowerCase() === (acc.displayName || '').toLowerCase()) {
-              p.authorBio = trimmedRole;
+        openRoleChooserModal({
+          title: `Pilih Jabatan / Role resmi untuk "${acc.displayName}" (@${acc.username}):`,
+          currentRole: acc.role,
+          onSave: (chosenRole) => {
+            const trimmedRole = chosenRole.trim();
+            acc.role = trimmedRole;
+            if (state.data.authors[acc.authorName || acc.displayName]) {
+              state.data.authors[acc.authorName || acc.displayName].bio = trimmedRole;
             }
-          });
-          saveDataToLocal(true);
-          renderAdminView();
-          showToast(`Jabatan ${acc.displayName} berhasil diubah menjadi "${trimmedRole}"!`);
-        }
+            // Also update all posts by this author
+            state.data.posts.forEach(p => {
+              if ((p.author || '').toLowerCase() === (acc.authorName || '').toLowerCase() ||
+                  (p.author || '').toLowerCase() === (acc.displayName || '').toLowerCase()) {
+                p.authorBio = trimmedRole;
+              }
+            });
+            saveDataToLocal(true);
+            renderAdminView();
+            showToast(`Jabatan ${acc.displayName} berhasil diubah menjadi "${trimmedRole}"!`);
+          }
+        });
       });
     });
 
