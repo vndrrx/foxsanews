@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html class="ltr" dir="ltr" lang="id" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta name="theme-color" content="#090C1E" />
+  <title>Panel Redaksi &amp; Editorial — FoxSA News</title>
+  <meta name="description" content="Panel manajemen redaksi FoxSA News: publikasi artikel berita, koordinasi chat, ACC pendaftaran anggota, dan kelola staf." />
+  <link rel="icon" type="image/jpeg" href="assets/logo/foxsa-icon.jpg" />
+
+  <!-- Google Fonts (Karla & Poppins) + Font Awesome Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,700;1,400;1,700&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    body.foxsa-admin-page {
+      background: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      padding: 0;
+      font-family: 'Karla', sans-serif;
+    }
+    .admin-page-navbar {
+      background: #090C1E;
+      color: #fff;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #F08D39;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .admin-page-navbar a.brand-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .admin-page-navbar a.brand-link img {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .admin-page-navbar .brand-text-wrap {
+      line-height: 1.2;
+    }
+    .admin-page-navbar .brand-text-wrap .b-title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: 0.5px;
+    }
+    .admin-page-navbar .brand-text-wrap .b-title .orange {
+      color: #F08D39;
+    }
+    .admin-page-navbar .brand-text-wrap .b-sub {
+      font-size: 10px;
+      color: #94a3b8;
+      letter-spacing: 1.5px;
+    }
+    .admin-navbar-user {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .admin-navbar-user .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.06);
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .admin-navbar-user .user-chip img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid #F08D39;
+      object-fit: cover;
+    }
+    .admin-navbar-user .user-chip .u-name {
+      font-weight: 700;
+      font-size: 12.5px;
+      color: #f8fafc;
+    }
+    .admin-navbar-user .user-chip .u-role {
+      font-size: 10.5px;
+      color: #F08D39;
+      font-weight: 600;
+    }
+    .admin-page-container {
+      flex: 1;
+      max-width: 1240px;
+      width: 100%;
+      margin: 24px auto;
+      padding: 0 16px 40px;
+      box-sizing: border-box;
+    }
+    .admin-page-footer {
+      background: #090C1E;
+      color: #64748b;
+      text-align: center;
+      font-size: 12px;
+      padding: 16px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+  </style>
+</head>
+
+<body class="foxsa-admin-page">
+  <!-- Top Navigation Header -->
+  <header class="admin-page-navbar">
+    <a href="index.html" class="brand-link">
+      <img src="assets/logo/foxsa-icon.jpg" alt="FoxSA News" />
+      <div class="brand-text-wrap">
+        <div class="b-title">FOXSA <span class="orange">NEWS</span></div>
+        <div class="b-sub">PANEL REDAKSI &amp; EDITORIAL</div>
+      </div>
+    </a>
+
+    <div class="admin-navbar-user" id="admin-header-user-wrap">
+      <div class="user-chip">
+        <img id="header-user-avatar" src="assets/logo/foxsa-icon.jpg" alt="Avatar" />
+        <div>
+          <div class="u-name" id="header-user-name">Memuat Akun...</div>
+          <div class="u-role" id="header-user-role">Staf Redaksi</div>
+        </div>
+      </div>
+      <a href="index.html" class="foxsa-btn foxsa-btn-outline" style="text-decoration:none;padding:6px 12px;font-size:12px;">
+        <i class="fa-solid fa-house"></i> Beranda Berita
+      </a>
+      <button type="button" class="foxsa-btn foxsa-btn-danger" id="nav-logout-btn" style="padding:6px 14px;font-size:12px;">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Admin Wrapper -->
+  <main class="admin-page-container" id="admin-main-wrap">
+    <div style="text-align:center;padding:60px 20px;">
+      <i class="fa-solid fa-spinner fa-spin" style="font-size:32px;color:#F08D39;margin-bottom:12px;"></i>
+      <p style="color:#64748b;font-weight:600;">Memuat Panel Redaksi &amp; Sinkronisasi Supabase Cloud...</p>
+    </div>
+  </main>
+
+  <footer class="admin-page-footer">
+    &copy; 2026 FoxSA News Network — San Andreas Independent News. Hak cipta dilindungi undang-undang.
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/data.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

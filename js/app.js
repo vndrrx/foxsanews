@@ -671,7 +671,7 @@
       const labelSpan = staffBtn.querySelector('.staff-btn-label');
       if (state.currentUser) {
         staffBtn.style.display = 'inline-flex';
-        staffBtn.href = '#/admin';
+        staffBtn.href = 'admin.html';
         if (labelSpan) labelSpan.textContent = `Panel (${state.currentUser.displayName.split(' ')[0]})`;
         staffBtn.classList.add('is-logged-in');
         staffBtn.title = `Login sebagai ${state.currentUser.displayName} (${state.currentUser.role})`;
@@ -680,7 +680,7 @@
         staffBtn.style.display = 'none';
         staffBtn.classList.remove('is-logged-in');
         staffBtn.title = 'Login khusus Redaksi & Staff FoxSA';
-        staffBtn.href = '#/admin';
+        staffBtn.href = 'login.html';
       }
     }
     if (footerStaffLink) {
@@ -763,6 +763,33 @@
 
     let hasChanges = false;
     try {
+      // 0. Ambil Berita & Artikel dari Supabase Cloud (foxsa_posts)
+      const { data: dbPosts, error: postErr } = await sb
+        .from('foxsa_posts')
+        .select('*')
+        .order('published', { ascending: false });
+
+      if (!postErr && Array.isArray(dbPosts) && dbPosts.length > 0) {
+        state.data.posts = dbPosts.map(p => ({
+          id: p.id,
+          slug: p.slug,
+          title: p.title,
+          published: p.published,
+          updated: p.updated,
+          author: p.author,
+          authorAvatar: p.author_avatar,
+          authorBio: p.author_bio,
+          labels: Array.isArray(p.labels) ? p.labels : [],
+          featuredImage: p.featured_image,
+          snippet: p.snippet,
+          content: p.content,
+          originalUrl: p.original_url,
+          popular: Boolean(p.popular),
+          comments: Array.isArray(p.comments) ? p.comments : []
+        }));
+        hasChanges = true;
+      }
+
       // 1. Ambil Akun Staff & Jurnalis
       const { data: accounts, error: accErr } = await sb
         .from('foxsa_staff_accounts')
@@ -983,6 +1010,9 @@
 
     try {
       sb.channel('foxsa-realtime-sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'foxsa_posts' }, async () => {
+          await syncFromSupabase(true);
+        })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'foxsa_admin_chats' }, async () => {
           await syncFromSupabase(false);
           if (state.currentRoute.view === 'admin' && state.adminTab === 'chat') {
@@ -1367,10 +1397,22 @@
     if (action === 'archive' && param) return { view: 'archive', param };
     if (action === 'author' && param) return { view: 'author', param };
     if (action === 'search') return { view: 'search', param: param || '' };
-    if (action === 'admin') return { view: 'admin', param: param || null };
-    if (action === 'login') return { view: 'admin', param: 'login' };
-    if (action === 'register') return { view: 'admin', param: 'register' };
-    if (action === 'staff') return { view: 'admin', param: 'staff' };
+    if (action === 'admin') {
+      window.location.href = 'admin.html' + (param ? '#/' + param : '');
+      return { view: 'home', param: null };
+    }
+    if (action === 'login') {
+      window.location.href = 'login.html';
+      return { view: 'home', param: null };
+    }
+    if (action === 'register') {
+      window.location.href = 'login.html?tab=register';
+      return { view: 'home', param: null };
+    }
+    if (action === 'staff') {
+      window.location.href = 'admin.html#/staff';
+      return { view: 'home', param: null };
+    }
     return { view: 'home', param: null };
   }
 
@@ -6302,7 +6344,7 @@ const LEADER_QUOTES = {
                       <strong>discord.gg/rVeaKGzhyy</strong>
                     </div>
                   </a>
-                  <a href="#/register" class="rec-link-card web-card">
+                  <a href="login.html?tab=register" class="rec-link-card web-card">
                     <i class="fa-solid fa-id-card"></i>
                     <div>
                       <small>📝 Anggota Baru?</small>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html class="ltr" dir="ltr" lang="id" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta name="theme-color" content="#090C1E" />
+  <title>Login &amp; Registrasi Staff — FoxSA News</title>
+  <meta name="description" content="Portal khusus jurnalis, editor, dan staf redaksi FoxSA News Agency untuk publikasi berita dan kelola portal editorial." />
+  <link rel="icon" type="image/jpeg" href="assets/logo/foxsa-icon.jpg" />
+
+  <!-- Google Fonts (Karla & Poppins) + Font Awesome Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,700;1,400;1,700&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    body.foxsa-auth-page {
+      background: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      padding: 0;
+      font-family: 'Karla', sans-serif;
+    }
+    .auth-page-topbar {
+      background: #090C1E;
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #F08D39;
+    }
+    .auth-page-topbar a.brand-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .auth-page-topbar a.brand-link img {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .auth-page-topbar .brand-text-wrap {
+      line-height: 1.2;
+    }
+    .auth-page-topbar .brand-text-wrap .b-title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: 0.5px;
+    }
+    .auth-page-topbar .brand-text-wrap .b-title .orange {
+      color: #F08D39;
+    }
+    .auth-page-topbar .brand-text-wrap .b-sub {
+      font-size: 10px;
+      color: #94a3b8;
+      letter-spacing: 1.5px;
+    }
+    .auth-page-topbar a.back-home-link {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.06);
+      transition: all 0.2s ease;
+    }
+    .auth-page-topbar a.back-home-link:hover {
+      background: rgba(240,141,57,0.2);
+      color: #F08D39;
+    }
+    .auth-page-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 16px 50px;
+    }
+    .auth-page-footer {
+      background: #090C1E;
+      color: #64748b;
+      text-align: center;
+      font-size: 12px;
+      padding: 16px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+  </style>
+</head>
+
+<body class="foxsa-auth-page">
+  <!-- Top Navigation Header -->
+  <header class="auth-page-topbar">
+    <a href="index.html" class="brand-link">
+      <img src="assets/logo/foxsa-icon.jpg" alt="FoxSA News" />
+      <div class="brand-text-wrap">
+        <div class="b-title">FOXSA <span class="orange">NEWS</span></div>
+        <div class="b-sub">PORTAL REDAKSI &amp; STAF</div>
+      </div>
+    </a>
+    <a href="index.html" class="back-home-link">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>Kembali ke Beranda</span>
+    </a>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="auth-page-main">
+    <div class="foxsa-login-card" style="margin:0 auto;box-shadow:0 12px 35px rgba(0,0,0,0.12);">
+      
+      <!-- Tab Header Switcher -->
+      <div class="foxsa-auth-tabs">
+        <button type="button" class="foxsa-auth-tab active" id="auth-tab-btn-login">
+          <i class="fa-solid fa-right-to-bracket"></i> Masuk Staff
+        </button>
+        <button type="button" class="foxsa-auth-tab" id="auth-tab-btn-register">
+          <i class="fa-solid fa-user-plus"></i> Registrasi Anggota
+        </button>
+      </div>
+
+      <!-- ==================== TAB 1: LOGIN FORM ==================== -->
+      <div id="foxsa-auth-panel-login">
+        <div class="foxsa-login-header">
+          <img src="assets/logo/foxsa-icon.jpg" class="foxsa-login-logo" alt="FoxSA News" />
+          <div class="foxsa-login-badge">
+            <i class="fa-solid fa-shield-halved"></i> PORTAL REDAKSI FOXSA
+          </div>
+          <h2>Login Staff &amp; Admin</h2>
+          <p>Khusus jurnalis, editor, dan staf redaksi FoxSA News untuk publikasi berita, koordinasi tim, dan kelola portal.</p>
+        </div>
+
+        <form id="foxsa-staff-login-form" class="foxsa-login-form">
+          <div class="foxsa-form-group">
+            <label for="login-username">Username atau Nama Staff *</label>
+            <div class="foxsa-input-icon-wrap">
+              <i class="fa-solid fa-user"></i>
+              <input type="text" id="login-username" class="foxsa-input" placeholder="Contoh: arthur atau Arthur Redfields" autocomplete="username" required />
+            </div>
+          </div>
+
+          <div class="foxsa-form-group">
+            <label for="login-password">Password Akun *</label>
+            <div class="foxsa-input-icon-wrap">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="login-password" class="foxsa-input" placeholder="Masukkan password staff..." autocomplete="current-password" required />
+              <button type="button" class="foxsa-pwd-toggle" id="login-toggle-pwd" aria-label="Tampilkan Password">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="login-error-msg" class="foxsa-login-error" style="display:none;"></div>
+
+          <div class="foxsa-login-actions">
+            <button type="submit" class="foxsa-btn foxsa-btn-full" id="login-submit-btn">
+              <i class="fa-solid fa-right-to-bracket"></i> Masuk ke Panel Redaksi
+            </button>
+            <a href="index.html" class="foxsa-login-back-link">
+              <i class="fa-solid fa-newspaper"></i> Baca Berita di Beranda FoxSA
+            </a>
+          </div>
+        </form>
+      </div>
+
+      <!-- ==================== TAB 2: REGISTER FORM ==================== -->
+      <div id="foxsa-auth-panel-register" style="display:none;">
+        <div class="foxsa-login-header">
+          <img src="assets/logo/foxsa-icon.jpg" class="foxsa-login-logo" alt="FoxSA News" />
+          <div class="foxsa-login-badge" style="background:rgba(16, 185, 129, 0.14);color:#059669;">
+            <i class="fa-solid fa-id-card"></i> PENDAFTARAN ANGGOTA
+          </div>
+          <h2>Registrasi Anggota Baru</h2>
+          <p>Khusus calon jurnalis &amp; staf yang telah diterima di tim redaksi FoxSA News Agency.</p>
+        </div>
+
+        <form id="foxsa-staff-register-form" class="foxsa-login-form">
+          <!-- Random Avatar Picker -->
+          <div class="foxsa-reg-avatar-card" style="display:flex;align-items:center;gap:14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+            <img id="reg-avatar-preview" src="" alt="Foto Profil" style="width:58px;height:58px;border-radius:50%;object-fit:cover;border:2px solid #F08D39;box-shadow:0 2px 8px rgba(0,0,0,0.08);background:#fff;" />
+            <div style="flex:1;">
+              <div style="font-weight:600;font-size:12.5px;color:#0f172a;margin-bottom:2px;">Foto Profil Jurnalis (Default Executive)</div>
+              <div style="font-size:11.5px;color:#64748b;margin-bottom:6px;">Karakter eksekutif acak disiapkan otomatis untuk akun Anda.</div>
+              <button type="button" class="foxsa-editor-btn" id="reg-btn-random-avatar" style="font-size:11.5px;padding:4px 10px;color:#ea580c;border-color:#fdba74;background:#fff;">
+                <i class="fa-solid fa-dice"></i> Acak Foto Karakter
+              </button>
+            </div>
+          </div>
+
+          <div class="foxsa-form-group">
+            <label for="reg-username">Username Login (Tanpa spasi) *</label>
+            <div class="foxsa-input-icon-wrap">
+              <i class="fa-solid fa-at"></i>
+              <input type="text" id="reg-username" class="foxsa-input" placeholder="Contoh: kevin (huruf kecil &amp; angka)" autocomplete="username" required />
+            </div>
+          </div>
+
+          <div class="foxsa-form-group">
+            <label for="reg-name">Nama Lengkap IC / Reporter *</label>
+            <div class="foxsa-input-icon-wrap">
+              <i class="fa-solid fa-signature"></i>
+              <input type="text" id="reg-name" class="foxsa-input" placeholder="Contoh: Kevin Salvatore" required />
+            </div>
+          </div>
+
+          <div class="foxsa-form-group">
+            <label for="reg-role">Departemen / Jabatan yang Diajukan *</label>
+            <select id="reg-role" class="foxsa-select">
+              <option value="Junior Reporter" selected>Junior Reporter (Reporter Magang)</option>
+              <option value="FoxSA News Journalist & Field Reporter">Journalist &amp; Field Reporter (Staf Lapangan)</option>
+              <option value="Investigative Reporter">Investigative Reporter (Liputan Kriminal & Investigasi)</option>
+              <option value="Photojournalist & Visual Media">Photojournalist &amp; Visual Media</option>
+              <option value="Senior Editor">Senior Editor (Redaktur Senior)</option>
+              <option value="Managing Editor">Managing Editor (Manajer Redaksi)</option>
+              <option value="Executive Producer">Executive Producer (Produser Siaran)</option>
+            </select>
+            <small style="color:#64748b;font-size:11.5px;margin-top:4px;display:block;">
+              <i class="fa-solid fa-circle-info"></i> Jabatan resmi akan diverifikasi &amp; di-ACC oleh High Staff FoxSA.
+            </small>
+          </div>
+
+          <div class="foxsa-form-group">
+            <label for="reg-password">Password Baru *</label>
+            <div class="foxsa-input-icon-wrap">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="reg-password" class="foxsa-input" placeholder="Minimal 4 karakter..." autocomplete="new-password" required />
+              <button type="button" class="foxsa-pwd-toggle" id="reg-toggle-pwd" aria-label="Tampilkan Password">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="foxsa-form-group">
+            <label for="reg-confirm-password">Konfirmasi Password *</label>
+            <div class="foxsa-input-icon-wrap">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="reg-confirm-password" class="foxsa-input" placeholder="Ulangi password..." autocomplete="new-password" required />
+            </div>
+          </div>
+
+          <div id="reg-error-msg" class="foxsa-login-error" style="display:none;"></div>
+
+          <div class="foxsa-login-actions">
+            <button type="submit" class="foxsa-btn foxsa-btn-full" id="reg-submit-btn" style="background:#090C1E;border-color:#090C1E;">
+              <i class="fa-solid fa-user-check"></i> Selesaikan Registrasi
+            </button>
+            <a href="index.html" class="foxsa-login-back-link">
+              <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda Berita
+            </a>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="auth-page-footer">
+    &copy; 2026 FoxSA News Network — San Andreas Independent News. Hak cipta dilindungi undang-undang.
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/data.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>
