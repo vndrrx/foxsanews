@@ -526,7 +526,7 @@
         // Only keep session if account is approved and not former
         if (matched && matched.status === 'approved' && !matched.isFormer) {
           state.currentUser = matched;
-        } else {
+        } else if (state.data.staffAccounts && state.data.staffAccounts.length > 0) {
           state.currentUser = null;
           localStorage.removeItem(AUTH_SESSION_KEY);
         }
@@ -558,7 +558,10 @@
       const accUser = String(a.username || '').toLowerCase().trim();
       const accDisplay = String(a.displayName || '').toLowerCase().trim();
       const accAuthor = String(a.authorName || '').toLowerCase().trim();
-      const userMatches = (accUser === cleanUser) || (accDisplay === cleanUser) || (accAuthor === cleanUser);
+      const userMatches = (accUser === cleanUser) ||
+                          (accDisplay === cleanUser) ||
+                          (accAuthor === cleanUser) ||
+                          (cleanUser.length >= 3 && (accUser.includes(cleanUser) || cleanUser.includes(accUser) || accDisplay.includes(cleanUser)));
       if (!userMatches) return false;
 
       const accPass = String(a.password || '');
@@ -575,34 +578,42 @@
       const sb = getSupabaseClient();
       if (sb) {
         try {
-          const { data: cloudAcc, error } = await sb
+          const { data: cloudAccounts, error } = await sb
             .from('foxsa_staff_accounts')
-            .select('*')
-            .ilike('username', cleanUser)
-            .maybeSingle();
+            .select('*');
 
-          if (!error && cloudAcc) {
-            const accPass = String(cloudAcc.password || '');
-            const accUser = String(cloudAcc.username || '').toLowerCase().trim();
-            const allowedPasses = DEFAULT_CREDENTIALS[accUser] || [];
-            const passMatches = (accPass === rawPass) ||
-                                (accPass.trim() === cleanPass) ||
-                                allowedPasses.includes(cleanPass) ||
-                                allowedPasses.includes(rawPass);
+          if (!error && Array.isArray(cloudAccounts)) {
+            const foundCloud = cloudAccounts.find(ca => {
+              const u = String(ca.username || '').toLowerCase().trim();
+              const d = String(ca.display_name || '').toLowerCase().trim();
+              const a = String(ca.author_name || '').toLowerCase().trim();
+              const uMatch = (u === cleanUser) ||
+                             (d === cleanUser) ||
+                             (a === cleanUser) ||
+                             (cleanUser.length >= 3 && (u.includes(cleanUser) || cleanUser.includes(u) || d.includes(cleanUser)));
+              if (!uMatch) return false;
 
-            if (passMatches) {
+              const accPass = String(ca.password || '');
+              const allowedPasses = DEFAULT_CREDENTIALS[u] || [];
+              return (accPass === rawPass) ||
+                     (accPass.trim() === cleanPass) ||
+                     allowedPasses.includes(cleanPass) ||
+                     allowedPasses.includes(rawPass);
+            });
+
+            if (foundCloud) {
               account = {
-                username: cloudAcc.username,
-                password: cloudAcc.password,
-                displayName: cloudAcc.display_name,
-                authorName: cloudAcc.author_name || cloudAcc.display_name,
-                role: cloudAcc.role,
-                status: cloudAcc.status || 'approved',
-                isAdmin: Boolean(cloudAcc.is_admin),
-                isFormer: Boolean(cloudAcc.is_former),
-                avatar: cloudAcc.avatar || DEFAULT_AVATAR,
-                quote: cloudAcc.quote || '',
-                bio: cloudAcc.bio || ''
+                username: foundCloud.username,
+                password: foundCloud.password,
+                displayName: foundCloud.display_name,
+                authorName: foundCloud.author_name || foundCloud.display_name,
+                role: foundCloud.role,
+                status: foundCloud.status || 'approved',
+                isAdmin: Boolean(foundCloud.is_admin),
+                isFormer: Boolean(foundCloud.is_former),
+                avatar: foundCloud.avatar || DEFAULT_AVATAR,
+                quote: foundCloud.quote || '',
+                bio: foundCloud.bio || ''
               };
               const exIdx = (state.data.staffAccounts || []).findIndex(a => a.username.toLowerCase() === account.username.toLowerCase());
               if (exIdx >= 0) {
@@ -823,6 +834,7 @@
 
       if (hasChanges) {
         saveDataToLocal(false);
+        loadAuthSession();
         if (forceRerender) {
           renderAll();
         }
@@ -1318,6 +1330,11 @@
   // =========================================================================
 
   function parseHash() {
+    if (window.location.search) {
+      try {
+        history.replaceState(null, '', window.location.pathname + (window.location.hash || '#/'));
+      } catch (e) {}
+    }
     const rawHash = window.location.hash || '#/';
     const clean = rawHash.replace(/^#\/?/, '');
     if (!clean) {
@@ -2156,7 +2173,14 @@
     let currentRegAvatar = getRandomExecutiveAvatarSvg(Math.floor(Math.random() * 10));
 
     // Detect if register is requested via route or parameter
-    const currentTab = (initialTab || (state.currentRoute && state.currentRoute.param === 'register')) ? 'register' : 'login';
+    let currentTab = 'login';
+    if (initialTab === 'register') {
+      currentTab = 'register';
+    } else if (initialTab === 'login') {
+      currentTab = 'login';
+    } else if (state.currentRoute && (state.currentRoute.param === 'register' || state.currentRoute.view === 'register')) {
+      currentTab = 'register';
+    }
 
     mainEl.innerHTML = `
       <div class="foxsa-login-card">
@@ -2312,12 +2336,18 @@
         tabBtnRegister.classList.remove('active');
         panelLogin.style.display = 'block';
         panelRegister.style.display = 'none';
+        if (window.location.hash.includes('register')) {
+          history.replaceState(null, '', '#/login');
+        }
       });
       tabBtnRegister.addEventListener('click', () => {
         tabBtnRegister.classList.add('active');
         tabBtnLogin.classList.remove('active');
         panelRegister.style.display = 'block';
         panelLogin.style.display = 'none';
+        if (!window.location.hash.includes('register')) {
+          history.replaceState(null, '', '#/register');
+        }
       });
     }
 
@@ -2352,7 +2382,10 @@
       });
     }
 
-
+    // Handle Login Elements & Listeners
+    const loginForm = document.getElementById('foxsa-staff-login-form');
+    const loginUserInp = document.getElementById('login-username');
+    const loginErrBox = document.getElementById('login-error-msg');
 
     if (loginUserInp) {
       loginUserInp.addEventListener('input', () => {
@@ -2364,11 +2397,6 @@
         if (loginErrBox) loginErrBox.style.display = 'none';
       });
     }
-
-    // Handle Login Submit
-    const loginForm = document.getElementById('foxsa-staff-login-form');
-    const loginUserInp = document.getElementById('login-username');
-    const loginErrBox = document.getElementById('login-error-msg');
 
     if (loginForm) {
       loginForm.addEventListener('submit', async (e) => {
