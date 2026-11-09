@@ -4212,12 +4212,7 @@
         });
       }
 
-      if (pDiscordInp) {
-        pDiscordInp.addEventListener('input', () => {
-          const discordEl = document.querySelector('#myprofile-preview-discord span');
-          if (discordEl) discordEl.textContent = pDiscordInp.value.trim() || 'Belum diisi';
-        });
-      }
+
 
       if (pQuoteInp) {
         pQuoteInp.addEventListener('input', () => {
@@ -4238,7 +4233,7 @@
         e.preventDefault();
         const newAvatar = (pAvatarUrlInp ? pAvatarUrlInp.value.trim() : '') || state.currentUser.avatar || DEFAULT_AVATAR;
         const newName = pNameInp.value.trim();
-        const newDiscord = pDiscordInp ? pDiscordInp.value.trim() : '';
+        
         const newQuote = pQuoteInp ? pQuoteInp.value.trim() : '';
         const newBio = pBioInp ? pBioInp.value.trim() : '';
         const newPass = pNewPassInp ? pNewPassInp.value.trim() : '';
@@ -4252,7 +4247,7 @@
         state.currentUser.avatar = newAvatar;
         state.currentUser.displayName = newName;
         state.currentUser.authorName = newName;
-        state.currentUser.discordId = newDiscord;
+        
         state.currentUser.quote = newQuote;
         state.currentUser.bio = newBio;
         if (newPass) {
@@ -4265,7 +4260,7 @@
           targetAcc.avatar = newAvatar;
           targetAcc.displayName = newName;
           targetAcc.authorName = newName;
-          targetAcc.discordId = newDiscord;
+          
           targetAcc.quote = newQuote;
           targetAcc.bio = newBio;
           if (newPass) targetAcc.password = newPass;
