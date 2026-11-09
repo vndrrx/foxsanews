@@ -545,7 +545,7 @@
     'steven': ['stevendeluca', 'steven', 'foxsa2026', 'foxsa']
   };
 
-  function loginStaff(username, password) {
+  async function loginStaff(username, password) {
     const cleanUser = String(username || '').trim().toLowerCase().replace(/^@+/, '');
     const rawPass = String(password || '');
     const cleanPass = rawPass.trim();
@@ -554,7 +554,7 @@
       return { success: false, reason: 'empty_credentials' };
     }
 
-    const account = (state.data.staffAccounts || []).find(a => {
+    let account = (state.data.staffAccounts || []).find(a => {
       const accUser = String(a.username || '').toLowerCase().trim();
       const accDisplay = String(a.displayName || '').toLowerCase().trim();
       const accAuthor = String(a.authorName || '').toLowerCase().trim();
@@ -570,9 +570,61 @@
       return passMatches;
     });
 
+    // Jika tidak ditemukan di memori browser lokal, query langsung ke database Supabase
+    if (!account) {
+      const sb = getSupabaseClient();
+      if (sb) {
+        try {
+          const { data: cloudAcc, error } = await sb
+            .from('foxsa_staff_accounts')
+            .select('*')
+            .ilike('username', cleanUser)
+            .maybeSingle();
+
+          if (!error && cloudAcc) {
+            const accPass = String(cloudAcc.password || '');
+            const accUser = String(cloudAcc.username || '').toLowerCase().trim();
+            const allowedPasses = DEFAULT_CREDENTIALS[accUser] || [];
+            const passMatches = (accPass === rawPass) ||
+                                (accPass.trim() === cleanPass) ||
+                                allowedPasses.includes(cleanPass) ||
+                                allowedPasses.includes(rawPass);
+
+            if (passMatches) {
+              account = {
+                username: cloudAcc.username,
+                password: cloudAcc.password,
+                displayName: cloudAcc.display_name,
+                authorName: cloudAcc.author_name || cloudAcc.display_name,
+                role: cloudAcc.role,
+                status: cloudAcc.status || 'approved',
+                isAdmin: Boolean(cloudAcc.is_admin),
+                isFormer: Boolean(cloudAcc.is_former),
+                avatar: cloudAcc.avatar || DEFAULT_AVATAR,
+                quote: cloudAcc.quote || '',
+                bio: cloudAcc.bio || ''
+              };
+              const exIdx = (state.data.staffAccounts || []).findIndex(a => a.username.toLowerCase() === account.username.toLowerCase());
+              if (exIdx >= 0) {
+                state.data.staffAccounts[exIdx] = account;
+              } else {
+                state.data.staffAccounts.push(account);
+              }
+              saveDataToLocal(false);
+            }
+          }
+        } catch (e) {
+          console.warn('Supabase login lookup error:', e);
+        }
+      }
+    }
+
     if (!account) return { success: false, reason: 'invalid_credentials' };
     if (account.status === 'pending') {
       return { success: false, reason: 'pending_approval', account };
+    }
+    if (account.status === 'rejected') {
+      return { success: false, reason: 'rejected_approval', account };
     }
 
     state.currentUser = account;
@@ -636,6 +688,324 @@
     } catch (err) {
       console.error('Gagal menyimpan ke localStorage:', err);
       showToast('Peringatan: Penyimpanan browser penuh. Gunakan fitur Download data.js di Admin Panel.');
+    }
+  }
+
+  // =========================================================================
+  // SUPABASE CLOUD DATABASE INTEGRATION (REALTIME & MULTI-DEVICE SYNC)
+  // =========================================================================
+  const SUPABASE_CONFIG_KEY = 'foxsa_supabase_config_v2';
+  let _supabaseClientInstance = null;
+  let _supabaseRealtimeSubscribed = false;
+
+  function getSupabaseConfig() {
+    try {
+      const raw = localStorage.getItem(SUPABASE_CONFIG_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.url && parsed.anonKey) {
+          return { url: parsed.url.trim(), anonKey: parsed.anonKey.trim(), enabled: true };
+        }
+      }
+    } catch (e) {}
+
+    if (window.FOXSA_SUPABASE_CONFIG && window.FOXSA_SUPABASE_CONFIG.url && window.FOXSA_SUPABASE_CONFIG.anonKey) {
+      return {
+        url: window.FOXSA_SUPABASE_CONFIG.url.trim(),
+        anonKey: window.FOXSA_SUPABASE_CONFIG.anonKey.trim(),
+        enabled: true
+      };
+    }
+
+    return { url: '', anonKey: '', enabled: false };
+  }
+
+  function saveSupabaseConfig(cfg) {
+    try {
+      localStorage.setItem(SUPABASE_CONFIG_KEY, JSON.stringify(cfg));
+      _supabaseClientInstance = null;
+      _supabaseRealtimeSubscribed = false;
+    } catch (e) {}
+  }
+
+  function getSupabaseClient() {
+    if (_supabaseClientInstance) return _supabaseClientInstance;
+    if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient !== 'function') {
+      return null;
+    }
+    const cfg = getSupabaseConfig();
+    if (!cfg || !cfg.enabled || !cfg.url || !cfg.anonKey) {
+      return null;
+    }
+    try {
+      _supabaseClientInstance = window.supabase.createClient(cfg.url, cfg.anonKey);
+      return _supabaseClientInstance;
+    } catch (e) {
+      console.warn('Gagal membuat Supabase client:', e);
+      return null;
+    }
+  }
+
+  async function syncFromSupabase(forceRerender = false) {
+    const sb = getSupabaseClient();
+    if (!sb) return false;
+
+    let hasChanges = false;
+    try {
+      // 1. Ambil Akun Staff & Jurnalis
+      const { data: accounts, error: accErr } = await sb
+        .from('foxsa_staff_accounts')
+        .select('*');
+
+      if (!accErr && Array.isArray(accounts)) {
+        if (accounts.length > 0) {
+          state.data.staffAccounts = accounts.map(a => ({
+            username: a.username,
+            password: a.password,
+            displayName: a.display_name,
+            authorName: a.author_name || a.display_name,
+            role: a.role,
+            status: a.status || 'approved',
+            isAdmin: Boolean(a.is_admin),
+            isFormer: Boolean(a.is_former),
+            avatar: a.avatar || DEFAULT_AVATAR,
+            quote: a.quote || '',
+            bio: a.bio || ''
+          }));
+          hasChanges = true;
+        } else {
+          await seedInitialAccountsToSupabase(sb);
+        }
+      }
+
+      // 2. Ambil Mantan Staf (Former Staff)
+      const { data: former, error: fErr } = await sb
+        .from('foxsa_former_staff')
+        .select('*');
+
+      if (!fErr && Array.isArray(former)) {
+        if (former.length > 0) {
+          state.data.formerStaff = former.map(f => ({
+            id: f.id,
+            name: f.name,
+            formerRole: f.former_role,
+            category: f.category,
+            badge: f.badge,
+            period: f.period,
+            avatar: f.avatar,
+            bio: f.bio,
+            legacy: f.legacy
+          }));
+          hasChanges = true;
+        } else {
+          await seedInitialFormerStaffToSupabase(sb);
+        }
+      }
+
+      // 3. Ambil Pesan Chat Redaksi
+      const { data: chats, error: cErr } = await sb
+        .from('foxsa_admin_chats')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (!cErr && Array.isArray(chats)) {
+        state.data.adminChats = chats.map(c => ({
+          id: c.id,
+          senderUsername: c.sender_username,
+          senderName: c.sender_name,
+          senderRole: c.sender_role,
+          senderAvatar: c.sender_avatar,
+          message: c.message,
+          timestamp: c.created_at
+        }));
+        hasChanges = true;
+      }
+
+      if (hasChanges) {
+        saveDataToLocal(false);
+        if (forceRerender) {
+          renderAll();
+        }
+      }
+      return true;
+    } catch (err) {
+      console.warn('Sync dari Supabase terganggu:', err);
+      return false;
+    }
+  }
+
+  async function seedInitialAccountsToSupabase(sb) {
+    try {
+      const records = (state.data.staffAccounts || DEFAULT_STAFF_ACCOUNTS).map(a => ({
+        username: a.username,
+        password: a.password,
+        display_name: a.displayName,
+        author_name: a.authorName || a.displayName,
+        role: a.role,
+        status: a.status || 'approved',
+        is_admin: Boolean(a.isAdmin),
+        is_former: Boolean(a.isFormer),
+        avatar: a.avatar || '',
+        quote: a.quote || '',
+        bio: a.bio || ''
+      }));
+      await sb.from('foxsa_staff_accounts').upsert(records, { onConflict: 'username' });
+    } catch (e) {
+      console.warn('Gagal seed akun ke Supabase:', e);
+    }
+  }
+
+  async function seedInitialFormerStaffToSupabase(sb) {
+    try {
+      const records = (state.data.formerStaff || FOXSA_FORMER_STAFF).map(f => ({
+        id: f.id,
+        name: f.name,
+        former_role: f.formerRole,
+        category: f.category,
+        badge: f.badge,
+        period: f.period,
+        avatar: f.avatar,
+        bio: f.bio,
+        legacy: f.legacy
+      }));
+      await sb.from('foxsa_former_staff').upsert(records, { onConflict: 'id' });
+    } catch (e) {
+      console.warn('Gagal seed former staff ke Supabase:', e);
+    }
+  }
+
+  async function syncStaffAccountToSupabase(acc) {
+    const sb = getSupabaseClient();
+    if (!sb || !acc) return;
+    try {
+      await sb.from('foxsa_staff_accounts').upsert([{
+        username: acc.username,
+        password: acc.password,
+        display_name: acc.displayName,
+        author_name: acc.authorName || acc.displayName,
+        role: acc.role,
+        status: acc.status || 'approved',
+        is_admin: Boolean(acc.isAdmin),
+        is_former: Boolean(acc.isFormer),
+        avatar: acc.avatar || '',
+        quote: acc.quote || '',
+        bio: acc.bio || ''
+      }], { onConflict: 'username' });
+    } catch (e) {
+      console.warn('Gagal sync akun ke Supabase:', e);
+    }
+  }
+
+  async function deleteStaffAccountFromSupabase(username) {
+    const sb = getSupabaseClient();
+    if (!sb || !username) return;
+    try {
+      await sb.from('foxsa_staff_accounts').delete().eq('username', username);
+    } catch (e) {
+      console.warn('Gagal hapus akun di Supabase:', e);
+    }
+  }
+
+  async function syncFormerStaffToSupabase(former) {
+    const sb = getSupabaseClient();
+    if (!sb || !former) return;
+    try {
+      await sb.from('foxsa_former_staff').upsert([{
+        id: former.id,
+        name: former.name,
+        former_role: former.formerRole,
+        category: former.category,
+        badge: former.badge,
+        period: former.period,
+        avatar: former.avatar,
+        bio: former.bio || '',
+        legacy: former.legacy || ''
+      }], { onConflict: 'id' });
+    } catch (e) {
+      console.warn('Gagal sync mantan staf ke Supabase:', e);
+    }
+  }
+
+  async function deleteFormerStaffFromSupabase(id) {
+    const sb = getSupabaseClient();
+    if (!sb || !id) return;
+    try {
+      await sb.from('foxsa_former_staff').delete().eq('id', id);
+    } catch (e) {
+      console.warn('Gagal hapus mantan staf di Supabase:', e);
+    }
+  }
+
+  async function syncAdminChatToSupabase(chat) {
+    const sb = getSupabaseClient();
+    if (!sb || !chat) return;
+    try {
+      await sb.from('foxsa_admin_chats').upsert([{
+        id: chat.id,
+        sender_username: chat.senderUsername,
+        sender_name: chat.senderName,
+        sender_role: chat.senderRole,
+        sender_avatar: chat.senderAvatar,
+        message: chat.message,
+        created_at: chat.timestamp || new Date().toISOString()
+      }], { onConflict: 'id' });
+    } catch (e) {
+      console.warn('Gagal sync chat ke Supabase:', e);
+    }
+  }
+
+  async function deleteAdminChatFromSupabase(id) {
+    const sb = getSupabaseClient();
+    if (!sb || !id) return;
+    try {
+      await sb.from('foxsa_admin_chats').delete().eq('id', id);
+    } catch (e) {
+      console.warn('Gagal hapus chat di Supabase:', e);
+    }
+  }
+
+  function initSupabaseRealtime() {
+    if (_supabaseRealtimeSubscribed) return;
+    const sb = getSupabaseClient();
+    if (!sb) return;
+
+    try {
+      sb.channel('foxsa-realtime-sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'foxsa_admin_chats' }, async () => {
+          await syncFromSupabase(false);
+          if (state.currentRoute.view === 'admin' && state.adminTab === 'chat') {
+            renderAdminView();
+          }
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'foxsa_staff_accounts' }, async () => {
+          await syncFromSupabase(false);
+          if (state.currentRoute.view === 'admin' && (state.adminTab === 'staff' || state.adminTab === 'profile')) {
+            renderAdminView();
+          } else if (state.currentRoute.view === 'profile') {
+            renderCompanyProfileView();
+          }
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'foxsa_former_staff' }, async () => {
+          await syncFromSupabase(false);
+          if (state.currentRoute.view === 'profile' && state.currentRoute.param === 'former-staff') {
+            renderCompanyProfileView();
+          }
+        })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            _supabaseRealtimeSubscribed = true;
+          }
+        });
+    } catch (e) {
+      console.warn('Gagal subscribe Realtime Supabase:', e);
+    }
+  }
+
+  async function initSupabaseCloud() {
+    const sb = getSupabaseClient();
+    if (sb) {
+      await syncFromSupabase(true);
+      initSupabaseRealtime();
     }
   }
 
@@ -2001,11 +2371,20 @@
     const loginErrBox = document.getElementById('login-error-msg');
 
     if (loginForm) {
-      loginForm.addEventListener('submit', (e) => {
+      loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const userVal = loginUserInp ? loginUserInp.value.trim() : '';
         const passVal = passInp ? passInp.value.trim() : '';
-        const res = loginStaff(userVal, passVal);
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memeriksa Akun...';
+        }
+        const res = await loginStaff(userVal, passVal);
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Masuk ke Panel Redaksi';
+        }
         if (res && res.success) {
           showToast(`Selamat datang, ${state.currentUser.displayName}!`);
           state.adminTab = 'posts';
@@ -2110,6 +2489,7 @@
 
         state.data.staffAccounts.push(newAccount);
         saveDataToLocal(true);
+        syncStaffAccountToSupabase(newAccount);
 
         panelRegister.innerHTML = `
           <div class="foxsa-reg-pending-alert">
@@ -2604,7 +2984,71 @@
 
     // TAB 4: KELOLA STAFF, PERSETUJUAN (ACC), & PASSWORD
     else if (state.adminTab === 'staff') {
+      const sbCfg = getSupabaseConfig();
       tabContentHtml = `
+        <!-- KONEKSI CLOUD DATABASE (SUPABASE) -->
+        ${isUserHighStaff ? `
+          <div class="foxsa-cloud-card">
+            <div class="foxsa-cloud-header">
+              <div class="foxsa-cloud-title">
+                <i class="fa-solid fa-cloud-arrow-up" style="color:#0ea5e9;font-size:22px;"></i>
+                <div>
+                  <h4>Koneksi Cloud Database (Supabase) — Realtime &amp; Multi-Device Sync</h4>
+                  <div style="font-size:12px;color:#64748b;margin-top:2px;">
+                    Hubungkan ke database online agar seluruh pendaftaran akun baru, foto profil, dan chat redaksi otomatis tersinkron ke semua HP &amp; browser secara Realtime.
+                  </div>
+                </div>
+              </div>
+              <div>
+                ${sbCfg.enabled ? `
+                  <span class="foxsa-cloud-badge connected">
+                    <i class="fa-solid fa-circle-check"></i> Terhubung ke Supabase Cloud
+                  </span>
+                ` : `
+                  <span class="foxsa-cloud-badge disconnected">
+                    <i class="fa-solid fa-circle-pause"></i> Mode Offline / Lokal Browser
+                  </span>
+                `}
+              </div>
+            </div>
+
+            <form id="foxsa-supabase-config-form">
+              <div class="foxsa-cloud-grid">
+                <div class="foxsa-form-group" style="margin:0;">
+                  <label style="font-size:12px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Supabase Project URL</label>
+                  <input type="url" id="sb-cfg-url" class="foxsa-input" style="font-size:13px;padding:8px 12px;" placeholder="https://xxxxxxxxxxxx.supabase.co" value="${escapeHtml(sbCfg.url || '')}" />
+                </div>
+                <div class="foxsa-form-group" style="margin:0;">
+                  <label style="font-size:12px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Supabase Anon / Public Key</label>
+                  <input type="password" id="sb-cfg-anon" class="foxsa-input" style="font-size:13px;padding:8px 12px;" placeholder="eyJhbGciOiJIUzI1NiIsIn..." value="${escapeHtml(sbCfg.anonKey || '')}" />
+                </div>
+              </div>
+
+              <div class="foxsa-cloud-actions" style="margin-top:12px;">
+                <button type="submit" class="foxsa-btn" style="padding:7px 16px;font-size:12.5px;background:#0ea5e9;border-color:#0ea5e9;">
+                  <i class="fa-solid fa-floppy-disk"></i> Simpan &amp; Uji Koneksi
+                </button>
+                <button type="button" class="foxsa-btn foxsa-btn-outline" id="sb-btn-manual-sync" style="padding:7px 16px;font-size:12.5px;">
+                  <i class="fa-solid fa-rotate"></i> Sinkronkan Data Sekarang
+                </button>
+                <button type="button" class="foxsa-editor-btn" id="sb-btn-toggle-sql" style="padding:6px 12px;font-size:12px;">
+                  <i class="fa-solid fa-code"></i> Panduan SQL Supabase
+                </button>
+              </div>
+            </form>
+
+            <div id="sb-sql-guide" style="display:none;margin-top:14px;background:#0f172a;color:#cbd5e1;border-radius:8px;padding:14px;font-size:12px;line-height:1.6;">
+              <div style="font-weight:700;color:#38bdf8;margin-bottom:6px;"><i class="fa-solid fa-circle-info"></i> Langkah Penggunaan Supabase (Gratis &amp; 1 Menit Selesai):</div>
+              <ol style="margin:0 0 10px 18px;padding:0;">
+                <li>Buka <a href="https://supabase.com" target="_blank" rel="noopener" style="color:#38bdf8;text-decoration:underline;">supabase.com</a> lalu buat project baru.</li>
+                <li>Masuk ke <strong>SQL Editor</strong> di dashboard Supabase.</li>
+                <li>Buka file <code>supabase_schema.sql</code> di project ini atau salin seluruh perintah SQL, lalu klik <strong>Run</strong>.</li>
+                <li>Masuk ke <strong>Project Settings &gt; API</strong>, salin <strong>Project URL</strong> dan <strong>anon/public key</strong>, lalu tempel di form di atas.</li>
+              </ol>
+            </div>
+          </div>
+        ` : ''}
+
         <div class="foxsa-status-box">
           <strong><i class="fa-solid fa-users-gear" style="color:#F08D39;"></i> Struktur Tim Redaksi &amp; Manajemen Akun Staff FoxSA:</strong>
           <p style="margin:6px 0 0;">
@@ -3289,6 +3733,8 @@
         state.data.formerStaff.unshift(newFormerEntry);
 
         saveDataToLocal(true);
+        syncFormerStaffToSupabase(newFormerEntry);
+        syncStaffAccountToSupabase(acc);
         closeModal();
         renderAdminView();
         showToast(`${acc.displayName} resmi purna tugas dan tercatat di Hall of Fame Former Staff!`);
@@ -3389,6 +3835,7 @@
         if (!Array.isArray(state.data.formerStaff)) state.data.formerStaff = [];
         state.data.formerStaff.unshift(newEntry);
         saveDataToLocal(true);
+        syncFormerStaffToSupabase(newEntry);
         closeModal();
         renderAdminView();
         showToast(`${nameVal} berhasil ditambahkan ke Galeri Former Staff!`);
@@ -3497,6 +3944,7 @@
         if (!Array.isArray(state.data.adminChats)) state.data.adminChats = [];
         state.data.adminChats.push(newMsg);
         saveDataToLocal(true);
+        syncAdminChatToSupabase(newMsg);
         renderAdminView();
         showToast('Pesan redaksi berhasil dikirim!');
       });
@@ -3520,6 +3968,7 @@
         if (!confirm('Hapus pesan koordinasi ini?')) return;
         state.data.adminChats = (state.data.adminChats || []).filter(m => m.id !== id);
         saveDataToLocal(true);
+        deleteAdminChatFromSupabase(id);
         renderAdminView();
         showToast('Pesan berhasil dihapus.');
       });
@@ -3584,6 +4033,8 @@
         // Remove from formerStaff list
         state.data.formerStaff = (state.data.formerStaff || []).filter(x => x.id !== formerId);
         saveDataToLocal(true);
+        deleteFormerStaffFromSupabase(formerId);
+        if (acc) syncStaffAccountToSupabase(acc);
         renderAdminView();
         showToast(`${f.name} berhasil diaktifkan kembali ke Staf Aktif (${restoredRole})!`);
       });
@@ -3597,6 +4048,7 @@
         if (!confirm(`Hapus "${f.name}" dari daftar Former Staff & Hall of Fame?`)) return;
         state.data.formerStaff = (state.data.formerStaff || []).filter(x => x.id !== formerId);
         saveDataToLocal(true);
+        deleteFormerStaffFromSupabase(formerId);
         renderAdminView();
         showToast(`${f.name} dihapus dari daftar Former Staff.`);
       });
@@ -4079,6 +4531,7 @@
         }
 
         saveDataToLocal(true);
+        syncStaffAccountToSupabase(acc);
         renderAdminView();
         showToast(`Akun @${acc.username} (${acc.displayName}) berhasil di-ACC sebagai "${chosenRole}"!`);
       });
@@ -4093,6 +4546,7 @@
         if (!confirm(`Tolak dan batalkan pendaftaran akun @${acc.username} (${acc.displayName})?`)) return;
         state.data.staffAccounts = (state.data.staffAccounts || []).filter(a => a.username !== username);
         saveDataToLocal(true);
+        deleteStaffAccountFromSupabase(username);
         renderAdminView();
         showToast(`Pendaftaran akun @${username} telah ditolak.`);
       });
@@ -4117,6 +4571,7 @@
             state.currentUser.avatar = acc.avatar;
           }
           saveDataToLocal(true);
+          syncStaffAccountToSupabase(acc);
           renderAdminView();
           updateHeaderStaffBadge();
           showToast(`Foto profil @${acc.username} berhasil diperbarui!`);
@@ -4146,6 +4601,7 @@
               }
             });
             saveDataToLocal(true);
+            syncStaffAccountToSupabase(acc);
             renderAdminView();
             showToast(`Jabatan ${acc.displayName} berhasil diubah menjadi "${trimmedRole}"!`);
           }
@@ -4192,6 +4648,7 @@
         if (!newPwd || !newPwd.trim()) return;
         acc.password = newPwd.trim();
         saveDataToLocal(true);
+        syncStaffAccountToSupabase(acc);
         renderAdminView();
         showToast(`Password untuk ${acc.displayName} berhasil diperbarui!`);
       });
@@ -4204,6 +4661,7 @@
         if (!confirm(`Hapus akun staff "${username}"?`)) return;
         state.data.staffAccounts = (state.data.staffAccounts || []).filter(a => a.username !== username);
         saveDataToLocal(true);
+        deleteStaffAccountFromSupabase(username);
         renderAdminView();
         showToast('Akun staff dihapus.');
       });
@@ -4225,7 +4683,7 @@
           return;
         }
 
-        state.data.staffAccounts.push({
+        const newStaff = {
           username,
           password,
           displayName,
@@ -4234,7 +4692,8 @@
           status: 'approved',
           isAdmin: false,
           avatar: getRandomExecutiveAvatarSvg(Math.floor(Math.random() * 10))
-        });
+        };
+        state.data.staffAccounts.push(newStaff);
 
         if (!state.data.authors[displayName]) {
           state.data.authors[displayName] = {
@@ -4246,6 +4705,7 @@
         }
 
         saveDataToLocal(true);
+        syncStaffAccountToSupabase(newStaff);
         renderAdminView();
         showToast(`Akun staff ${displayName} (${username}) berhasil ditambahkan & diaktifkan!`);
       });
@@ -4371,6 +4831,7 @@
 
         // Save and refresh
         saveDataToLocal(true);
+        if (targetAcc) syncStaffAccountToSupabase(targetAcc);
         updateHeaderStaffBadge();
         renderAdminView();
         showToast('Profil & foto Anda berhasil diperbarui dan langsung terhubung ke seluruh sistem!');
@@ -4449,6 +4910,67 @@
         if (cfg.enabled) {
           await syncToCloudIfConfigured();
         }
+      });
+    }
+
+    // Supabase Cloud Database Form Handlers
+    const sbConfigForm = document.getElementById('foxsa-supabase-config-form');
+    if (sbConfigForm) {
+      sbConfigForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const urlInp = document.getElementById('sb-cfg-url');
+        const anonInp = document.getElementById('sb-cfg-anon');
+        const urlVal = urlInp ? urlInp.value.trim() : '';
+        const anonVal = anonInp ? anonInp.value.trim() : '';
+
+        const cfg = {
+          url: urlVal,
+          anonKey: anonVal,
+          enabled: Boolean(urlVal && anonVal)
+        };
+        saveSupabaseConfig(cfg);
+
+        if (!cfg.enabled) {
+          showToast('Konfigurasi Supabase dikosongkan. Kembali ke mode penyimpanan lokal.');
+          renderAdminView();
+          return;
+        }
+
+        showToast('Menghubungkan ke Supabase Cloud...');
+        const ok = await syncFromSupabase(true);
+        if (ok) {
+          initSupabaseRealtime();
+          showToast('✅ Berhasil terhubung ke Supabase Cloud! Data akun & chat tersinkron.');
+        } else {
+          showToast('⚠️ Gagal terhubung ke Supabase. Periksa URL Project & Anon Key Anda.');
+        }
+        renderAdminView();
+      });
+    }
+
+    const sbManualSyncBtn = document.getElementById('sb-btn-manual-sync');
+    if (sbManualSyncBtn) {
+      sbManualSyncBtn.addEventListener('click', async () => {
+        sbManualSyncBtn.disabled = true;
+        sbManualSyncBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyinkronkan...';
+        const ok = await syncFromSupabase(true);
+        sbManualSyncBtn.disabled = false;
+        sbManualSyncBtn.innerHTML = '<i class="fa-solid fa-rotate"></i> Sinkronkan Data Sekarang';
+        if (ok) {
+          showToast('✅ Seluruh data akun & chat redaksi berhasil disinkronkan dengan Supabase Cloud!');
+          renderAdminView();
+        } else {
+          showToast('⚠️ Gagal sinkronisasi. Pastikan Supabase URL & Key sudah benar.');
+        }
+      });
+    }
+
+    const sbToggleSqlBtn = document.getElementById('sb-btn-toggle-sql');
+    if (sbToggleSqlBtn) {
+      sbToggleSqlBtn.addEventListener('click', () => {
+        const guide = document.getElementById('sb-sql-guide');
+        if (!guide) return;
+        guide.style.display = guide.style.display === 'none' ? 'block' : 'none';
       });
     }
   }
@@ -6102,6 +6624,7 @@ const LEADER_QUOTES = {
     renderAll();
     window.addEventListener('hashchange', handleRouteChange);
     tryFetchRemoteFreshData();
+    initSupabaseCloud();
   });
 
 })();

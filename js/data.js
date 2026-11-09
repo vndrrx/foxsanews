@@ -1,3 +1,9 @@
+// Konfigurasi Cloud Database Supabase (Sinkronisasi Multi-Device & Realtime)
+window.FOXSA_SUPABASE_CONFIG = {
+  url: '',       // Contoh: 'https://xxxxxxxxxxxx.supabase.co'
+  anonKey: ''    // Supabase anon public key
+};
+
 // Data bawaan FoxSA News (Otomatis di-load oleh website)
 window.FOXSA_INITIAL_DATA = {
   "siteInfo": {

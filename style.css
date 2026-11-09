@@ -12706,5 +12706,76 @@ html, body {
   }
 }
 
+/* =========================================================================
+   FOXSA NEWS - SUPABASE CLOUD DATABASE INTEGRATION STYLES
+   ========================================================================= */
+.foxsa-cloud-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 22px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+.foxsa-cloud-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 14px;
+}
+.foxsa-cloud-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.foxsa-cloud-title h4 {
+  margin: 0;
+  font-size: 15px;
+  font-family: 'Poppins', sans-serif;
+  color: #0f172a;
+  font-weight: 700;
+}
+.foxsa-cloud-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.foxsa-cloud-badge.connected {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+.foxsa-cloud-badge.disconnected {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+.foxsa-cloud-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+@media (max-width: 768px) {
+  .foxsa-cloud-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.foxsa-cloud-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+
 
 
