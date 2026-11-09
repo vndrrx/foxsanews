@@ -294,6 +294,10 @@
         try {
           localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({
             username: normalizedUser.username,
+            displayName: normalizedUser.displayName,
+            role: normalizedUser.role,
+            avatar: normalizedUser.avatar,
+            isAdmin: normalizedUser.isAdmin,
             loginAt: new Date().toISOString()
           }));
         } catch (e) {}
@@ -432,3 +436,4 @@
 
   });
 })();
+

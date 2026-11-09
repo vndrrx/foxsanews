@@ -7,7 +7,38 @@
 
   const AUTH_SESSION_KEY = 'foxsa_auth_session_v1';
   const STORAGE_KEY = 'foxsa_news_data_v1';
+  const ADMIN_CACHE_KEY = 'foxsa_admin_cache_v2';
   const DEFAULT_AVATAR = 'assets/logo/foxsa-icon.jpg';
+
+  function saveAdminCache() {
+    try {
+      localStorage.setItem(ADMIN_CACHE_KEY, JSON.stringify({
+        posts: state.posts,
+        staffAccounts: state.staffAccounts,
+        formerStaff: state.formerStaff,
+        adminChats: state.adminChats,
+        currentUser: state.currentUser,
+        cachedAt: Date.now()
+      }));
+    } catch (e) {}
+  }
+
+  function loadAdminCache() {
+    try {
+      const raw = localStorage.getItem(ADMIN_CACHE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return null;
+  }
+
+  function clearAllAdminCache() {
+    try {
+      localStorage.removeItem(ADMIN_CACHE_KEY);
+      localStorage.removeItem('foxsa_news_data_v1');
+      localStorage.removeItem('foxsa_supabase_cache_v2');
+      localStorage.removeItem('foxsa_state_v2');
+    } catch (e) {}
+  }
 
   const OFFICIAL_ROLES = [
     { name: 'Chief Executive Officer', group: 'Executive', color: '#7c3aed', badge: 'bg-purple' },
@@ -248,8 +279,20 @@
         if (freshUser) {
           state.currentUser = freshUser;
           updateHeaderUserUI();
+          try {
+            localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({
+              username: freshUser.username,
+              displayName: freshUser.displayName,
+              role: freshUser.role,
+              avatar: freshUser.avatar,
+              isAdmin: freshUser.isAdmin,
+              loginAt: new Date().toISOString()
+            }));
+          } catch (e) {}
         }
       }
+
+      saveAdminCache();
 
       if (changed && forceRender) {
         renderCurrentTab();
@@ -2043,6 +2086,16 @@
           <i class="fa-solid fa-rotate"></i> Sinkronkan Data Sekarang
         </button>
       </div>
+
+      <div style="background:#fff;border:1px solid #fee2e2;border-radius:10px;padding:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-top:16px;border-left:4px solid #ef4444;">
+        <div>
+          <h4 style="margin:0 0 4px;font-size:15px;color:#991b1b;"><i class="fa-solid fa-trash-can" style="color:#ef4444;margin-right:6px;"></i> Bersihkan Cache Browser Web</h4>
+          <p style="margin:0;font-size:12.5px;color:#64748b;">Hapus seluruh data cache lokal browser agar halaman selalu memuat data terbaru 100% dari Supabase Cloud tanpa jeda atau data lama.</p>
+        </div>
+        <button type="button" class="foxsa-btn" id="btn-clear-cache-now" style="background:#ef4444;border-color:#ef4444;color:#fff;padding:9px 20px;font-weight:700;">
+          <i class="fa-solid fa-broom"></i> Bersihkan Cache Sekarang
+        </button>
+      </div>
     `;
 
     // Manual sync button
@@ -2061,6 +2114,21 @@
         }
       });
     }
+
+    // Clear cache button
+    const clearBtn = document.getElementById('btn-clear-cache-now');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', async () => {
+        if (!confirm('Apakah Anda ingin membersihkan seluruh cache lokal browser? Data akan langsung dimuat ulang murni dari Supabase Cloud.')) return;
+        clearBtn.disabled = true;
+        clearBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Membersihkan Cache...';
+        clearAllAdminCache();
+        await syncAllFromSupabase(true);
+        clearBtn.disabled = false;
+        clearBtn.innerHTML = '<i class="fa-solid fa-broom"></i> Bersihkan Cache Sekarang';
+        showToast('✅ Seluruh cache lokal telah dibersihkan! Data 100% segar dari Supabase.');
+      });
+    }
   }
 
   // -----------------------------------------------------------------
@@ -2069,12 +2137,13 @@
   document.addEventListener('DOMContentLoaded', async () => {
     // 1. Check Auth Session
     let sessionUser = null;
+    let cachedSession = null;
     try {
       const raw = localStorage.getItem(AUTH_SESSION_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.username) {
-          sessionUser = parsed.username;
+        cachedSession = JSON.parse(raw);
+        if (cachedSession && cachedSession.username) {
+          sessionUser = cachedSession.username;
         }
       }
     } catch (e) {}
@@ -2085,46 +2154,69 @@
       return;
     }
 
-    // 2. Load Fallback Initial Data
-    if (window.FOXSA_INITIAL_DATA) {
-      if (Array.isArray(window.FOXSA_INITIAL_DATA.posts)) {
-        state.posts = [...window.FOXSA_INITIAL_DATA.posts];
-      }
-      if (Array.isArray(window.FOXSA_INITIAL_DATA.staffAccounts)) {
-        state.staffAccounts = [...window.FOXSA_INITIAL_DATA.staffAccounts];
+    // 2. Set Current User immediately from cached session (Zero flicker!)
+    state.currentUser = {
+      username: sessionUser,
+      displayName: (cachedSession && cachedSession.displayName) || (sessionUser === 'arthur' ? 'Arthur Redfields' : sessionUser),
+      role: (cachedSession && cachedSession.role) || 'Chief Executive Officer',
+      avatar: (cachedSession && cachedSession.avatar) || DEFAULT_AVATAR,
+      isAdmin: cachedSession ? (cachedSession.isAdmin !== false) : true
+    };
+
+    // If cachedSession didn't have full avatar/name, check window.FOXSA_INITIAL_DATA.staffAccounts
+    if (window.FOXSA_INITIAL_DATA && Array.isArray(window.FOXSA_INITIAL_DATA.staffAccounts)) {
+      const matched = window.FOXSA_INITIAL_DATA.staffAccounts.find(a => a.username.toLowerCase() === sessionUser.toLowerCase());
+      if (matched) {
+        state.currentUser = Object.assign({}, matched, state.currentUser);
+        if (matched.avatar && matched.avatar !== 'assets/logo/foxsa-icon.jpg') {
+          state.currentUser.avatar = matched.avatar;
+        }
       }
     }
 
-    // Set initial user from matching account
-    const matched = state.staffAccounts.find(a => a.username.toLowerCase() === sessionUser.toLowerCase());
-    if (matched) {
-      state.currentUser = matched;
-    } else {
-      state.currentUser = {
-        username: sessionUser,
-        displayName: sessionUser,
-        role: 'Chief Executive Officer',
-        avatar: DEFAULT_AVATAR,
-        isAdmin: true
-      };
-    }
-
-    // 3. Setup Header & Logout
     updateHeaderUserUI();
     setupLogout();
 
-    // 4. Resolve Active Tab from Hash
+    // 3. Resolve Active Tab from Hash
     const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase().trim();
     if (['posts', 'editor', 'chat', 'staff', 'former', 'comments', 'profile', 'supabase'].includes(hash)) {
       state.activeTab = hash;
     }
 
-    // 5. Initial Render
-    renderAdminShell();
+    // 4. Load from Admin Cache or Synced Initial Data (Zero jump/flicker!)
+    const cache = loadAdminCache();
+    if (cache && Array.isArray(cache.posts) && cache.posts.length > 0) {
+      state.posts = cache.posts;
+      state.staffAccounts = cache.staffAccounts || [];
+      state.formerStaff = cache.formerStaff || [];
+      state.adminChats = cache.adminChats || [];
+      if (cache.currentUser && cache.currentUser.username.toLowerCase() === sessionUser.toLowerCase()) {
+        state.currentUser = Object.assign({}, state.currentUser, cache.currentUser);
+        updateHeaderUserUI();
+      }
+      renderAdminShell();
+    } else if (window.FOXSA_INITIAL_DATA && Array.isArray(window.FOXSA_INITIAL_DATA.posts)) {
+      state.posts = [...window.FOXSA_INITIAL_DATA.posts];
+      if (Array.isArray(window.FOXSA_INITIAL_DATA.staffAccounts)) {
+        state.staffAccounts = [...window.FOXSA_INITIAL_DATA.staffAccounts];
+      }
+      renderAdminShell();
+    } else {
+      const mainWrap = document.getElementById('admin-main-wrap');
+      if (mainWrap) {
+        mainWrap.innerHTML = `
+          <div style="text-align:center;padding:70px 20px;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size:36px;color:#F08D39;margin-bottom:14px;"></i>
+            <p style="color:#64748b;font-weight:600;font-size:15px;">Menghubungkan ke Database Cloud Supabase...</p>
+          </div>
+        `;
+      }
+    }
 
-    // 6. Connect to Supabase Cloud & Sync Data
+    // 5. Connect to Supabase Cloud & Sync fresh data in background
     await syncAllFromSupabase(true);
     initRealtimeSubscription();
   });
 
 })();
+
