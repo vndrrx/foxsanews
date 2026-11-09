@@ -1,7 +1,7 @@
 // Konfigurasi Cloud Database Supabase (Sinkronisasi Multi-Device & Realtime)
 window.FOXSA_SUPABASE_CONFIG = {
-  url: '',       // Contoh: 'https://xxxxxxxxxxxx.supabase.co'
-  anonKey: ''    // Supabase anon public key
+  url: 'https://bvlwthwjpkaozbmqrbog.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ2bHd0aHdqcGthb3pibXFyYm9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQyNTA3NDcsImV4cCI6MjEwOTgyNjc0N30.68EKETK86d8pXPX-CDTeYF-HHTPY498dODeEkjQ47RA'
 };
 
 // Data bawaan FoxSA News (Otomatis di-load oleh website)

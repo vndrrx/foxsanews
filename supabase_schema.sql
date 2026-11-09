@@ -60,9 +60,16 @@ CREATE POLICY "Public access for foxsa_former_staff" ON public.foxsa_former_staf
 DROP POLICY IF EXISTS "Public access for foxsa_admin_chats" ON public.foxsa_admin_chats;
 CREATE POLICY "Public access for foxsa_admin_chats" ON public.foxsa_admin_chats FOR ALL USING (true) WITH CHECK (true);
 
+-- BERIKAN HAK AKSES TABEL KE ROLE ANON & AUTHENTICATED
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT ALL ON TABLE public.foxsa_staff_accounts TO anon, authenticated, service_role;
+GRANT ALL ON TABLE public.foxsa_former_staff TO anon, authenticated, service_role;
+GRANT ALL ON TABLE public.foxsa_admin_chats TO anon, authenticated, service_role;
+
 -- 5. REALTIME REPLICATION (Agar chat & update akun langsung live tanpa reload)
 ALTER PUBLICATION supabase_realtime ADD TABLE public.foxsa_admin_chats;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.foxsa_staff_accounts;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.foxsa_former_staff;
 
 -- 6. DATA AWAL (SEED DEFAULT STAFF & FORMER STAFF)
 INSERT INTO public.foxsa_staff_accounts (username, password, display_name, author_name, role, status, is_admin, avatar, quote, bio)
@@ -80,3 +87,4 @@ VALUES
   ('former_catherine', 'Catherine Cecilie', 'Former Station Manager & Senior Anchor', 'management', 'Pimpinan Siaran', '2025 - 2026', 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjczAy7LhtUkBsZZzOW5IrPDtx0XsQ_HvUTdjCTdK1uggIg9itmaLx523OOTEdiEAjEoZtHZBmGFl08XshLL-07nbD7NpkwLEEiV3OsyaXUeeKVfTNpotuo32uOi9v6kDXSQRPWseWo0xDNkJAdfVD2YWTupqmUK5mplTs1vBbL_bRBag/s200/pexels-photo-5717546.jpeg', 'Penyiar dan manajer stasiun yang mengawal siaran radio, podcast, dan hubungan komunitas FoxSA.', 'Memperluas jangkauan siaran radio dan program podcast FoxSA ke seluruh pelosok San Andreas.'),
   ('former_boniface', 'Boniface O''Connor', 'Former Senior Field Reporter', 'staff', 'Jurnalis Investigasi', '2025 - 2026', 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjczAy7LhtUkBsZZzOW5IrPDtx0XsQ_HvUTdjCTdK1uggIg9itmaLx523OOTEdiEAjEoZtHZBmGFl08XshLL-07nbD7NpkwLEEiV3OsyaXUeeKVfTNpotuo32uOi9v6kDXSQRPWseWo0xDNkJAdfVD2YWTupqmUK5mplTs1vBbL_bRBag/s200/pexels-photo-5717546.jpeg', 'Reporter investigasi yang gigih menembus batas liputan kriminal dan konflik jalanan di Los Santos.', 'Seri investigasi mendalam kasus kejahatan terorganisir yang mengangkat nama FoxSA di mata publik.')
 ON CONFLICT (id) DO NOTHING;
+
