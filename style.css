@@ -4631,6 +4631,54 @@ html, body {
 .foxsa-role-badge-btn:hover {
   background: #dbeafe;
 }
+.foxsa-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.foxsa-pending-badge {
+  background: #ea580c;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 99px;
+  margin-left: 6px;
+  vertical-align: middle;
+  letter-spacing: 0.3px;
+}
+.foxsa-pending-acc-box {
+  background: #fffbf5;
+  border: 1.5px solid #fbd38d;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px rgba(217, 119, 6, 0.08);
+}
+.foxsa-pending-acc-header h4 {
+  margin: 0 0 6px;
+  color: #92400e;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.foxsa-pending-acc-header p {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #78350f;
+  line-height: 1.5;
+}
+.foxsa-reg-pending-alert {
+  text-align: center;
+  padding: 20px 10px;
+}
 .foxsa-input-icon-wrap {
   position: relative;
   display: flex;

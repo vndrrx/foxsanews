@@ -48,13 +48,111 @@
     '4080555137325759950'  // OPEN RECRUITMENT FOXSA NEWS
   ];
 
+  // =========================================================================
+  // OFFICIAL FOXSA ROLES & HIERARCHY
+  // =========================================================================
+  const OFFICIAL_ROLES = [
+    // Tier 1: Red Shield (High Staff / Board of Commissioners)
+    { name: 'Commissioner', category: 'High Staff', color: '#dc2626', bg: '#fef2f2', border: '#fecaca', icon: 'fa-shield-halved', isHighStaff: true, level: 100 },
+
+    // Tier 2: Purple / Indigo Shield (High Staff / Executive Board)
+    { name: 'Chief Executive Officer', category: 'High Staff', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', icon: 'fa-crown', isHighStaff: true, level: 90 },
+    { name: 'Chief Operating Officer', category: 'High Staff', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', icon: 'fa-user-tie', isHighStaff: true, level: 85 },
+    { name: 'Vice President', category: 'High Staff', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', icon: 'fa-user-tie', isHighStaff: true, level: 80 },
+
+    // Tier 3: Blue Shield (Management / Operational Leads)
+    { name: 'General Manager', category: 'Management', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', icon: 'fa-briefcase', isHighStaff: true, level: 70 },
+    { name: 'Executive Producer', category: 'Management', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', icon: 'fa-clapperboard', isHighStaff: true, level: 65 },
+    { name: 'Managing Editor', category: 'Management', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', icon: 'fa-newspaper', isHighStaff: true, level: 60 },
+
+    // Tier 4: Teal / Dark Green Shield (Supervisor Team)
+    { name: 'Senior Producer', category: 'Supervisor', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', icon: 'fa-video', isHighStaff: false, level: 50 },
+    { name: 'Line Producer', category: 'Supervisor', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', icon: 'fa-film', isHighStaff: false, level: 45 },
+    { name: 'Head Reporter', category: 'Supervisor', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', icon: 'fa-bullhorn', isHighStaff: false, level: 40 },
+
+    // Tier 5: Green Shield (Operational Staff / Field Reporters)
+    { name: 'Senior Reporter', category: 'Operational', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', icon: 'fa-microphone', isHighStaff: false, level: 30 },
+    { name: 'Staff Reporter', category: 'Operational', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', icon: 'fa-pen-nib', isHighStaff: false, level: 20 },
+    { name: 'Junior Reporter', category: 'Operational', color: '#22c55e', bg: '#f0fdf4', border: '#bbf7d0', icon: 'fa-pen-fancy', isHighStaff: false, level: 10 },
+    { name: 'Journalism Intern', category: 'Operational', color: '#10b981', bg: '#ecfdf5', border: '#a7f3d0', icon: 'fa-graduation-cap', isHighStaff: false, level: 5 }
+  ];
+
+  function getRoleInfo(roleName) {
+    if (!roleName) return OFFICIAL_ROLES[OFFICIAL_ROLES.length - 1];
+    const clean = String(roleName).trim().toLowerCase();
+    const found = OFFICIAL_ROLES.find(r => r.name.toLowerCase() === clean);
+    if (found) return found;
+    const partial = OFFICIAL_ROLES.find(r => clean.includes(r.name.toLowerCase()) || r.name.toLowerCase().includes(clean));
+    if (partial) return partial;
+    return {
+      name: roleName,
+      category: 'Staff',
+      color: '#64748b',
+      bg: '#f1f5f9',
+      border: '#cbd5e1',
+      icon: 'fa-id-badge',
+      isHighStaff: clean.includes('admin') || clean.includes('chief') || clean.includes('commissioner') || clean.includes('manager')
+    };
+  }
+
+  function renderRoleBadgeHtml(roleName) {
+    const info = getRoleInfo(roleName);
+    return `<span class="foxsa-role-badge" style="background:${info.bg};color:${info.color};border:1px solid ${info.border};">
+      <i class="fa-solid ${info.icon}"></i> ${escapeHtml(info.name)}
+    </span>`;
+  }
+
+  function isHighStaff(user) {
+    if (!user) return false;
+    if (user.isAdmin) return true;
+    const rInfo = getRoleInfo(user.role);
+    return !!rInfo.isHighStaff;
+  }
+
+  function renderRoleOptionsHtml(selectedRole) {
+    const selClean = String(selectedRole || '').trim().toLowerCase();
+    const categories = ['High Staff', 'Management', 'Supervisor', 'Operational'];
+    const catLabels = {
+      'High Staff': '🛡️ High Staff (Red & Purple)',
+      'Management': '💼 Operational Management (Blue)',
+      'Supervisor': '🎬 Supervisor Team (Teal)',
+      'Operational': '🎤 Operational Staff (Green)'
+    };
+    return categories.map(cat => {
+      const rolesInCat = OFFICIAL_ROLES.filter(r => r.category === cat);
+      if (rolesInCat.length === 0) return '';
+      const opts = rolesInCat.map(r => {
+        const isSel = r.name.toLowerCase() === selClean;
+        return `<option value="${escapeHtml(r.name)}" ${isSel ? 'selected' : ''}>${escapeHtml(r.name)}</option>`;
+      }).join('');
+      return `<optgroup label="${catLabels[cat] || cat}">${opts}</optgroup>`;
+    }).join('');
+  }
+
+  function promptSelectRole(title, defaultRole) {
+    const roleListStr = OFFICIAL_ROLES.map((r, i) => `${i + 1}. ${r.name} [${r.category}]`).join('\n');
+    const input = prompt(
+      `${title}\n\nPilih nomor urut (1-${OFFICIAL_ROLES.length}) atau ketik nama role resmi:\n${roleListStr}`,
+      defaultRole || 'Junior Reporter'
+    );
+    if (!input) return null;
+    const num = parseInt(input.trim(), 10);
+    if (!isNaN(num) && num >= 1 && num <= OFFICIAL_ROLES.length) {
+      return OFFICIAL_ROLES[num - 1].name;
+    }
+    const found = OFFICIAL_ROLES.find(r => r.name.toLowerCase() === input.trim().toLowerCase());
+    if (found) return found.name;
+    return input.trim();
+  }
+
   const DEFAULT_STAFF_ACCOUNTS = [
     {
       username: 'admin',
       password: 'foxsa2026',
       displayName: 'Redaksi Utama (Admin)',
       authorName: 'Arthur Redfields',
-      role: 'Chief Editor / Super Admin',
+      role: 'Managing Editor',
+      status: 'approved',
       isAdmin: true,
       avatar: 'assets/logo/foxsa-icon.jpg'
     },
@@ -63,7 +161,8 @@
       password: 'arthurfoxsa',
       displayName: 'Arthur Redfields',
       authorName: 'Arthur Redfields',
-      role: 'Secretary Chief | Senior Staff',
+      role: 'Managing Editor',
+      status: 'approved',
       isAdmin: true,
       avatar: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEijelpjGHfXOoTKfqD1mokSIESF0WySrKkFx3EV9rhrMxaQHJmPSkWe7Lj9QbiFJQbVx7z2os7vSHs3TVJFg1nzGX2MTzdqBO1eO-gppMt99EfwrEBOG9BqW1ZrbkNcNNqd-k9pS8vHOItd_EF7yVe_MfaTvhN2EvXpcWmK7ZDpX94RY14/s200/In%20Edward%20Snowden%E2%80%99s%20New%20Memoir,%20the%20Disclosures%20This%20Time%20Are%20Personal%20(Published%202019).jpg'
     },
@@ -72,7 +171,8 @@
       password: 'clarissafoxsa',
       displayName: 'Clarissa Vencant',
       authorName: 'Clarissa Vencant',
-      role: 'Senior Staff | Editor',
+      role: 'Senior Reporter',
+      status: 'approved',
       isAdmin: false,
       avatar: 'assets/logo/foxsa-icon.jpg'
     },
@@ -81,7 +181,8 @@
       password: 'shenfoxsa',
       displayName: 'Shen Xander',
       authorName: 'Shen Xander',
-      role: 'Junior Staff | Journalist',
+      role: 'Junior Reporter',
+      status: 'approved',
       isAdmin: false,
       avatar: 'assets/logo/foxsa-icon.jpg'
     }
@@ -143,6 +244,7 @@
     delete cloned.profileFeedback;
 
     cloned.staffAccounts.forEach(acc => {
+      if (!acc.status) acc.status = 'approved';
       const known = cloned.authors[acc.authorName];
       if (known && known.avatar && (!acc.avatar || acc.avatar === DEFAULT_AVATAR || acc.avatar.includes('Arthur%20PP'))) {
         acc.avatar = known.avatar;
@@ -230,14 +332,17 @@
     const account = (state.data.staffAccounts || []).find(
       a => a.username.toLowerCase() === cleanUser && a.password === cleanPass
     );
-    if (!account) return false;
+    if (!account) return { success: false, reason: 'invalid_credentials' };
+    if (account.status === 'pending') {
+      return { success: false, reason: 'pending_approval', account };
+    }
     state.currentUser = account;
     localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({
       username: account.username,
       loginAt: new Date().toISOString()
     }));
     updateHeaderStaffBadge();
-    return true;
+    return { success: true, account };
   }
 
   function logoutStaff() {
@@ -1189,7 +1294,10 @@
                   <div class="byline-author-left">
                     <img src="${escapeHtml(authorInfo.avatar || DEFAULT_AVATAR)}" alt="${escapeHtml(post.author)}" onerror="this.src='${DEFAULT_AVATAR}'" />
                     <div>
-                      <a href="#/author/${encodeURIComponent(post.author)}" class="byline-author-name">${escapeHtml(post.author)}</a>
+                      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                        <a href="#/author/${encodeURIComponent(post.author)}" class="byline-author-name">${escapeHtml(post.author)}</a>
+                        ${post.authorBio ? renderRoleBadgeHtml(post.authorBio) : ''}
+                      </div>
                       <div class="byline-date-meta">
                         <span>Dipublikasikan ${escapeHtml(formatDateID(post.published))}</span>
                         <span>•</span>
@@ -1472,14 +1580,13 @@
             </div>
 
             <div class="foxsa-form-group">
-              <label for="reg-role">Departemen / Jabatan Awal *</label>
+              <label for="reg-role">Departemen / Jabatan yang Diajukan *</label>
               <select id="reg-role" class="foxsa-select">
-                <option value="Junior Staff | Journalist">Junior Staff | Journalist</option>
-                <option value="Operational Staff">Operational Staff</option>
-                <option value="Photographer / Cameraman">Photographer / Cameraman</option>
-                <option value="Supervisor Team">Supervisor Team</option>
-                <option value="Reporter Trainee">Reporter Trainee</option>
+                ${renderRoleOptionsHtml('Junior Reporter')}
               </select>
+              <small style="color:#64748b;font-size:11.5px;margin-top:4px;display:block;">
+                <i class="fa-solid fa-circle-info"></i> Jabatan resmi akan diverifikasi &amp; di-ACC oleh High Staff FoxSA.
+              </small>
             </div>
 
             <div class="foxsa-form-group">
@@ -1566,12 +1673,34 @@
     if (loginForm) {
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const ok = loginStaff(loginUserInp.value, passInp.value);
-        if (ok) {
+        const res = loginStaff(loginUserInp.value, passInp.value);
+        if (res && res.success) {
           showToast(`Selamat datang, ${state.currentUser.displayName}!`);
           renderAdminView();
+        } else if (res && res.reason === 'pending_approval') {
+          if (loginErrBox) {
+            loginErrBox.style.display = 'flex';
+            loginErrBox.style.background = '#fffbeb';
+            loginErrBox.style.color = '#b45309';
+            loginErrBox.style.borderColor = '#fde68a';
+            loginErrBox.innerHTML = `
+              <div style="display:flex;align-items:flex-start;gap:8px;">
+                <i class="fa-solid fa-hourglass-half" style="color:#d97706;font-size:16px;margin-top:2px;"></i>
+                <div>
+                  <strong>Menunggu ACC High Staff!</strong><br/>
+                  Akun <code>@${escapeHtml(loginUserInp.value)}</code> sedang menunggu verifikasi &amp; persetujuan (ACC) dari High Staff FoxSA News Agency sebelum dapat login.
+                </div>
+              </div>
+            `;
+          }
         } else {
-          if (loginErrBox) loginErrBox.style.display = 'flex';
+          if (loginErrBox) {
+            loginErrBox.style.display = 'flex';
+            loginErrBox.style.background = '#fee2e2';
+            loginErrBox.style.color = '#991b1b';
+            loginErrBox.style.borderColor = '#fecaca';
+            loginErrBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Username atau Password salah! Periksa kembali akun staff Anda.';
+          }
           passInp.value = '';
           passInp.focus();
         }
@@ -1591,7 +1720,7 @@
         e.preventDefault();
         const username = regUserInp.value.trim().toLowerCase().replace(/\s+/g, '');
         const displayName = regNameInp.value.trim();
-        const role = regRoleSelect.value.trim() || 'Junior Staff | Journalist';
+        const role = regRoleSelect.value.trim() || 'Junior Reporter';
         const password = regPassInp.value.trim();
         const confirmPassword = regConfirmInp.value.trim();
 
@@ -1636,24 +1765,46 @@
           displayName,
           authorName: displayName,
           role,
+          status: 'pending',
           isAdmin: false,
+          createdAt: new Date().toISOString(),
           avatar: DEFAULT_AVATAR
         };
 
         state.data.staffAccounts.push(newAccount);
-        if (!state.data.authors[displayName]) {
-          state.data.authors[displayName] = {
-            name: displayName,
-            avatar: DEFAULT_AVATAR,
-            bio: role,
-            profileUrl: `#/author/${encodeURIComponent(displayName)}`
-          };
+        saveDataToLocal(true);
+
+        panelRegister.innerHTML = `
+          <div class="foxsa-reg-pending-alert">
+            <div style="font-size:32px;margin-bottom:10px;">⏳</div>
+            <h3 style="margin:0 0 8px;color:#92400e;font-size:17px;font-family:'Poppins',sans-serif;">Pendaftaran Berhasil Terkirim!</h3>
+            <p style="margin:0 0 12px;font-size:13px;color:#78350f;line-height:1.6;">
+              Terima kasih, <strong>${escapeHtml(displayName)}</strong>! Akun Anda dengan username <code>@${escapeHtml(username)}</code> telah tersimpan dan saat ini berstatus <strong>Menunggu ACC (Approval) dari High Staff</strong> FoxSA News Agency.
+            </p>
+            <div style="background:#fff;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;margin-bottom:16px;text-align:left;font-size:12.5px;color:#78350f;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                <span>Jabatan Diajukan:</span>
+                ${renderRoleBadgeHtml(role)}
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span>Status Akun:</span>
+                <span class="foxsa-pending-badge" style="margin-left:0;">Pending High Staff Review</span>
+              </div>
+            </div>
+            <button type="button" class="foxsa-btn foxsa-btn-full" id="reg-back-to-login-btn">
+              <i class="fa-solid fa-right-to-bracket"></i> Kembali ke Form Login Staff
+            </button>
+          </div>
+        `;
+
+        const backBtn = document.getElementById('reg-back-to-login-btn');
+        if (backBtn) {
+          backBtn.addEventListener('click', () => {
+            renderStaffLoginView('login');
+          });
         }
 
-        saveDataToLocal(true);
-        loginStaff(username, password);
-        showToast(`Selamat datang di tim redaksi FoxSA News, ${displayName}!`);
-        renderAdminView();
+        showToast('Pendaftaran terkirim! Menunggu ACC High Staff.');
       });
     }
   }
@@ -1670,7 +1821,10 @@
 
     const totalPosts = state.data.posts.length;
     const totalComments = state.data.posts.reduce((acc, p) => acc + ((p.comments && p.comments.length) || 0), 0);
-    const totalStaff = (state.data.staffAccounts || []).length;
+    const allStaffList = state.data.staffAccounts || [];
+    const pendingStaff = allStaffList.filter(a => a.status === 'pending');
+    const approvedStaff = allStaffList.filter(a => a.status !== 'pending');
+    const isUserHighStaff = isHighStaff(state.currentUser);
 
     let tabContentHtml = '';
 
@@ -1712,9 +1866,9 @@
                   </td>
                   <td>
                     <div style="font-weight:600;color:#090C1E;">${escapeHtml(p.author)}</div>
-                    <div style="margin-top:4px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
-                      <span class="foxsa-badge" style="font-size:10.5px;">${escapeHtml(p.authorBio || 'Staff FoxSA')}</span>
-                      ${state.currentUser.isAdmin ? `
+                    <div style="margin-top:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                      ${renderRoleBadgeHtml(p.authorBio)}
+                      ${isHighStaff(state.currentUser) ? `
                         <button type="button" class="foxsa-role-badge-btn" data-set-post-role="${escapeHtml(p.id)}" title="Ubah Jabatan/Role Penulis Artikel Ini">
                           <i class="fa-solid fa-user-gear"></i> Set Role
                         </button>
@@ -1898,13 +2052,13 @@
             </div>
           </div>
 
-          ${state.currentUser.isAdmin ? `
-            <!-- PENGATURAN REDAKSI & JABATAN PENULIS (KHUSUS ADMIN) -->
+          ${isHighStaff(state.currentUser) ? `
+            <!-- PENGATURAN REDAKSI & JABATAN PENULIS (KHUSUS HIGH STAFF / ADMIN) -->
             <div class="foxsa-editor-step-card foxsa-admin-override-card">
               <div class="step-card-badge" style="background:#090C1E;color:#F08D39;">
-                <i class="fa-solid fa-user-shield"></i> Pengaturan Penulis &amp; Jabatan (Khusus Admin)
+                <i class="fa-solid fa-user-shield"></i> Pengaturan Penulis &amp; Role Resmi (Khusus High Staff)
               </div>
-              <p style="font-size:12px;color:#64748b;margin:6px 0 14px;">Admin dapat menentukan nama jurnalis yang memposting berita ini dan mengubah jabatan resminya.</p>
+              <p style="font-size:12px;color:#64748b;margin:6px 0 14px;">High Staff dapat menentukan nama jurnalis yang memposting berita ini dan mengatur jabatan resminya dari 14 role hierarki FoxSA.</p>
               <div class="foxsa-form-row" style="margin-bottom:0;">
                 <div class="foxsa-form-group">
                   <label>Pilih Penulis Berita</label>
@@ -1922,8 +2076,12 @@
                   <input type="text" id="post-author-custom-input" class="foxsa-input" value="${escapeHtml(authorVal)}" placeholder="Nama Penulis..." />
                 </div>
                 <div class="foxsa-form-group">
-                  <label>Role / Jabatan Penulis Ini *</label>
-                  <input type="text" id="post-author-role-input" class="foxsa-input" value="${escapeHtml(authorBioVal)}" placeholder="Contoh: Senior Staff | Field Reporter, Chief Editor" required />
+                  <label>Role / Jabatan Resmi Penulis *</label>
+                  <select id="post-author-role-select" class="foxsa-select">
+                    ${renderRoleOptionsHtml(authorBioVal)}
+                    <option value="__custom__" ${!OFFICIAL_ROLES.some(r => r.name.toLowerCase() === (authorBioVal || '').toLowerCase()) ? 'selected' : ''}>+ Custom / Jabatan Lainnya</option>
+                  </select>
+                  <input type="text" id="post-author-role-input" class="foxsa-input" value="${escapeHtml(authorBioVal)}" placeholder="Ketik jabatan..." style="margin-top:6px;display:${!OFFICIAL_ROLES.some(r => r.name.toLowerCase() === (authorBioVal || '').toLowerCase()) ? 'block' : 'none'};" required />
                 </div>
               </div>
             </div>
@@ -1934,7 +2092,7 @@
               <div>
                 <div style="font-size:11.5px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;">Identitas Jurnalis</div>
                 <strong style="color:#090C1E;font-size:14px;">${escapeHtml(state.currentUser.authorName || state.currentUser.displayName)}</strong>
-                <span class="foxsa-badge" style="margin-left:6px;">${escapeHtml(state.currentUser.role || 'Jurnalis FoxSA')}</span>
+                <span style="margin-left:6px;">${renderRoleBadgeHtml(state.currentUser.role)}</span>
               </div>
             </div>
           `}
@@ -2013,32 +2171,104 @@
       `;
     }
 
-    // TAB 4: KELOLA STAFF & PASSWORD
+    // TAB 4: KELOLA STAFF, PERSETUJUAN (ACC), & PASSWORD
     else if (state.adminTab === 'staff') {
-      const staffList = state.data.staffAccounts || [];
       tabContentHtml = `
         <div class="foxsa-status-box">
-          <strong><i class="fa-solid fa-users-gear" style="color:#F08D39;"></i> Manajemen Akun Staff &amp; Password Redaksi FoxSA:</strong>
-          <p style="margin:6px 0 0;">Di sini kamu bisa mengubah password akunmu, menambah akun untuk anggota staff FoxSA baru, atau mengatur jabatan penulis.</p>
+          <strong><i class="fa-solid fa-users-gear" style="color:#F08D39;"></i> Struktur Tim Redaksi &amp; Manajemen Akun Staff FoxSA:</strong>
+          <p style="margin:6px 0 0;">
+            Hierarki resmi FoxSA News Network terdiri dari 5 tingkatan jabatan resmi.
+            ${isUserHighStaff ? 'Sebagai <strong>High Staff / Admin</strong>, Anda memiliki wewenang untuk menyetujui (ACC) pendaftaran baru, menetapkan role, dan mengelola staf.' : 'Anda dapat memperbarui password akun redaksi Anda di bawah.'}
+          </p>
+        </div>
+
+        ${pendingStaff.length > 0 ? (
+          isUserHighStaff ? `
+            <div class="foxsa-pending-acc-box">
+              <div class="foxsa-pending-acc-header">
+                <h4>
+                  <i class="fa-solid fa-user-clock" style="color:#ea580c;"></i>
+                  Permintaan Registrasi Anggota — Menunggu ACC High Staff (${pendingStaff.length})
+                </h4>
+                <p>
+                  Calon staf berikut telah mendaftar dan menunggu persetujuan (ACC). Silakan sesuaikan jabatan resmi sebelum mengaktifkan akun mereka.
+                </p>
+              </div>
+              <div class="foxsa-table-responsive">
+                <table class="foxsa-admin-table">
+                  <thead>
+                    <tr>
+                      <th>Username</th>
+                      <th>Nama Lengkap IC</th>
+                      <th>Waktu Daftar</th>
+                      <th>Pilihan Role Resmi</th>
+                      <th>Tindakan ACC</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${pendingStaff.map(acc => `
+                      <tr>
+                        <td><code>@${escapeHtml(acc.username)}</code></td>
+                        <td><strong>${escapeHtml(acc.displayName)}</strong></td>
+                        <td style="font-size:12px;color:#64748b;white-space:nowrap;">
+                          ${escapeHtml(acc.createdAt ? formatDateID(acc.createdAt) : 'Baru saja')}
+                        </td>
+                        <td>
+                          <select class="foxsa-select" style="padding:6px 10px;font-size:12px;min-width:180px;" data-acc-role-select="${escapeHtml(acc.username)}">
+                            ${renderRoleOptionsHtml(acc.role || 'Junior Reporter')}
+                          </select>
+                        </td>
+                        <td style="white-space:nowrap;">
+                          <button type="button" class="foxsa-btn" style="padding:6px 14px;font-size:12px;background:#16a34a;border-color:#16a34a;margin-right:6px;" data-approve-staff="${escapeHtml(acc.username)}">
+                            <i class="fa-solid fa-check"></i> ACC &amp; Aktifkan
+                          </button>
+                          <button type="button" class="foxsa-editor-btn" style="padding:6px 10px;font-size:12px;color:#dc2626;border-color:#fecaca;" data-reject-staff="${escapeHtml(acc.username)}" title="Tolak Registrasi">
+                            <i class="fa-solid fa-xmark"></i> Tolak
+                          </button>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ` : `
+            <div class="foxsa-status-box" style="background:#fffbeb;border-color:#fde68a;margin-bottom:20px;">
+              <strong style="color:#b45309;"><i class="fa-solid fa-hourglass-half"></i> ${pendingStaff.length} Calon Anggota Menunggu ACC:</strong>
+              <p style="margin:4px 0 0;font-size:12.5px;color:#78350f;">
+                Terdapat ${pendingStaff.length} pendaftaran anggota baru yang sedang menunggu verifikasi dan persetujuan (ACC) dari High Staff FoxSA.
+              </p>
+            </div>
+          `
+        ) : ''}
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+          <h4 style="margin:0;font-size:15px;color:#090C1E;display:flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-id-badge" style="color:#2563eb;"></i>
+            Daftar Anggota Staf Aktif (${approvedStaff.length})
+          </h4>
+          <button type="button" class="foxsa-btn foxsa-btn-outline" id="btn-copy-register-link" style="padding:6px 14px;font-size:12px;">
+            <i class="fa-solid fa-share-nodes"></i> Bagikan Link Registrasi
+          </button>
         </div>
 
         <div class="foxsa-table-responsive" style="margin-bottom:24px;">
           <table class="foxsa-admin-table">
             <thead>
               <tr>
-                <th>Username Login</th>
-                <th>Nama Jurnalis / Tampilan</th>
-                <th>Jabatan / Role</th>
-                <th>Password Saat Ini</th>
+                <th>Username</th>
+                <th>Nama Jurnalis / Staf</th>
+                <th>Jabatan / Role Resmi</th>
+                <th>Password</th>
                 <th>Aksi</th>
               </tr>
             </thead>
             <tbody>
-              ${staffList.map(acc => `
+              ${approvedStaff.map(acc => `
                 <tr>
-                  <td><code>${escapeHtml(acc.username)}</code></td>
+                  <td><code>@${escapeHtml(acc.username)}</code></td>
                   <td><strong>${escapeHtml(acc.displayName)}</strong></td>
-                  <td><span class="foxsa-badge">${escapeHtml(acc.role)}</span></td>
+                  <td>${renderRoleBadgeHtml(acc.role)}</td>
                   <td>
                     <span class="pwd-mask" data-pwd="${escapeHtml(acc.password)}">••••••••</span>
                     <button type="button" class="foxsa-editor-btn" style="padding:2px 6px;font-size:11px;margin-left:6px;" data-show-staff-pwd="${escapeHtml(acc.username)}">
@@ -2046,14 +2276,16 @@
                     </button>
                   </td>
                   <td style="white-space:nowrap;">
-                    <button type="button" class="foxsa-editor-btn" style="color:#0284c7;border-color:#bae6fd;" data-edit-staff-role="${escapeHtml(acc.username)}">
-                      <i class="fa-solid fa-id-badge"></i> Set Role
-                    </button>
+                    ${isUserHighStaff ? `
+                      <button type="button" class="foxsa-editor-btn" style="color:#0284c7;border-color:#bae6fd;" data-edit-staff-role="${escapeHtml(acc.username)}" title="Ubah Jabatan/Role Resmi">
+                        <i class="fa-solid fa-user-tag"></i> Set Role
+                      </button>
+                    ` : ''}
                     <button type="button" class="foxsa-editor-btn" data-change-pwd="${escapeHtml(acc.username)}">
                       <i class="fa-solid fa-key"></i> Ubah Password
                     </button>
-                    ${acc.username !== 'admin' ? `
-                      <button type="button" class="foxsa-editor-btn" style="color:#dc2626;border-color:#fecaca;" data-del-staff="${escapeHtml(acc.username)}">
+                    ${acc.username !== 'admin' && (isUserHighStaff || acc.username === state.currentUser.username) ? `
+                      <button type="button" class="foxsa-editor-btn" style="color:#dc2626;border-color:#fecaca;" data-del-staff="${escapeHtml(acc.username)}" title="Hapus Akun">
                         <i class="fa-solid fa-trash"></i>
                       </button>
                     ` : ''}
@@ -2064,40 +2296,38 @@
           </table>
         </div>
 
-        <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
-          <button type="button" class="foxsa-btn foxsa-btn-outline" id="btn-copy-register-link">
-            <i class="fa-solid fa-link"></i> Salin Link Registrasi Anggota Baru
-          </button>
-        </div>
-
-        <div class="foxsa-comment-form">
-          <h4><i class="fa-solid fa-user-plus" style="color:#F08D39;"></i> Tambah Akun Staff / Jurnalis Baru</h4>
-          <form id="foxsa-add-staff-form">
-            <div class="foxsa-form-row">
-              <div class="foxsa-form-group">
-                <label>Username Login (Tanpa spasi) *</label>
-                <input type="text" id="new-staff-username" class="foxsa-input" placeholder="Contoh: kevin" required />
+        ${isUserHighStaff ? `
+          <div class="foxsa-comment-form">
+            <h4><i class="fa-solid fa-user-plus" style="color:#F08D39;"></i> Tambah Anggota Staf Langsung (Bypass ACC)</h4>
+            <form id="foxsa-add-staff-form">
+              <div class="foxsa-form-row">
+                <div class="foxsa-form-group">
+                  <label>Username Login (Tanpa spasi) *</label>
+                  <input type="text" id="new-staff-username" class="foxsa-input" placeholder="Contoh: kevin" required />
+                </div>
+                <div class="foxsa-form-group">
+                  <label>Password Login *</label>
+                  <input type="text" id="new-staff-password" class="foxsa-input" placeholder="Contoh: kevinfoxsa" required />
+                </div>
               </div>
-              <div class="foxsa-form-group">
-                <label>Password Login *</label>
-                <input type="text" id="new-staff-password" class="foxsa-input" placeholder="Contoh: kevinfoxsa" required />
+              <div class="foxsa-form-row">
+                <div class="foxsa-form-group">
+                  <label>Nama Lengkap IC Jurnalis *</label>
+                  <input type="text" id="new-staff-name" class="foxsa-input" placeholder="Contoh: Kevin Salvatore" required />
+                </div>
+                <div class="foxsa-form-group">
+                  <label>Jabatan Resmi di FoxSA News *</label>
+                  <select id="new-staff-role" class="foxsa-select">
+                    ${renderRoleOptionsHtml('Junior Reporter')}
+                  </select>
+                </div>
               </div>
-            </div>
-            <div class="foxsa-form-row">
-              <div class="foxsa-form-group">
-                <label>Nama Lengkap IC Jurnalis *</label>
-                <input type="text" id="new-staff-name" class="foxsa-input" placeholder="Contoh: Kevin Salvatore" required />
-              </div>
-              <div class="foxsa-form-group">
-                <label>Jabatan di FoxSA News *</label>
-                <input type="text" id="new-staff-role" class="foxsa-input" value="Junior Staff | Journalist" required />
-              </div>
-            </div>
-            <button type="submit" class="foxsa-btn">
-              <i class="fa-solid fa-user-check"></i> Simpan Akun Staff Baru
-            </button>
-          </form>
-        </div>
+              <button type="submit" class="foxsa-btn">
+                <i class="fa-solid fa-user-check"></i> Simpan &amp; Aktifkan Akun
+              </button>
+            </form>
+          </div>
+        ` : ''}
       `;
     }
 
@@ -2179,7 +2409,7 @@
             <img src="${escapeHtml(state.currentUser.avatar || DEFAULT_AVATAR)}" alt="${escapeHtml(state.currentUser.displayName)}" onerror="this.src='${DEFAULT_AVATAR}'" />
             <div>
               <div class="staff-logged-name">${escapeHtml(state.currentUser.displayName)}</div>
-              <div class="staff-logged-role">${escapeHtml(state.currentUser.role)}</div>
+              <div class="staff-logged-role" style="margin-top:2px;">${renderRoleBadgeHtml(state.currentUser.role)}</div>
             </div>
           </div>
           <div class="foxsa-staff-logged-actions">
@@ -2203,7 +2433,8 @@
             <i class="fa-regular fa-comments"></i> Komentar (${totalComments})
           </button>
           <button type="button" class="foxsa-admin-tab ${state.adminTab === 'staff' ? 'active' : ''}" data-admin-tab="staff">
-            <i class="fa-solid fa-users-gear"></i> Akun Staff (${totalStaff})
+            <i class="fa-solid fa-users-gear"></i> Akun Staff (${approvedStaff.length})
+            ${pendingStaff.length > 0 ? `<span class="foxsa-pending-badge">${pendingStaff.length} ACC</span>` : ''}
           </button>
         </div>
 
@@ -2570,11 +2801,24 @@
         });
       }
 
-      // Author selection logic for Admin
+      // Author selection logic for High Staff & Admin
       const authorSelect = document.getElementById('post-author-select');
       const authorCustomGroup = document.getElementById('post-author-custom-group');
       const authorCustomInput = document.getElementById('post-author-custom-input');
+      const authorRoleSelect = document.getElementById('post-author-role-select');
       const authorRoleInput = document.getElementById('post-author-role-input');
+
+      if (authorRoleSelect && authorRoleInput) {
+        authorRoleSelect.addEventListener('change', () => {
+          if (authorRoleSelect.value === '__custom__') {
+            authorRoleInput.style.display = 'block';
+            authorRoleInput.focus();
+          } else {
+            authorRoleInput.value = authorRoleSelect.value;
+            authorRoleInput.style.display = 'none';
+          }
+        });
+      }
 
       if (authorSelect) {
         authorSelect.addEventListener('change', () => {
@@ -2588,8 +2832,18 @@
             if (authorCustomGroup) authorCustomGroup.style.display = 'none';
             const opt = authorSelect.options[authorSelect.selectedIndex];
             const role = opt ? opt.getAttribute('data-role') : '';
-            if (authorRoleInput && role) {
-              authorRoleInput.value = role;
+            if (role) {
+              if (authorRoleInput) authorRoleInput.value = role;
+              if (authorRoleSelect) {
+                const found = Array.from(authorRoleSelect.options).some(o => o.value.toLowerCase() === role.toLowerCase());
+                if (found) {
+                  authorRoleSelect.value = role;
+                  if (authorRoleInput) authorRoleInput.style.display = 'none';
+                } else {
+                  authorRoleSelect.value = '__custom__';
+                  if (authorRoleInput) authorRoleInput.style.display = 'block';
+                }
+              }
             }
           }
         });
@@ -2626,7 +2880,7 @@
         let authorBio = '';
         let authorAvatar = DEFAULT_AVATAR;
 
-        if (state.currentUser && state.currentUser.isAdmin) {
+        if (state.currentUser && isHighStaff(state.currentUser)) {
           const aSelect = document.getElementById('post-author-select');
           const aCustom = document.getElementById('post-author-custom-input');
           const aRole = document.getElementById('post-author-role-input');
@@ -2747,14 +3001,14 @@
       });
     });
 
-    // Set Author Role from Post List (Admin)
+    // Set Author Role from Post List (High Staff & Admin)
     mainEl.querySelectorAll('[data-set-post-role]').forEach(btn => {
       btn.addEventListener('click', () => {
         const postId = btn.getAttribute('data-set-post-role');
         const post = state.data.posts.find(p => p.id === postId);
         if (!post) return;
         const currentRole = post.authorBio || '';
-        const newRole = prompt(`Ubah Jabatan / Role untuk "${post.author}" pada artikel ini:`, currentRole);
+        const newRole = promptSelectRole(`Ubah Jabatan / Role Penulis untuk artikel "${post.title}" (${post.author}):`, currentRole);
         if (newRole && newRole.trim()) {
           const trimmedRole = newRole.trim();
           post.authorBio = trimmedRole;
@@ -2776,18 +3030,60 @@
       });
     });
 
+    // High Staff ACC Approval Handler
+    mainEl.querySelectorAll('[data-approve-staff]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const username = btn.getAttribute('data-approve-staff');
+        const acc = (state.data.staffAccounts || []).find(a => a.username === username);
+        if (!acc) return;
+        const roleSel = mainEl.querySelector(`[data-acc-role-select="${username}"]`);
+        const chosenRole = roleSel ? roleSel.value.trim() : (acc.role || 'Junior Reporter');
+
+        acc.status = 'approved';
+        acc.role = chosenRole;
+        if (!state.data.authors[acc.displayName]) {
+          state.data.authors[acc.displayName] = {
+            name: acc.displayName,
+            avatar: acc.avatar || DEFAULT_AVATAR,
+            bio: chosenRole,
+            profileUrl: `#/author/${encodeURIComponent(acc.displayName)}`
+          };
+        } else {
+          state.data.authors[acc.displayName].bio = chosenRole;
+        }
+
+        saveDataToLocal(true);
+        renderAdminView();
+        showToast(`Akun @${acc.username} (${acc.displayName}) berhasil di-ACC sebagai "${chosenRole}"!`);
+      });
+    });
+
+    // High Staff ACC Reject Handler
+    mainEl.querySelectorAll('[data-reject-staff]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const username = btn.getAttribute('data-reject-staff');
+        const acc = (state.data.staffAccounts || []).find(a => a.username === username);
+        if (!acc) return;
+        if (!confirm(`Tolak dan batalkan pendaftaran akun @${acc.username} (${acc.displayName})?`)) return;
+        state.data.staffAccounts = (state.data.staffAccounts || []).filter(a => a.username !== username);
+        saveDataToLocal(true);
+        renderAdminView();
+        showToast(`Pendaftaran akun @${username} telah ditolak.`);
+      });
+    });
+
     // Staff Management Tab Events
     mainEl.querySelectorAll('[data-edit-staff-role]').forEach(btn => {
       btn.addEventListener('click', () => {
         const username = btn.getAttribute('data-edit-staff-role');
         const acc = (state.data.staffAccounts || []).find(a => a.username === username);
         if (!acc) return;
-        const newRole = prompt(`Masukkan Jabatan / Role baru untuk "${acc.displayName}" (${acc.username}):`, acc.role);
+        const newRole = promptSelectRole(`Ubah Jabatan / Role resmi untuk "${acc.displayName}" (@${acc.username}):`, acc.role);
         if (newRole && newRole.trim()) {
           const trimmedRole = newRole.trim();
           acc.role = trimmedRole;
-          if (state.data.authors[acc.authorName]) {
-            state.data.authors[acc.authorName].bio = trimmedRole;
+          if (state.data.authors[acc.authorName || acc.displayName]) {
+            state.data.authors[acc.authorName || acc.displayName].bio = trimmedRole;
           }
           // Also update all posts by this author
           state.data.posts.forEach(p => {
@@ -2866,7 +3162,8 @@
         const username = document.getElementById('new-staff-username').value.trim().toLowerCase().replace(/\s+/g, '');
         const password = document.getElementById('new-staff-password').value.trim();
         const displayName = document.getElementById('new-staff-name').value.trim();
-        const role = document.getElementById('new-staff-role').value.trim() || 'FoxSA News Journalist';
+        const roleSel = document.getElementById('new-staff-role');
+        const role = roleSel ? roleSel.value.trim() : 'Junior Reporter';
 
         if (!username || !password || !displayName) return;
         if ((state.data.staffAccounts || []).some(a => a.username.toLowerCase() === username)) {
@@ -2880,6 +3177,7 @@
           displayName,
           authorName: displayName,
           role,
+          status: 'approved',
           isAdmin: false,
           avatar: DEFAULT_AVATAR
         });
@@ -2895,7 +3193,7 @@
 
         saveDataToLocal(true);
         renderAdminView();
-        showToast(`Akun staff ${displayName} (${username}) berhasil ditambahkan!`);
+        showToast(`Akun staff ${displayName} (${username}) berhasil ditambahkan & diaktifkan!`);
       });
     }
 
