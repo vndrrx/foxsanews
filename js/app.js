@@ -2423,6 +2423,96 @@
       `;
     }
 
+    // TAB: CHAT REDAKSI (INTERNAL NEWSROOM CHAT)
+    else if (state.adminTab === 'chat') {
+      const chatMessages = state.data.adminChats || [];
+      const activeStaffList = (state.data.staffAccounts || []).filter(a => a.status === 'approved' && !a.isFormer);
+
+      tabContentHtml = `
+        <div class="foxsa-admin-chat-wrap">
+          <div class="foxsa-chat-header-bar">
+            <div class="foxsa-chat-title-group">
+              <h4><i class="fa-solid fa-satellite-dish" style="color:#F08D39;"></i> Ruang Koordinasi Redaksi FoxSA News</h4>
+              <p>Saluran komunikasi internal real-time untuk jurnalis, editor, dan pimpinan dalam koordinasi liputan 24/7 di San Andreas.</p>
+            </div>
+            <div class="foxsa-chat-online-pill">
+              <span class="online-indicator-dot"></span>
+              <span>${activeStaffList.length} Staf Terhubung</span>
+            </div>
+          </div>
+
+          <!-- Active Staff Chips -->
+          <div class="foxsa-chat-staff-chips">
+            ${activeStaffList.map(s => `
+              <span class="chat-staff-chip" title="${escapeHtml(s.role)}">
+                <img src="${escapeHtml(s.avatar || DEFAULT_AVATAR)}" onerror="this.src='${DEFAULT_AVATAR}'" />
+                <span>${escapeHtml(s.displayName)}</span>
+              </span>
+            `).join('')}
+          </div>
+
+          <div class="foxsa-chat-messages-container" id="foxsa-chat-messages-container">
+            ${chatMessages.length === 0 ? `
+              <div class="foxsa-chat-empty">
+                <i class="fa-regular fa-comments" style="font-size:32px;color:#cbd5e1;margin-bottom:8px;"></i>
+                <p>Belum ada pesan koordinasi. Kirim pesan pertama untuk memulai obrolan redaksi!</p>
+              </div>
+            ` : chatMessages.map(msg => {
+              const isSelf = (state.currentUser && state.currentUser.username === msg.senderUsername);
+              const canDelete = isSelf || isUserHighStaff;
+              const avatarSrc = msg.senderAvatar || DEFAULT_AVATAR;
+              return `
+                <div class="foxsa-chat-msg-row ${isSelf ? 'msg-self' : ''}" id="chat-msg-${escapeHtml(msg.id)}">
+                  <img src="${escapeHtml(avatarSrc)}" class="foxsa-chat-avatar" alt="${escapeHtml(msg.senderName)}" onerror="this.src='${DEFAULT_AVATAR}'" />
+                  <div class="foxsa-chat-bubble-wrap">
+                    <div class="foxsa-chat-meta">
+                      <span class="foxsa-chat-sender-name">${escapeHtml(msg.senderName)}</span>
+                      ${renderRoleBadgeHtml(msg.senderRole)}
+                      <span class="foxsa-chat-time"><i class="fa-regular fa-clock"></i> ${formatChatTime(msg.timestamp)}</span>
+                      ${canDelete ? `
+                        <button type="button" class="foxsa-chat-del-btn" data-delete-chat="${escapeHtml(msg.id)}" title="Hapus Pesan">
+                          <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                      ` : ''}
+                    </div>
+                    <div class="foxsa-chat-bubble">
+                      ${escapeHtml(msg.message).replace(/\n/g, '<br/>')}
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- Quick Tag Helper Bar -->
+          <div class="foxsa-chat-quick-tags">
+            <span style="font-size:11px;font-weight:600;color:#64748b;margin-right:4px;">Topik Cepat:</span>
+            <button type="button" class="foxsa-chat-tag-pill" data-chat-tag="[BREAKING NEWS]">🚨 Breaking News</button>
+            <button type="button" class="foxsa-chat-tag-pill" data-chat-tag="[TUGAS LIPUTAN]">🎙️ Tugas Liputan</button>
+            <button type="button" class="foxsa-chat-tag-pill" data-chat-tag="[PENGUMUMAN REDAKSI]">📢 Pengumuman</button>
+            <button type="button" class="foxsa-chat-tag-pill" data-chat-tag="[LAPORAN TKP]">📍 Laporan TKP</button>
+            <button type="button" class="foxsa-chat-tag-pill" data-chat-tag="[KOORDINASI]">☕ Koordinasi</button>
+          </div>
+
+          <form id="foxsa-admin-chat-form" class="foxsa-chat-form">
+            <div class="foxsa-chat-input-row">
+              <textarea id="foxsa-chat-input" class="foxsa-input" rows="2" placeholder="Tulis instruksi liputan, catatan redaksi, atau laporan berita sebagai ${escapeHtml(state.currentUser.displayName)}..." required></textarea>
+              <button type="submit" class="foxsa-btn" style="background:#F08D39;border-color:#F08D39;padding:0 22px;white-space:nowrap;">
+                <i class="fa-solid fa-paper-plane"></i> Kirim Pesan
+              </button>
+            </div>
+            ${isUserHighStaff ? `
+              <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+                <button type="button" id="btn-clear-chat-history" class="foxsa-editor-btn" style="font-size:11px;color:#dc2626;border-color:#fecaca;">
+                  <i class="fa-solid fa-broom"></i> Bersihkan Riwayat Chat
+                </button>
+              </div>
+            ` : ''}
+          </form>
+        </div>
+      `;
+    }
+
     // TAB 4: KELOLA STAFF, PERSETUJUAN (ACC), & PASSWORD
     else if (state.adminTab === 'staff') {
       tabContentHtml = `
@@ -2466,7 +2556,7 @@
                       <img src="${escapeHtml(acc.avatar || DEFAULT_AVATAR)}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid #cbd5e1;" onerror="this.src='${DEFAULT_AVATAR}'" />
                       <div>
                         <strong>${escapeHtml(acc.displayName)}</strong>
-                        ${acc.discordId ? `<div style="font-size:11px;color:#5865F2;"><i class="fa-brands fa-discord"></i> ${escapeHtml(acc.discordId)}</div>` : ''}
+                        
                       </div>
                     </div>
                   </td>
@@ -2671,7 +2761,7 @@
           <div class="foxsa-myprofile-header">
             <div class="myprofile-header-title">
               <h3><i class="fa-solid fa-user-gear"></i> Pengaturan Profil &amp; Foto Staff</h3>
-              <p>Kelola identitas jurnalis, foto profil, Discord ID, biografi, serta quote Anda yang tampil di halaman tim dan artikel berita.</p>
+              <p>Kelola identitas jurnalis, foto profil, biografi, serta quote Anda yang tampil di halaman tim dan artikel berita.</p>
             </div>
             <div class="myprofile-header-meta">
               <span class="myprofile-status-badge"><i class="fa-solid fa-circle-check"></i> Akun Terverifikasi</span>
@@ -2693,10 +2783,7 @@
                   ${renderRoleBadgeHtml(state.currentUser.role)}
                 </div>
                 
-                <div class="myprofile-discord-box" id="myprofile-preview-discord">
-                  <i class="fa-brands fa-discord"></i>
-                  <span>${escapeHtml(state.currentUser.discordId || 'Belum diisi')}</span>
-                </div>
+
 
                 <div class="myprofile-quote-bubble" id="myprofile-preview-quote">
                   <i class="fa-solid fa-quote-left"></i>
@@ -2769,14 +2856,7 @@
                   <small class="form-hint">Nama ini akan tercantum pada byline berita dan kartu jajaran tim.</small>
                 </div>
 
-                <div class="foxsa-form-group">
-                  <label for="myprofile-discord">Discord Tag / User ID</label>
-                  <div class="foxsa-input-icon-wrap">
-                    <i class="fa-brands fa-discord"></i>
-                    <input type="text" id="myprofile-discord" class="foxsa-input" placeholder="Contoh: &lt;@797879523726983198&gt; atau 797879523726983198" value="${escapeHtml(state.currentUser.discordId || '')}" />
-                  </div>
-                  <small class="form-hint">Format ID Discord untuk ditampilkan di papan Official Member Roster.</small>
-                </div>
+
 
                 <div class="foxsa-form-group">
                   <label for="myprofile-quote">Kutipan / Motto Jurnalistik (Quotes)</label>
@@ -3026,65 +3106,68 @@
     if (cleanRole.includes('chief') || cleanRole.includes('commissioner') || cleanRole.includes('director')) defCategory = 'leadership';
     else if (cleanRole.includes('manager') || cleanRole.includes('producer') || cleanRole.includes('editor')) defCategory = 'management';
 
-    const modalHtml = `
-      <div id="foxsa-former-modal" class="foxsa-role-modal" style="display:flex;">
-        <div class="foxsa-role-modal-overlay" id="former-modal-overlay"></div>
-        <div class="foxsa-role-modal-box" style="max-width:520px;text-align:left;">
-          <div class="foxsa-role-modal-header" style="border-bottom:1px solid #e2e8f0;padding-bottom:12px;margin-bottom:14px;">
-            <h3 style="margin:0;font-size:16px;color:#090C1E;display:flex;align-items:center;gap:8px;">
-              <i class="fa-solid fa-graduation-cap" style="color:#d97706;"></i>
-              Purnatugaskan Staf: ${escapeHtml(acc.displayName)}
-            </h3>
-            <button type="button" class="foxsa-role-modal-close" id="former-modal-close-btn">&times;</button>
+    const modal = document.createElement('div');
+    modal.id = 'foxsa-former-modal';
+    modal.className = 'foxsa-modal-overlay';
+    modal.innerHTML = `
+      <div class="foxsa-modal-card" style="max-width:520px;text-align:left;">
+        <div class="foxsa-modal-header">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-graduation-cap" style="color:#d97706;font-size:18px;"></i>
+            <h4 style="margin:0;font-size:16px;color:#090C1E;font-family:'Poppins',sans-serif;">Purnatugaskan Staf: ${escapeHtml(acc.displayName)}</h4>
           </div>
-          <form id="former-staff-submit-form">
-            <p style="font-size:12.5px;color:#64748b;margin:0 0 14px;line-height:1.5;">
+          <button type="button" class="foxsa-modal-close" id="former-modal-close-btn" aria-label="Tutup">&times;</button>
+        </div>
+        <form id="former-staff-submit-form">
+          <div class="foxsa-modal-body">
+            <p style="font-size:13px;color:#64748b;margin:0 0 14px;line-height:1.5;">
               Staf ini akan dipindahkan dari <strong>Staf Aktif</strong> ke <strong>Hall of Fame Former Staff &amp; Alumni</strong>. Posisi resminya di struktur organisasi FoxSA News akan menjadi <strong>[VACANT]</strong>.
             </p>
             <div class="foxsa-form-group" style="margin-bottom:12px;">
-              <label style="font-size:12px;font-weight:600;">Gelar / Jabatan Terakhir Purna Tugas *</label>
-              <input type="text" id="former-inp-role" class="foxsa-input" value="${escapeHtml(defFormerRole)}" required />
+              <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Gelar / Jabatan Terakhir Purna Tugas *</label>
+              <input type="text" id="former-inp-role" class="foxsa-input" value="${escapeHtml(defFormerRole)}" required style="width:100%;font-size:13px;" />
             </div>
-            <div class="foxsa-form-row" style="margin-bottom:12px;">
-              <div class="foxsa-form-group">
-                <label style="font-size:12px;font-weight:600;">Masa Bakti / Periode *</label>
-                <input type="text" id="former-inp-period" class="foxsa-input" value="${escapeHtml(defPeriod)}" required />
+            <div class="foxsa-form-row" style="margin-bottom:12px;display:flex;gap:10px;">
+              <div class="foxsa-form-group" style="flex:1;">
+                <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Masa Bakti / Periode *</label>
+                <input type="text" id="former-inp-period" class="foxsa-input" value="${escapeHtml(defPeriod)}" required style="width:100%;font-size:13px;" />
               </div>
-              <div class="foxsa-form-group">
-                <label style="font-size:12px;font-weight:600;">Kategori Galeri *</label>
-                <select id="former-inp-cat" class="foxsa-select">
+              <div class="foxsa-form-group" style="flex:1;">
+                <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Kategori Galeri *</label>
+                <select id="former-inp-cat" class="foxsa-select" style="width:100%;font-size:13px;padding:8px 10px;">
                   <option value="leadership" ${defCategory === 'leadership' ? 'selected' : ''}>Dewan Eksekutif (Leadership)</option>
                   <option value="management" ${defCategory === 'management' ? 'selected' : ''}>Manajemen &amp; Supervisor</option>
                   <option value="staff" ${defCategory === 'staff' ? 'selected' : ''}>Staf Lapangan &amp; Reporter</option>
                 </select>
               </div>
             </div>
-            <div class="foxsa-form-group" style="margin-bottom:18px;">
-              <label style="font-size:12px;font-weight:600;">Pesan Kesan / Warisan (Legacy Quote) *</label>
-              <textarea id="former-inp-legacy" class="foxsa-input" rows="3" required>Dedikasi dan kontribusi jurnalistik luar biasa dalam pembangunan divisi redaksi FoxSA News Agency.</textarea>
+            <div class="foxsa-form-group" style="margin-bottom:6px;">
+              <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Pesan Kesan / Warisan (Legacy Quote) *</label>
+              <textarea id="former-inp-legacy" class="foxsa-input" rows="3" required style="width:100%;font-size:13px;line-height:1.4;">Dedikasi dan kontribusi jurnalistik luar biasa dalam pembangunan divisi redaksi FoxSA News Agency.</textarea>
             </div>
-            <div style="display:flex;justify-content:flex-end;gap:10px;">
-              <button type="button" class="foxsa-btn foxsa-btn-outline" id="former-modal-cancel-btn">Batal</button>
-              <button type="submit" class="foxsa-btn" style="background:#d97706;border-color:#d97706;">
-                <i class="fa-solid fa-check"></i> Simpan ke Former Staff
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
+          <div class="foxsa-modal-footer">
+            <button type="button" class="foxsa-btn foxsa-btn-outline" id="former-modal-cancel-btn" style="padding:8px 16px;font-size:13px;">Batal</button>
+            <button type="submit" class="foxsa-btn" style="background:#d97706;border-color:#d97706;padding:8px 18px;font-size:13px;">
+              <i class="fa-solid fa-check"></i> Simpan ke Former Staff
+            </button>
+          </div>
+        </form>
       </div>
     `;
 
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-    const modalEl = document.getElementById('foxsa-former-modal');
-    const closeBtn = document.getElementById('former-modal-close-btn');
-    const cancelBtn = document.getElementById('former-modal-cancel-btn');
-    const overlay = document.getElementById('former-modal-overlay');
-    const form = document.getElementById('former-staff-submit-form');
+    document.body.appendChild(modal);
 
-    const closeModal = () => { if (modalEl) modalEl.remove(); };
+    const closeBtn = modal.querySelector('#former-modal-close-btn');
+    const cancelBtn = modal.querySelector('#former-modal-cancel-btn');
+    const form = modal.querySelector('#former-staff-submit-form');
+
+    const closeModal = () => modal.remove();
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
     if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-    if (overlay) overlay.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
 
     if (form) {
       form.addEventListener('submit', (e) => {
@@ -3128,66 +3211,69 @@
     const existing = document.getElementById('foxsa-former-modal');
     if (existing) existing.remove();
 
-    const modalHtml = `
-      <div id="foxsa-former-modal" class="foxsa-role-modal" style="display:flex;">
-        <div class="foxsa-role-modal-overlay" id="former-modal-overlay"></div>
-        <div class="foxsa-role-modal-box" style="max-width:520px;text-align:left;">
-          <div class="foxsa-role-modal-header" style="border-bottom:1px solid #e2e8f0;padding-bottom:12px;margin-bottom:14px;">
-            <h3 style="margin:0;font-size:16px;color:#090C1E;display:flex;align-items:center;gap:8px;">
-              <i class="fa-solid fa-user-plus" style="color:#d97706;"></i>
-              Tambah Alumni / Former Staff Manual
-            </h3>
-            <button type="button" class="foxsa-role-modal-close" id="former-modal-close-btn">&times;</button>
+    const modal = document.createElement('div');
+    modal.id = 'foxsa-former-modal';
+    modal.className = 'foxsa-modal-overlay';
+    modal.innerHTML = `
+      <div class="foxsa-modal-card" style="max-width:520px;text-align:left;">
+        <div class="foxsa-modal-header">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-user-plus" style="color:#d97706;font-size:18px;"></i>
+            <h4 style="margin:0;font-size:16px;color:#090C1E;font-family:'Poppins',sans-serif;">Tambah Alumni / Former Staff Manual</h4>
           </div>
-          <form id="former-manual-submit-form">
+          <button type="button" class="foxsa-modal-close" id="former-modal-close-btn" aria-label="Tutup">&times;</button>
+        </div>
+        <form id="former-manual-submit-form">
+          <div class="foxsa-modal-body">
             <div class="foxsa-form-group" style="margin-bottom:12px;">
-              <label style="font-size:12px;font-weight:600;">Nama Lengkap Tokoh Alumni *</label>
-              <input type="text" id="manual-former-name" class="foxsa-input" placeholder="Contoh: Jessica Roberts" required />
+              <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Nama Lengkap Tokoh Alumni *</label>
+              <input type="text" id="manual-former-name" class="foxsa-input" placeholder="Contoh: Jessica Roberts" required style="width:100%;font-size:13px;" />
             </div>
             <div class="foxsa-form-group" style="margin-bottom:12px;">
-              <label style="font-size:12px;font-weight:600;">Jabatan / Gelar Kehormatan *</label>
-              <input type="text" id="manual-former-role" class="foxsa-input" placeholder="Contoh: Former Senior Anchor" required />
+              <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Jabatan / Gelar Kehormatan *</label>
+              <input type="text" id="manual-former-role" class="foxsa-input" placeholder="Contoh: Former Senior Anchor" required style="width:100%;font-size:13px;" />
             </div>
-            <div class="foxsa-form-row" style="margin-bottom:12px;">
-              <div class="foxsa-form-group">
-                <label style="font-size:12px;font-weight:600;">Masa Bakti / Periode *</label>
-                <input type="text" id="manual-former-period" class="foxsa-input" value="2025 – 2026" required />
+            <div class="foxsa-form-row" style="margin-bottom:12px;display:flex;gap:10px;">
+              <div class="foxsa-form-group" style="flex:1;">
+                <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Masa Bakti / Periode *</label>
+                <input type="text" id="manual-former-period" class="foxsa-input" value="2025 – 2026" required style="width:100%;font-size:13px;" />
               </div>
-              <div class="foxsa-form-group">
-                <label style="font-size:12px;font-weight:600;">Kategori Galeri *</label>
-                <select id="manual-former-cat" class="foxsa-select">
+              <div class="foxsa-form-group" style="flex:1;">
+                <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Kategori Galeri *</label>
+                <select id="manual-former-cat" class="foxsa-select" style="width:100%;font-size:13px;padding:8px 10px;">
                   <option value="leadership">Dewan Eksekutif (Leadership)</option>
                   <option value="management">Manajemen &amp; Supervisor</option>
                   <option value="staff" selected>Staf Lapangan &amp; Reporter</option>
                 </select>
               </div>
             </div>
-            <div class="foxsa-form-group" style="margin-bottom:18px;">
-              <label style="font-size:12px;font-weight:600;">Warisan / Catatan Pengabdian *</label>
-              <textarea id="manual-former-legacy" class="foxsa-input" rows="2" placeholder="Catatan kontribusi jurnalistik di FoxSA News..." required></textarea>
+            <div class="foxsa-form-group" style="margin-bottom:6px;">
+              <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Warisan / Catatan Pengabdian *</label>
+              <textarea id="manual-former-legacy" class="foxsa-input" rows="2" placeholder="Catatan kontribusi jurnalistik di FoxSA News..." required style="width:100%;font-size:13px;line-height:1.4;"></textarea>
             </div>
-            <div style="display:flex;justify-content:flex-end;gap:10px;">
-              <button type="button" class="foxsa-btn foxsa-btn-outline" id="former-modal-cancel-btn">Batal</button>
-              <button type="submit" class="foxsa-btn" style="background:#d97706;border-color:#d97706;">
-                <i class="fa-solid fa-plus"></i> Tambah ke Hall of Fame
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
+          <div class="foxsa-modal-footer">
+            <button type="button" class="foxsa-btn foxsa-btn-outline" id="former-modal-cancel-btn" style="padding:8px 16px;font-size:13px;">Batal</button>
+            <button type="submit" class="foxsa-btn" style="background:#d97706;border-color:#d97706;padding:8px 18px;font-size:13px;">
+              <i class="fa-solid fa-plus"></i> Tambah ke Hall of Fame
+            </button>
+          </div>
+        </form>
       </div>
     `;
 
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-    const modalEl = document.getElementById('foxsa-former-modal');
-    const closeBtn = document.getElementById('former-modal-close-btn');
-    const cancelBtn = document.getElementById('former-modal-cancel-btn');
-    const overlay = document.getElementById('former-modal-overlay');
-    const form = document.getElementById('former-manual-submit-form');
+    document.body.appendChild(modal);
 
-    const closeModal = () => { if (modalEl) modalEl.remove(); };
+    const closeBtn = modal.querySelector('#former-modal-close-btn');
+    const cancelBtn = modal.querySelector('#former-modal-cancel-btn');
+    const form = modal.querySelector('#former-manual-submit-form');
+
+    const closeModal = () => modal.remove();
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
     if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-    if (overlay) overlay.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
 
     if (form) {
       form.addEventListener('submit', (e) => {
@@ -3206,7 +3292,7 @@
           badge: roleVal.replace(/^Former\s*/i, '') || 'Alumni FoxSA',
           period: periodVal,
           avatar: getRandomExecutiveAvatarSvg(Math.floor(Math.random() * 10)),
-          bio: `Alumni kehormatan FoxSA News Agency.`,
+          bio: 'Alumni kehormatan FoxSA News Agency.',
           legacy: legacyVal,
           authorName: nameVal
         };
@@ -4084,7 +4170,7 @@
       const pFormAvatarPreview = document.getElementById('myprofile-form-avatar-preview');
       const pCardAvatarPreview = document.getElementById('myprofile-preview-avatar');
       const pNameInp = document.getElementById('myprofile-name');
-      const pDiscordInp = document.getElementById('myprofile-discord');
+      const pDiscordInp = null;
       const pQuoteInp = document.getElementById('myprofile-quote');
       const pBioInp = document.getElementById('myprofile-bio');
       const pNewPassInp = document.getElementById('myprofile-new-password');
@@ -4742,8 +4828,6 @@
         ? getCommissionerAvatarSvg()
         : getDefaultTeamAvatarSvg(idx);
     }
-
-    const discordId = (acc && acc.discordId) || m.discordId || 'Belum terhubung';
     const bio = (acc && acc.bio && acc.bio.trim()) || m.bio || authorObj.bio || '';
     const quote = (acc && acc.quote && acc.quote.trim()) || (LEADER_QUOTES[m.id]) || '';
     const role = (acc && acc.role) || m.role || '';
@@ -4754,7 +4838,6 @@
       name,
       role,
       avatar,
-      discordId,
       bio,
       quote,
       account: acc
@@ -4774,7 +4857,6 @@ const LEADER_QUOTES = {
       badge: 'Board of Commissioners',
       dept: 'boc',
       featured: true,
-      discordId: '797879523726983198',
       bio: 'Dewan Komisaris FoxSA News Agency yang mengawasi tata kelola perusahaan, memberikan nasihat strategis tingkat tinggi kepada Dewan Direksi, serta menjaga marwah dan independensi jaringan media di San Andreas.',
       experienceIntro: 'Berperan sebagai pengawas tertinggi yang memastikan seluruh kebijakan strategis dan operasional FoxSA News berjalan sesuai visi utama perusahaan.',
       highlights: [
@@ -4790,7 +4872,6 @@ const LEADER_QUOTES = {
       badge: 'Chief Executive Officer',
       dept: 'bod',
       featured: true,
-      discordId: '797879523726983198',
       bio: 'Pimpinan tertinggi FoxSA News Agency yang mengarahkan visi strategis, kebijakan penyiaran, independensi ruang redaksi, transformasi digital, serta kemitraan utama jaringan media di seluruh San Andreas.',
       experienceIntro: 'Memimpin operasional dan strategi ruang redaksi FoxSA News dengan komitmen teguh terhadap integritas, akurasi, dan profesionalisme.',
       highlights: [
@@ -4806,7 +4887,6 @@ const LEADER_QUOTES = {
       badge: 'Supervisor Team',
       dept: 'supervisor',
       featured: false,
-      discordId: '797879523726983198',
       bio: 'Line Producer pada Supervisor Team yang mengoordinasikan eksekusi teknis produksi siaran harian, alur kerja liputan lapangan, serta kelancaran jadwal program berita.'
     },
     {
@@ -4816,7 +4896,6 @@ const LEADER_QUOTES = {
       badge: 'Operational Staff',
       dept: 'staff',
       featured: false,
-      discordId: '1302277024425185380',
       bio: 'Journalism Intern pada Operational Staff yang aktif membantu riset lapangan, peliputan peristiwa aktual, serta dokumentasi berita di kawasan Los Santos.'
     }
   ];
@@ -4837,7 +4916,6 @@ const LEADER_QUOTES = {
           num: '',
           title: 'Board of Commissioners',
           matchRoles: ['board of commissioners', 'commissioner'],
-          defaultDiscord: '797879523726983198'
         }
       ]
     },
@@ -4848,7 +4926,7 @@ const LEADER_QUOTES = {
       pillText: 'Executive Leadership',
       icon: 'fa-shield-halved',
       slots: [
-        { num: '01', title: 'Chief Executive Officer', matchRoles: ['chief executive officer', 'ceo'], defaultDiscord: '797879523726983198' },
+        { num: '01', title: 'Chief Executive Officer', matchRoles: ['chief executive officer', 'ceo'], },
         { num: '02', title: 'Chief Operational Officer', matchRoles: ['chief operational officer', 'chief operating officer', 'coo'] },
         { num: '03', title: 'Vice President', matchRoles: ['vice president', 'vp'] }
       ]
@@ -4873,7 +4951,7 @@ const LEADER_QUOTES = {
       slots: [
         { num: '06', title: 'Managing Editor', matchRoles: ['managing editor'] },
         { num: '07', title: 'Senior Producer', matchRoles: ['senior producer'] },
-        { num: '08', title: 'Line Producer', matchRoles: ['line producer'], defaultDiscord: '797879523726983198' }
+        { num: '08', title: 'Line Producer', matchRoles: ['line producer'], }
       ]
     },
     {
@@ -4887,7 +4965,7 @@ const LEADER_QUOTES = {
         { num: '10', title: 'Senior Reporter', matchRoles: ['senior reporter'] },
         { num: '11', title: 'Staff Reporter', matchRoles: ['staff reporter'] },
         { num: '12', title: 'Junior Reporter', matchRoles: ['junior reporter'] },
-        { num: '13', title: 'Journalism Intern', matchRoles: ['journalism intern', 'intern'], defaultDiscord: '1302277024425185380', allowMultiple: true }
+        { num: '13', title: 'Journalism Intern', matchRoles: ['journalism intern', 'intern'], allowMultiple: true }
       ]
     }
   ];
@@ -4933,7 +5011,6 @@ const LEADER_QUOTES = {
         dept,
         badge: rInfo.name,
         avatar,
-        discordId: acc.discordId || (acc.username === 'steven' ? '1302277024425185380' : '797879523726983198'),
         bio: acc.bio || authorObj.bio || 'Staf redaksi FoxSA News Agency dengan integritas jurnalisme tinggi.',
         quote: acc.quote || (LEADER_QUOTES[acc.username] || 'Menyajikan informasi akurat dan kredibel untuk masyarakat San Andreas.'),
         account: acc
@@ -5164,7 +5241,7 @@ const LEADER_QUOTES = {
                                   </div>
                                   <div class="roster-officer-info">
                                     <div class="roster-officer-name">${escapeHtml(member.name)}</div>
-                                    <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@${escapeHtml(member.discordId || slot.defaultDiscord || 'Discord Terhubung')}&gt;</div>
+                                    
                                   </div>
                                 </div>
                               </div>
@@ -5724,7 +5801,7 @@ const LEADER_QUOTES = {
               <span class="leader-profile-kicker">${escapeHtml(isBoc ? 'Dewan Komisaris' : 'Dewan Direksi')} • ${escapeHtml(m.badge)}</span>
               <h3>${escapeHtml(m.name)}</h3>
               <p class="leader-profile-role">${escapeHtml(isBoc ? 'President Commissioner' : m.role)}</p>
-              <div class="leader-profile-discord"><i class="fa-brands fa-discord"></i> &lt;@${escapeHtml(m.discordId)}&gt;</div>
+              
               <blockquote class="leader-profile-quote">“${escapeHtml(m.quote || 'Setiap berita yang terbit harus akurat, tajam, dan independen.')}”</blockquote>
               <p class="leader-profile-bio">${escapeHtml(m.bio)}</p>
               <h4>${isBoc ? 'Wewenang &amp; Fokus Pengawasan' : 'Fokus &amp; Tanggung Jawab'}</h4>
