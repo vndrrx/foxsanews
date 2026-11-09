@@ -2326,7 +2326,15 @@
                     ${pendingStaff.map(acc => `
                       <tr>
                         <td><code>@${escapeHtml(acc.username)}</code></td>
-                        <td><strong>${escapeHtml(acc.displayName)}</strong></td>
+                        <td>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                      <img src="${escapeHtml(acc.avatar || DEFAULT_AVATAR)}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid #cbd5e1;" onerror="this.src='${DEFAULT_AVATAR}'" />
+                      <div>
+                        <strong>${escapeHtml(acc.displayName)}</strong>
+                        ${acc.discordId ? `<div style="font-size:11px;color:#5865F2;"><i class="fa-brands fa-discord"></i> ${escapeHtml(acc.discordId)}</div>` : ''}
+                      </div>
+                    </div>
+                  </td>
                         <td style="font-size:12px;color:#64748b;white-space:nowrap;">
                           ${escapeHtml(acc.createdAt ? formatDateID(acc.createdAt) : 'Baru saja')}
                         </td>
@@ -2397,6 +2405,9 @@
                       <button type="button" class="foxsa-editor-btn" style="color:#0284c7;border-color:#bae6fd;" data-edit-staff-role="${escapeHtml(acc.username)}" title="Ubah Jabatan/Role Resmi">
                         <i class="fa-solid fa-user-tag"></i> Set Role
                       </button>
+                      <button type="button" class="foxsa-editor-btn" style="color:#7c3aed;border-color:#ddd6fe;" data-edit-staff-avatar="${escapeHtml(acc.username)}" title="Ubah Foto Profil Staff">
+                        <i class="fa-solid fa-image"></i> Foto
+                      </button>
                     ` : ''}
                     <button type="button" class="foxsa-editor-btn" data-change-pwd="${escapeHtml(acc.username)}">
                       <i class="fa-solid fa-key"></i> Ubah Password
@@ -2449,6 +2460,161 @@
     }
 
     // TAB 5: PENYIMPANAN & CLOUD SYNC
+    else if (state.adminTab === 'profile') {
+      const userAvatar = state.currentUser.avatar || DEFAULT_AVATAR;
+      const roleInfo = getRoleInfo(state.currentUser.role);
+      const userPostsCount = state.data.posts.filter(p => (p.author || '').toLowerCase() === (state.currentUser.displayName || '').toLowerCase()).length;
+
+      tabContentHtml = `
+        <div class="foxsa-myprofile-wrap">
+          <div class="foxsa-myprofile-header">
+            <div class="myprofile-header-title">
+              <h3><i class="fa-solid fa-user-gear"></i> Pengaturan Profil &amp; Foto Staff</h3>
+              <p>Kelola identitas jurnalis, foto profil, Discord ID, biografi, serta quote Anda yang tampil di halaman tim dan artikel berita.</p>
+            </div>
+            <div class="myprofile-header-meta">
+              <span class="myprofile-status-badge"><i class="fa-solid fa-circle-check"></i> Akun Terverifikasi</span>
+            </div>
+          </div>
+
+          <div class="foxsa-myprofile-grid">
+            <!-- LEFT CARD: LIVE PROFILE CARD PREVIEW -->
+            <div class="myprofile-preview-card">
+              <div class="myprofile-card-cover"></div>
+              <div class="myprofile-avatar-wrapper">
+                <img id="myprofile-preview-avatar" src="${userAvatar}" alt="${escapeHtml(state.currentUser.displayName)}" onerror="this.src='${DEFAULT_AVATAR}'" />
+                <span class="myprofile-avatar-badge" title="Role Aktif"><i class="fa-solid ${roleInfo.icon}"></i></span>
+              </div>
+              <div class="myprofile-card-body">
+                <h4 id="myprofile-preview-name">${escapeHtml(state.currentUser.displayName)}</h4>
+                <div class="myprofile-username-tag">@${escapeHtml(state.currentUser.username)}</div>
+                <div class="myprofile-role-pill" id="myprofile-preview-role">
+                  ${renderRoleBadgeHtml(state.currentUser.role)}
+                </div>
+                
+                <div class="myprofile-discord-box" id="myprofile-preview-discord">
+                  <i class="fa-brands fa-discord"></i>
+                  <span>${escapeHtml(state.currentUser.discordId || 'Belum diisi')}</span>
+                </div>
+
+                <div class="myprofile-quote-bubble" id="myprofile-preview-quote">
+                  <i class="fa-solid fa-quote-left"></i>
+                  <p>“${escapeHtml(state.currentUser.quote || 'Jurnalisme jujur, terpercaya, dan akurat untuk San Andreas.')}”</p>
+                </div>
+
+                <div class="myprofile-bio-box">
+                  <label>Bio Singkat:</label>
+                  <p id="myprofile-preview-bio">${escapeHtml(state.currentUser.bio || 'Staf redaksi resmi FoxSA News Agency.')}</p>
+                </div>
+
+                <div class="myprofile-stats-row">
+                  <div class="myprofile-stat-item">
+                    <strong>${userPostsCount}</strong>
+                    <span>Berita Ditulis</span>
+                  </div>
+                  <div class="myprofile-stat-item">
+                    <strong>${state.currentUser.isAdmin ? 'Admin / High Staff' : 'Redaksi'}</strong>
+                    <span>Hak Akses</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT CARD: FORM EDIT PROFIL & UPLOAD FOTO -->
+            <div class="myprofile-form-card">
+              <form id="foxsa-myprofile-form">
+                <!-- 1. FOTO PROFIL SECTION -->
+                <div class="myprofile-section-title">
+                  <i class="fa-solid fa-camera"></i> 1. Foto Profil / Avatar Akun
+                </div>
+                
+                <div class="myprofile-photo-picker-row">
+                  <div class="photo-picker-preview-col">
+                    <img id="myprofile-form-avatar-preview" src="${userAvatar}" alt="Preview" onerror="this.src='${DEFAULT_AVATAR}'" />
+                  </div>
+                  <div class="photo-picker-inputs-col">
+                    <div class="foxsa-form-group">
+                      <label for="myprofile-avatar-url">URL Foto / Link Gambar (Disarankan)</label>
+                      <div class="foxsa-input-icon-wrap">
+                        <i class="fa-solid fa-link"></i>
+                        <input type="url" id="myprofile-avatar-url" class="foxsa-input" placeholder="https://blogger.googleusercontent.com/... atau https://i.ibb.co/..." value="${escapeHtml(state.currentUser.avatar || '')}" />
+                      </div>
+                      <small class="form-hint">Mendukung link langsung dari ImgBB, Discord CDN, Postimages, Google Blogger, dll.</small>
+                    </div>
+
+                    <div class="myprofile-or-divider"><span>ATAU UPLOAD DARI PERANGKAT</span></div>
+
+                    <div class="foxsa-form-group">
+                      <label for="myprofile-avatar-file" class="myprofile-upload-btn">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Pilih File Foto dari Galeri / Laptop
+                      </label>
+                      <input type="file" id="myprofile-avatar-file" accept="image/*" style="display:none;" />
+                      <small id="myprofile-file-info" style="display:block;margin-top:4px;color:#64748b;font-size:11.5px;"></small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2. DATA DIRI SECTION -->
+                <div class="myprofile-section-title" style="margin-top:24px;">
+                  <i class="fa-solid fa-id-card"></i> 2. Informasi Pribadi &amp; Jurnalistik
+                </div>
+
+                <div class="foxsa-form-group">
+                  <label for="myprofile-name">Nama Lengkap IC / Reporter *</label>
+                  <div class="foxsa-input-icon-wrap">
+                    <i class="fa-solid fa-signature"></i>
+                    <input type="text" id="myprofile-name" class="foxsa-input" value="${escapeHtml(state.currentUser.displayName || '')}" required />
+                  </div>
+                  <small class="form-hint">Nama ini akan tercantum pada byline berita dan kartu jajaran tim.</small>
+                </div>
+
+                <div class="foxsa-form-group">
+                  <label for="myprofile-discord">Discord Tag / User ID</label>
+                  <div class="foxsa-input-icon-wrap">
+                    <i class="fa-brands fa-discord"></i>
+                    <input type="text" id="myprofile-discord" class="foxsa-input" placeholder="Contoh: &lt;@797879523726983198&gt; atau 797879523726983198" value="${escapeHtml(state.currentUser.discordId || '')}" />
+                  </div>
+                  <small class="form-hint">Format ID Discord untuk ditampilkan di papan Official Member Roster.</small>
+                </div>
+
+                <div class="foxsa-form-group">
+                  <label for="myprofile-quote">Kutipan / Motto Jurnalistik (Quotes)</label>
+                  <div class="foxsa-input-icon-wrap">
+                    <i class="fa-solid fa-quote-left"></i>
+                    <input type="text" id="myprofile-quote" class="foxsa-input" placeholder="Contoh: Setiap kata yang terbit harus akurat, tajam, dan independen." value="${escapeHtml(state.currentUser.quote || LEADER_QUOTES[state.currentUser.username] || '')}" />
+                  </div>
+                </div>
+
+                <div class="foxsa-form-group">
+                  <label for="myprofile-bio">Biografi / Deskripsi Jurnalis</label>
+                  <textarea id="myprofile-bio" class="foxsa-textarea" rows="3" placeholder="Tuliskan peran, rekam jejak, atau pengalaman Anda di FoxSA News...">${escapeHtml(state.currentUser.bio || '')}</textarea>
+                </div>
+
+                <!-- 3. KEAMANAN AKUN SECTION -->
+                <div class="myprofile-section-title" style="margin-top:24px;">
+                  <i class="fa-solid fa-lock"></i> 3. Ubah Password Login (Opsional)
+                </div>
+
+                <div class="foxsa-form-group">
+                  <label for="myprofile-new-password">Password Baru</label>
+                  <div class="foxsa-input-icon-wrap">
+                    <i class="fa-solid fa-key"></i>
+                    <input type="password" id="myprofile-new-password" class="foxsa-input" placeholder="Biarkan kosong jika tidak ingin mengubah password" autocomplete="new-password" />
+                  </div>
+                </div>
+
+                <div class="myprofile-submit-row">
+                  <button type="submit" class="foxsa-btn foxsa-btn-primary" style="padding:12px 24px;font-size:14px;">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Pembaruan Profil &amp; Foto
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     else if (state.adminTab === 'storage') {
       const cfg = getGitHubConfig();
       tabContentHtml = `
@@ -2530,6 +2696,9 @@
             </div>
           </div>
           <div class="foxsa-staff-logged-actions">
+            <button type="button" class="foxsa-btn foxsa-btn-primary" data-admin-tab="profile" style="padding:7px 12px;font-size:12px;">
+              <i class="fa-solid fa-user-pen"></i> Edit Profil
+            </button>
             <a href="#/" class="foxsa-btn foxsa-btn-outline" style="text-decoration:none;padding:7px 12px;font-size:12px;">
               <i class="fa-solid fa-house"></i> Beranda
             </a>
@@ -2548,6 +2717,9 @@
           </button>
           <button type="button" class="foxsa-admin-tab ${state.adminTab === 'comments' ? 'active' : ''}" data-admin-tab="comments">
             <i class="fa-regular fa-comments"></i> Komentar (${totalComments})
+          </button>
+          <button type="button" class="foxsa-admin-tab ${state.adminTab === 'profile' ? 'active' : ''}" data-admin-tab="profile">
+            <i class="fa-solid fa-user-pen"></i> Profil Saya
           </button>
           <button type="button" class="foxsa-admin-tab ${state.adminTab === 'staff' ? 'active' : ''}" data-admin-tab="staff">
             <i class="fa-solid fa-users-gear"></i> Akun Staff (${approvedStaff.length})
@@ -3193,6 +3365,31 @@
     });
 
     // Staff Management Tab Events
+    mainEl.querySelectorAll('[data-edit-staff-avatar]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const username = btn.getAttribute('data-edit-staff-avatar');
+        const acc = (state.data.staffAccounts || []).find(a => a.username === username);
+        if (!acc) return;
+        const current = acc.avatar || '';
+        const newAvatar = prompt(`Masukkan URL Foto Profil baru untuk @${acc.username} (${acc.displayName}):\n\n(Atau masukkan link gambar dari ImgBB / Discord / Google Blogger)`, current);
+        if (newAvatar !== null) {
+          const trimmed = newAvatar.trim();
+          acc.avatar = trimmed || DEFAULT_AVATAR;
+          if (!state.data.authors) state.data.authors = {};
+          if (state.data.authors[acc.displayName]) {
+            state.data.authors[acc.displayName].avatar = acc.avatar;
+          }
+          if (state.currentUser && state.currentUser.username === acc.username) {
+            state.currentUser.avatar = acc.avatar;
+          }
+          saveDataToLocal(true);
+          renderAdminView();
+          updateHeaderStaffBadge();
+          showToast(`Foto profil @${acc.username} berhasil diperbarui!`);
+        }
+      });
+    });
+
     mainEl.querySelectorAll('[data-edit-staff-role]').forEach(btn => {
       btn.addEventListener('click', () => {
         const username = btn.getAttribute('data-edit-staff-role');
@@ -3317,6 +3514,137 @@
         saveDataToLocal(true);
         renderAdminView();
         showToast(`Akun staff ${displayName} (${username}) berhasil ditambahkan & diaktifkan!`);
+      });
+    }
+
+    // Profile Tab Events (Edit Profile & Live Photo Upload)
+    const myProfileForm = document.getElementById('foxsa-myprofile-form');
+    if (myProfileForm) {
+      const pAvatarUrlInp = document.getElementById('myprofile-avatar-url');
+      const pAvatarFileInp = document.getElementById('myprofile-avatar-file');
+      const pFormAvatarPreview = document.getElementById('myprofile-form-avatar-preview');
+      const pCardAvatarPreview = document.getElementById('myprofile-preview-avatar');
+      const pNameInp = document.getElementById('myprofile-name');
+      const pDiscordInp = document.getElementById('myprofile-discord');
+      const pQuoteInp = document.getElementById('myprofile-quote');
+      const pBioInp = document.getElementById('myprofile-bio');
+      const pNewPassInp = document.getElementById('myprofile-new-password');
+
+      // Live typing updates on preview card
+      if (pAvatarUrlInp && pFormAvatarPreview && pCardAvatarPreview) {
+        pAvatarUrlInp.addEventListener('input', () => {
+          const val = pAvatarUrlInp.value.trim() || DEFAULT_AVATAR;
+          pFormAvatarPreview.src = val;
+          pCardAvatarPreview.src = val;
+        });
+      }
+
+      if (pAvatarFileInp) {
+        pAvatarFileInp.addEventListener('change', (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          if (file.size > 2.5 * 1024 * 1024) {
+            alert('Ukuran file maksimal 2.5 MB!');
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const dataUrl = ev.target.result;
+            if (pAvatarUrlInp) pAvatarUrlInp.value = dataUrl;
+            if (pFormAvatarPreview) pFormAvatarPreview.src = dataUrl;
+            if (pCardAvatarPreview) pCardAvatarPreview.src = dataUrl;
+            const infoEl = document.getElementById('myprofile-file-info');
+            if (infoEl) infoEl.textContent = `Foto dipilih: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (pNameInp) {
+        pNameInp.addEventListener('input', () => {
+          const nameEl = document.getElementById('myprofile-preview-name');
+          if (nameEl) nameEl.textContent = pNameInp.value.trim() || state.currentUser.displayName;
+        });
+      }
+
+      if (pDiscordInp) {
+        pDiscordInp.addEventListener('input', () => {
+          const discordEl = document.querySelector('#myprofile-preview-discord span');
+          if (discordEl) discordEl.textContent = pDiscordInp.value.trim() || 'Belum diisi';
+        });
+      }
+
+      if (pQuoteInp) {
+        pQuoteInp.addEventListener('input', () => {
+          const qEl = document.querySelector('#myprofile-preview-quote p');
+          if (qEl) qEl.textContent = `“${pQuoteInp.value.trim() || 'Jurnalisme jujur, terpercaya, dan akurat untuk San Andreas.'}”`;
+        });
+      }
+
+      if (pBioInp) {
+        pBioInp.addEventListener('input', () => {
+          const bioEl = document.getElementById('myprofile-preview-bio');
+          if (bioEl) bioEl.textContent = pBioInp.value.trim() || 'Staf redaksi resmi FoxSA News Agency.';
+        });
+      }
+
+      // Handle submit
+      myProfileForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newAvatar = (pAvatarUrlInp ? pAvatarUrlInp.value.trim() : '') || state.currentUser.avatar || DEFAULT_AVATAR;
+        const newName = pNameInp.value.trim();
+        const newDiscord = pDiscordInp ? pDiscordInp.value.trim() : '';
+        const newQuote = pQuoteInp ? pQuoteInp.value.trim() : '';
+        const newBio = pBioInp ? pBioInp.value.trim() : '';
+        const newPass = pNewPassInp ? pNewPassInp.value.trim() : '';
+
+        if (!newName) {
+          alert('Nama lengkap tidak boleh kosong!');
+          return;
+        }
+
+        // Update state.currentUser
+        state.currentUser.avatar = newAvatar;
+        state.currentUser.displayName = newName;
+        state.currentUser.authorName = newName;
+        state.currentUser.discordId = newDiscord;
+        state.currentUser.quote = newQuote;
+        state.currentUser.bio = newBio;
+        if (newPass) {
+          state.currentUser.password = newPass;
+        }
+
+        // Update account in state.data.staffAccounts
+        const targetAcc = (state.data.staffAccounts || []).find(a => a.username === state.currentUser.username);
+        if (targetAcc) {
+          targetAcc.avatar = newAvatar;
+          targetAcc.displayName = newName;
+          targetAcc.authorName = newName;
+          targetAcc.discordId = newDiscord;
+          targetAcc.quote = newQuote;
+          targetAcc.bio = newBio;
+          if (newPass) targetAcc.password = newPass;
+        }
+
+        // Update in state.data.authors
+        if (!state.data.authors) state.data.authors = {};
+        state.data.authors[newName] = {
+          bio: `${state.currentUser.role} | FoxSA News`,
+          profileUrl: `#/author/${encodeURIComponent(newName)}`,
+          name: newName,
+          avatar: newAvatar
+        };
+
+        // Update in LEADER_QUOTES
+        if (typeof LEADER_QUOTES !== 'undefined') {
+          LEADER_QUOTES[state.currentUser.username] = newQuote;
+        }
+
+        // Save and refresh
+        saveDataToLocal(true);
+        updateHeaderStaffBadge();
+        renderAdminView();
+        showToast('Profil & foto Anda berhasil diperbarui dan langsung terhubung ke seluruh sistem!');
       });
     }
 
@@ -3712,7 +4040,205 @@
     return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
   }
 
-  const LEADER_QUOTES = {
+  
+  // =========================================================================
+  // FOXSA FORMER STAFF & HONORARY ALUMNI (HALL OF FAME)
+  // =========================================================================
+  const FOXSA_FORMER_STAFF = [
+    {
+      id: 'messiah',
+      name: 'Messiah Dillard',
+      formerRole: 'Founder & 1st Chief Executive Officer',
+      category: 'leadership',
+      badge: 'Founder & 1st CEO',
+      period: '17 Nov 2025 – Era Rintisan',
+      avatar: 'assets/logo/foxsa-icon.jpg',
+      bio: 'Pendiri pertama FoxSA News Agency yang meletakkan dasar jurnalisme berani, independen, dan lugas di San Andreas. Membangun fondasi stasiun penyiaran 24 jam.',
+      legacy: 'Perintis berdirinya FoxSA News & peletak nilai independensi media.',
+      authorName: 'Messiah Dillard'
+    },
+    {
+      id: 'catherine',
+      name: 'Catherine Cecillie',
+      formerRole: 'Former Chief Executive Officer (CEO)',
+      category: 'leadership',
+      badge: 'Former CEO',
+      period: '2025 – 2026',
+      avatar: 'assets/logo/foxsa-icon.jpg',
+      bio: 'Mantan CEO yang memimpin era ekspansi jaringan siaran televisi kabel, transformasi studio digital, serta perintisan 3 ekosistem utama penyiaran FoxSA News Network.',
+      legacy: 'Memimpin ekspansi siaran kabel, modernisasi newsroom, dan regenerasi talenta.',
+      authorName: 'Catherine Cecilie'
+    },
+    {
+      id: 'boniface',
+      name: 'Boniface Ernest',
+      formerRole: 'Former Vice CEO & Board of Directors',
+      category: 'leadership',
+      badge: 'Former Vice CEO',
+      period: '2025 – 2026',
+      avatar: 'assets/logo/foxsa-icon.jpg',
+      bio: 'Mantan Wakil CEO yang mengawal efektivitas tata kelola manajemen eksekutif, koordinasi lintas departemen, dan kemitraan strategis perusahaan di San Andreas.',
+      legacy: 'Penguatan struktur internal dan tata kelola operasional eksekutif.',
+      authorName: 'Boniface Ernest'
+    },
+    {
+      id: 'marshall',
+      name: 'Marshall Swiss',
+      formerRole: 'Former Executive Director',
+      category: 'leadership',
+      badge: 'Former Executive Director',
+      period: '2025 – 2026',
+      avatar: 'assets/logo/foxsa-icon.jpg',
+      bio: 'Anggota Dewan Direksi kehormatan yang menanamkan budaya kerja kekeluargaan yang solid, etika komunikasi, dan profesionalisme di FoxSA News.',
+      legacy: 'Pembangun kultur kekeluargaan para pencerita (family of storytellers).',
+      authorName: 'Marshall Swiss'
+    },
+    {
+      id: 'jesus',
+      name: 'Jesus Conway',
+      formerRole: 'Former Command / Senior Crime Supervisor',
+      category: 'management',
+      badge: 'Former Command FoxSA',
+      period: '2025 – 2026',
+      avatar: 'assets/logo/foxsa-icon.jpg',
+      bio: 'Pimpinan operasional & koresponden kriminal legendaris yang memimpin liputan investigasi berisiko tinggi bersama LSPD dan penegak hukum di Los Santos.',
+      legacy: 'Pelopor liputan kriminal investigatif dan koordinasi lapangan tangguh.',
+      authorName: 'Jesus Conway'
+    },
+    {
+      id: 'jeremiah',
+      name: 'Jeremiah Howell',
+      formerRole: 'Former Event Manager & Chief Analyst',
+      category: 'management',
+      badge: 'Former Event Manager',
+      period: '2025 – 2026',
+      avatar: 'assets/logo/foxsa-icon.jpg',
+      bio: 'Manajer liputan event besar dan analis utama olahraga bermotor yang memelopori liputan San Andreas Motorsport Championship.',
+      legacy: 'Liputan kejuaraan balap San Andreas & siaran langsung event kota.',
+      authorName: 'Jeremiah Howell'
+    },
+    {
+      id: 'nayeon',
+      name: 'Nayeon Park',
+      formerRole: 'Former HRD Manager',
+      category: 'management',
+      badge: 'Former HRD Manager',
+      period: '2025 – 2026',
+      avatar: 'assets/logo/foxsa-icon.jpg',
+      bio: 'Manajer HRD pertama yang menyusun kerangka rekrutmen resmi, standardisasi kualifikasi kru, serta pembinaan awal FoxSA Academy.',
+      legacy: 'Standardisasi proses rekrutmen dan tata tertib anggota redaksi.',
+      authorName: 'Nayeon Park'
+    },
+    {
+      id: 'clarissa',
+      name: 'Clarissa Vencant',
+      formerRole: 'Former Senior Editor & Supervisor',
+      category: 'supervisor',
+      badge: 'Former Senior Editor',
+      period: '2025 – 2026',
+      avatar: 'assets/logo/foxsa-icon.jpg',
+      bio: 'Supervisor redaksi yang mengawal kualitas bahasa, akurasi fakta, serta pembimbingan jurnalis muda dalam penulisan artikel harian.',
+      legacy: 'Standar penyuntingan berita berimbang, tajam, dan akurat.',
+      authorName: 'Clarissa Vencant'
+    },
+    {
+      id: 'franklin',
+      name: 'Franklin Baxter',
+      formerRole: 'Former HR Supervisor',
+      category: 'supervisor',
+      badge: 'Former HR Supervisor',
+      period: '2025 – 2026',
+      avatar: 'assets/logo/foxsa-icon.jpg',
+      bio: 'Supervisor HRD yang mendampingi program orientasi, pelatihan siaran, serta kesiapan mental kru jurnalis baru di lapangan.',
+      legacy: 'Pengembangan kurikulum pelatihan jurnalis lapangan FoxSA.',
+      authorName: 'Franklin Baxter'
+    },
+    {
+      id: 'bryan',
+      name: 'Bryan Andregaz',
+      formerRole: 'Former Senior Field Reporter',
+      category: 'staff',
+      badge: 'Former Field Reporter',
+      period: '2025 – 2026',
+      avatar: 'assets/logo/foxsa-icon.jpg',
+      bio: 'Jurnalis lapangan tanggap darurat yang kerap hadir pertama di lokasi kebakaran, operasi penegakan hukum, serta akademi darurat San Andreas.',
+      legacy: 'Liputan sigap dari garis depan peristiwa darurat Los Santos.',
+      authorName: 'Bryan Andregaz'
+    },
+    {
+      id: 'shen',
+      name: 'Shen Xander',
+      formerRole: 'Former Staff Journalist',
+      category: 'staff',
+      badge: 'Former Journalist',
+      period: '2025 – 2026',
+      avatar: 'assets/logo/foxsa-icon.jpg',
+      bio: 'Jurnalis harian yang berkontribusi aktif meliput dinamika sosial masyarakat, komunitas warga, dan dokumentasi peristiwa perkotaan.',
+      legacy: 'Laporan jurnalisme warga dan dokumentasi kehidupan kota.',
+      authorName: 'Shen Xander'
+    }
+  ];
+
+  // Helper: Find connected account in state.data.staffAccounts
+  function findStaffAccountForMember(memberOrName) {
+    const accounts = (state.data && state.data.staffAccounts) || [];
+    if (!memberOrName) return null;
+    const id = typeof memberOrName === 'string' ? memberOrName : (memberOrName.id || memberOrName.username);
+    const name = typeof memberOrName === 'string' ? memberOrName : (memberOrName.name || memberOrName.displayName || memberOrName.authorName);
+
+    if (id) {
+      const cleanId = String(id).toLowerCase().trim();
+      const byUser = accounts.find(a => (a.username || '').toLowerCase().trim() === cleanId);
+      if (byUser) return byUser;
+    }
+    if (name) {
+      const cleanName = String(name).toLowerCase().trim();
+      const byName = accounts.find(a => 
+        ((a.authorName || '').toLowerCase().trim() === cleanName) ||
+        ((a.displayName || '').toLowerCase().trim() === cleanName)
+      );
+      if (byName) return byName;
+    }
+    return null;
+  }
+
+  // Helper: Dynamic data resolution linking team member to account photo, bio, quote & discord
+  function getMemberEffectiveData(m) {
+    const acc = findStaffAccountForMember(m);
+    const authorsMap = (state.data && state.data.authors) || {};
+    const authorObj = (m.name && authorsMap[m.name]) || (acc && acc.authorName && authorsMap[acc.authorName]) || {};
+
+    let avatar = (acc && acc.avatar && acc.avatar.trim() && acc.avatar !== DEFAULT_AVATAR)
+      ? acc.avatar.trim()
+      : (authorObj.avatar && authorObj.avatar.trim())
+        ? authorObj.avatar.trim()
+        : (m.avatar && m.avatar.trim())
+          ? m.avatar.trim()
+          : '';
+
+    if (!avatar) {
+      avatar = m.dept === 'boc' ? getCommissionerAvatarSvg() : getDefaultTeamAvatarSvg(1);
+    }
+
+    const discordId = (acc && acc.discordId) || m.discordId || 'Belum terhubung';
+    const bio = (acc && acc.bio && acc.bio.trim()) || m.bio || authorObj.bio || '';
+    const quote = (acc && acc.quote && acc.quote.trim()) || (LEADER_QUOTES[m.id]) || '';
+    const role = (acc && acc.role) || m.role || '';
+    const name = (acc && acc.displayName) || m.name || '';
+
+    return {
+      ...m,
+      name,
+      role,
+      avatar,
+      discordId,
+      bio,
+      quote,
+      account: acc
+    };
+  }
+
+const LEADER_QUOTES = {
     reinhardt: 'Menjaga marwah, independensi redaksi, dan integritas jurnalistik tertinggi FoxSA News.',
     arthur: 'Setiap berita yang terbit harus akurat, tajam, dan menjunjung profesionalisme jurnalisme di San Andreas.'
   };
@@ -3777,17 +4303,26 @@
     const mainEl = document.getElementById('main');
     if (!mainEl) return;
 
-    const validTabs = ['overview', 'divisions', 'roadmap', 'recruitment'];
+    const validTabs = ['overview', 'former-staff', 'alumni', 'divisions', 'roadmap', 'recruitment'];
     const activeTab = validTabs.includes(subtab) ? subtab : 'overview';
 
     let bodyHtml = '';
 
-    // TAB 1: OVERVIEW & "MEET OUR TEAM" INTERACTIVE SLIDER SHOWCASE
+    // =========================================================================
+    // TAB 1: OVERVIEW & ACTIVE TEAM SHOWCASE
+    // =========================================================================
     if (activeTab === 'overview') {
-      const commissioner = FOXSA_TEAM_MEMBERS.find(m => m.dept === 'boc');
-      const featuredExecs = FOXSA_TEAM_MEMBERS.filter(m => m.dept === 'bod');
+      const commissionerRaw = FOXSA_TEAM_MEMBERS.find(m => m.dept === 'boc');
+      const commissioner = commissionerRaw ? getMemberEffectiveData(commissionerRaw) : null;
+      const featuredExecs = FOXSA_TEAM_MEMBERS.filter(m => m.dept === 'bod').map(m => getMemberEffectiveData(m));
       const leaders = (commissioner ? [commissioner] : []).concat(featuredExecs);
-      const crewMembers = FOXSA_TEAM_MEMBERS.filter(m => m.dept !== 'bod' && m.dept !== 'boc');
+      const crewMembers = FOXSA_TEAM_MEMBERS.filter(m => m.dept !== 'bod' && m.dept !== 'boc').map(m => getMemberEffectiveData(m));
+
+      // Resolve active officers for 13-tier Official Member Roster board dynamically from accounts
+      const rReinhardt = getMemberEffectiveData({ id: 'reinhardt', name: 'Reinhardt Harrison', role: 'Board of Commissioners', dept: 'boc' });
+      const rArthur = getMemberEffectiveData({ id: 'arthur', name: 'Arthur Redfields', role: 'Chief Executive Officer', dept: 'bod' });
+      const rPark = getMemberEffectiveData({ id: 'park', name: 'Park Young-Hwan', role: 'Line Producer', dept: 'supervisor' });
+      const rSteven = getMemberEffectiveData({ id: 'steven', name: 'Steven Deluca', role: 'Journalism Intern', dept: 'staff' });
 
       bodyHtml = `
         <div class="foxsa-profile-section">
@@ -3796,7 +4331,7 @@
               <span class="foxsa-profile-kicker"><i class="fa-solid fa-shield-halved"></i> TENTANG PERUSAHAAN</span>
               <h3>Jaringan Media Berita, Televisi &amp; Radio Independen di San Andreas</h3>
               <p>
-                <strong>FoxSA News</strong> adalah jaringan televisi kabel dan portal berita 24 jam di San Andreas yang dikenal karena pengaruh besarnya terhadap liputan politik, opini publik, penegakan hukum, motorsport, dan peristiwa nasional. FoxSA News resmi diluncurkan pada <strong>17 November 2025</strong> dengan <strong>Messiah Dillard</strong> sebagai CEO pertama, dan kini dipimpin oleh <strong>Catherine Cecillie</strong> selaku <em>Chief Executive Officer (CEO)</em>.
+                <strong>FoxSA News</strong> adalah jaringan televisi kabel dan portal berita 24 jam di San Andreas yang dikenal karena pengaruh besarnya terhadap liputan politik, opini publik, penegakan hukum, motorsport, dan peristiwa nasional. FoxSA News resmi diluncurkan pada <strong>17 November 2025</strong> dengan <strong>Messiah Dillard</strong> sebagai CEO pertama, dan kini dipimpin oleh <strong>Arthur Redfields</strong> selaku <em>Chief Executive Officer (CEO)</em> bersama <strong>Reinhardt Harrison</strong> selaku <em>Board of Commissioners</em>.
               </p>
               <p>
                 Sejak awal berdirinya, FoxSA News hadir sebagai alternatif media independen yang berani, tajam, dan lugas. Kami bukan sekadar jaringan berita, melainkan keluarga para pencerita (<em>a family of storytellers</em>) yang menjunjung tinggi kerja sama tim, persahabatan, dan integritas jurnalistik di seluruh San Andreas.
@@ -3833,14 +4368,14 @@
 
           <hr class="foxsa-profile-divider" />
 
-          <!-- ==================== MEET OUR TEAM (REFERENCE IMAGE 1 STYLE + SLIDER) ==================== -->
+          <!-- ==================== MEET OUR TEAM ==================== -->
           <div class="foxsa-meet-team-wrap" id="foxsa-meet-team-section">
             <div class="meet-team-top-heading">
               <h2>Meet Our <span class="team-underline">Team</span></h2>
-              <p>Mengenal lebih dekat jajaran Dewan Komisaris, Dewan Direksi (CEO &amp; Board of Directors), manajemen operasional, supervisor, dan kru redaksi FoxSA News Agency.</p>
+              <p>Mengenal lebih dekat jajaran Dewan Komisaris, Dewan Direksi, tim manajemen operasional, supervisor, dan kru redaksi FoxSA News Agency yang terhubung langsung dengan akun sistem.</p>
             </div>
 
-            <!-- 1. LEADERSHIP MEMBER SHOWCASE (Board of Commissioners & Board of Directors, JAL "MEMBER" Style) -->
+            <!-- 1. LEADERSHIP MEMBER SHOWCASE (JAL "MEMBER" Style) -->
             <div class="foxsa-leader-member-wrap">
               <div class="leader-member-hero">
                 <div class="leader-member-hero-overlay"></div>
@@ -3853,14 +4388,14 @@
               </div>
 
               <div class="leader-member-grid">
-                ${leaders.map((m, idx) => `
+                ${leaders.map(m => `
                   <article class="leader-member-card ${m.dept === 'boc' ? 'is-commissioner' : ''}" data-leader-id="${escapeHtml(m.id)}" tabindex="0" role="button" aria-label="Lihat profil ${escapeHtml(m.name)}">
                     <div class="leader-member-photo">
-                      <img src="${m.dept === 'boc' ? getCommissionerAvatarSvg() : getDefaultTeamAvatarSvg(idx - 1)}" alt="${escapeHtml(m.name)}" loading="lazy" />
+                      <img src="${m.avatar}" alt="${escapeHtml(m.name)}" loading="lazy" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
                       <span class="leader-member-tag">${m.dept === 'boc' ? '<i class="fa-solid fa-crown"></i> ' : ''}${escapeHtml(m.dept === 'boc' ? 'Board of Commissioners' : m.role)}</span>
                     </div>
                     <div class="leader-member-info">
-                      <p class="leader-member-quote">${escapeHtml(LEADER_QUOTES[m.id] || m.experienceIntro || '')}</p>
+                      <p class="leader-member-quote">${escapeHtml(m.quote || m.bio || '')}</p>
                       <span class="leader-member-meta">${escapeHtml(m.dept === 'boc' ? 'Dewan Komisaris' : 'Dewan Direksi')} / ${escapeHtml(m.badge)}</span>
                       <div class="leader-member-name-row">
                         <strong>${escapeHtml(m.name)}</strong>
@@ -3882,7 +4417,7 @@
               </div>
             </div>
 
-            <!-- 3. Operational Management, Supervisor Team & Operational Staff Carousel (Slide Right & Left) -->
+            <!-- 2. Operational Management, Supervisor Team & Operational Staff Carousel -->
             <div class="meet-board-slider-section">
               <div class="meet-board-header">
                 <div class="meet-board-title-col">
@@ -3904,11 +4439,11 @@
               <!-- Horizontal Slidable Cards Track -->
               <div class="meet-team-slider-viewport" id="team-slider-viewport">
                 <div class="meet-team-slider-track" id="team-slider-track">
-                  ${crewMembers.map((member, idx) => `
+                  ${crewMembers.map(member => `
                     <div class="meet-member-card" data-member-id="${escapeHtml(member.id)}">
                       <div class="meet-member-photo-box">
                         <span class="meet-floating-role-pill">${escapeHtml(member.role)}</span>
-                        <img src="${getDefaultTeamAvatarSvg(idx + 1)}" alt="${escapeHtml(member.name)}" loading="lazy" />
+                        <img src="${member.avatar}" alt="${escapeHtml(member.name)}" loading="lazy" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
                       </div>
                       <div class="meet-member-info-box">
                         <span class="meet-member-dept-tag">${escapeHtml(member.badge)}</span>
@@ -3919,8 +4454,9 @@
                   `).join('')}
                 </div>
               </div>
-            
-            <!-- 4. OFFICIAL MEMBER ROSTER (COMPREHENSIVE 13 TIERS) -->
+            </div>
+
+            <!-- 3. OFFICIAL MEMBER ROSTER (COMPREHENSIVE 13 TIERS WITH CONNECTED PHOTOS) -->
             <div class="foxsa-roster-board">
               <div class="roster-board-header">
                 <div class="roster-header-brand">
@@ -3930,7 +4466,7 @@
                 </div>
                 <div class="roster-header-meta">
                   <span class="roster-tag"><i class="fa-solid fa-calendar-check"></i> Active Period 2026</span>
-                  <span class="roster-tag"><i class="fa-solid fa-users-gear"></i> Official Structure</span>
+                  <span class="roster-tag"><i class="fa-solid fa-users-gear"></i> Connected Accounts</span>
                 </div>
               </div>
 
@@ -3948,8 +4484,15 @@
                         <span class="roster-pos-title">Board of Commissioners</span>
                         <span class="roster-status-badge active"><i class="fa-solid fa-circle-check"></i> Active</span>
                       </div>
-                      <div class="roster-officer-name">Reinhardt Harrison</div>
-                      <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@797879523726983198&gt;</div>
+                      <div class="roster-officer-row">
+                        <div class="roster-avatar-box">
+                          <img src="${rReinhardt.avatar}" alt="${escapeHtml(rReinhardt.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
+                        </div>
+                        <div class="roster-officer-info">
+                          <div class="roster-officer-name">${escapeHtml(rReinhardt.name)}</div>
+                          <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@${escapeHtml(rReinhardt.discordId)}&gt;</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -3968,8 +4511,15 @@
                         <span class="roster-pos-title">Chief Executive Officer</span>
                         <span class="roster-status-badge active"><i class="fa-solid fa-circle-check"></i> Active</span>
                       </div>
-                      <div class="roster-officer-name">Arthur Redfields</div>
-                      <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@797879523726983198&gt;</div>
+                      <div class="roster-officer-row">
+                        <div class="roster-avatar-box">
+                          <img src="${rArthur.avatar}" alt="${escapeHtml(rArthur.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
+                        </div>
+                        <div class="roster-officer-info">
+                          <div class="roster-officer-name">${escapeHtml(rArthur.name)}</div>
+                          <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@${escapeHtml(rArthur.discordId)}&gt;</div>
+                        </div>
+                      </div>
                     </div>
 
                     <div class="roster-card vacant">
@@ -4058,8 +4608,15 @@
                         <span class="roster-pos-title">Line Producer</span>
                         <span class="roster-status-badge active"><i class="fa-solid fa-circle-check"></i> Active</span>
                       </div>
-                      <div class="roster-officer-name">Park Young-Hwan</div>
-                      <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@797879523726983198&gt;</div>
+                      <div class="roster-officer-row">
+                        <div class="roster-avatar-box">
+                          <img src="${rPark.avatar}" alt="${escapeHtml(rPark.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
+                        </div>
+                        <div class="roster-officer-info">
+                          <div class="roster-officer-name">${escapeHtml(rPark.name)}</div>
+                          <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@${escapeHtml(rPark.discordId)}&gt;</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -4118,8 +4675,15 @@
                         <span class="roster-pos-title">Journalism Intern</span>
                         <span class="roster-status-badge active"><i class="fa-solid fa-circle-check"></i> Active</span>
                       </div>
-                      <div class="roster-officer-name">Steven Deluca</div>
-                      <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@1302277024425185380&gt;</div>
+                      <div class="roster-officer-row">
+                        <div class="roster-avatar-box">
+                          <img src="${rSteven.avatar}" alt="${escapeHtml(rSteven.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
+                        </div>
+                        <div class="roster-officer-info">
+                          <div class="roster-officer-name">${escapeHtml(rSteven.name)}</div>
+                          <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@${escapeHtml(rSteven.discordId)}&gt;</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -4135,7 +4699,186 @@
                 </a>
               </div>
             </div>
-</div>
+
+            <!-- 4. FORMER STAFF TEASER BANNER (HALL OF FAME TEASER) -->
+            <div class="foxsa-former-teaser-banner">
+              <div class="former-teaser-left">
+                <div class="former-teaser-badge"><i class="fa-solid fa-medal"></i> FOXSA HALL OF FAME</div>
+                <h3>Purna Tugas &amp; Penghormatan Former Staff FoxSA</h3>
+                <p>Apresiasi setinggi-tingginya bagi para pendiri, mantan pimpinan eksekutif, serta jurnalis yang telah meletakkan fondasi dan mendedikasikan karyanya untuk FoxSA News Agency di San Andreas.</p>
+                <div class="former-teaser-pills">
+                  <span class="former-mini-pill"><strong>Messiah Dillard</strong> (Founder &amp; 1st CEO)</span>
+                  <span class="former-mini-pill"><strong>Catherine Cecillie</strong> (Former CEO)</span>
+                  <span class="former-mini-pill"><strong>Boniface Ernest</strong> (Former Vice CEO)</span>
+                  <span class="former-mini-pill"><strong>Marshall Swiss</strong> (Former Director)</span>
+                  <span class="former-mini-pill"><strong>Jesus Conway</strong> (Former Command)</span>
+                </div>
+              </div>
+              <div class="former-teaser-right">
+                <a href="#/profile/former-staff" class="former-teaser-btn">
+                  <i class="fa-solid fa-arrow-right"></i> Buka Galeri Lengkap Former Staff &rarr;
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // TAB: FORMER STAFF & ALUMNI (BAGIAN KHUSUS FORMER STAFF FOXSA)
+    // =========================================================================
+    else if (activeTab === 'former-staff' || activeTab === 'alumni') {
+      const leadershipFormer = FOXSA_FORMER_STAFF.filter(f => f.category === 'leadership');
+      const mgmtFormer = FOXSA_FORMER_STAFF.filter(f => f.category === 'management' || f.category === 'supervisor');
+      const staffFormer = FOXSA_FORMER_STAFF.filter(f => f.category === 'staff');
+
+      bodyHtml = `
+        <div class="foxsa-profile-section">
+          <!-- Alumni Hero Header -->
+          <div class="foxsa-alumni-hero">
+            <div class="alumni-hero-badge"><i class="fa-solid fa-medal"></i> FOXSA NEWS HALL OF FAME • HONORARY ALUMNI</div>
+            <h2>Jajaran Purna Tugas &amp; Former Staff FoxSA News</h2>
+            <p class="alumni-hero-lead">
+              Penghormatan dan apresiasi setinggi-tingginya bagi para pendiri, mantan pimpinan eksekutif, manajer, supervisor, dan staf jurnalis yang telah menorehkan karya jurnalistik terbaik di San Andreas. Terima kasih atas dedikasi, integritas, dan semangat kekeluargaan yang telah kalian wariskan bagi FoxSA News Agency.
+            </p>
+            <div class="alumni-stats-bar">
+              <span class="alumni-stat"><i class="fa-solid fa-users"></i> <strong>11</strong> Tokoh Kehormatan</span>
+              <span class="alumni-stat"><i class="fa-solid fa-calendar-check"></i> <strong>Sejak 2025</strong> Jejak Sejarah</span>
+              <span class="alumni-stat"><i class="fa-solid fa-newspaper"></i> <strong>Arsip Liputan</strong> Tetap Tersimpan</span>
+            </div>
+          </div>
+
+          <!-- Category 1: Founder & Leadership Alumni -->
+          <div class="alumni-category-section">
+            <div class="alumni-category-title-bar">
+              <div class="alumni-cat-icon gold"><i class="fa-solid fa-crown"></i></div>
+              <div>
+                <h3>Dewan Pendiri &amp; Mantan Pimpinan Eksekutif</h3>
+                <p>Tokoh pilar yang mendirikan FoxSA News, mengarahkan visi independensi, dan memimpin era transformasi penyiaran 24 jam di San Andreas.</p>
+              </div>
+            </div>
+
+            <div class="alumni-cards-grid">
+              ${leadershipFormer.map(f => `
+                <div class="alumni-card gold-border">
+                  <div class="alumni-card-head">
+                    <div class="alumni-photo-box">
+                      <img src="${f.avatar}" alt="${escapeHtml(f.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
+                    </div>
+                    <div class="alumni-head-info">
+                      <span class="alumni-role-tag gold"><i class="fa-solid fa-award"></i> ${escapeHtml(f.badge)}</span>
+                      <h4>${escapeHtml(f.name)}</h4>
+                      <span class="alumni-period"><i class="fa-regular fa-calendar"></i> ${escapeHtml(f.period)}</span>
+                    </div>
+                  </div>
+                  <div class="alumni-card-body">
+                    <div class="alumni-legacy-quote">
+                      <i class="fa-solid fa-quote-left"></i>
+                      <span>${escapeHtml(f.legacy)}</span>
+                    </div>
+                    <p class="alumni-bio">${escapeHtml(f.bio)}</p>
+                    <div class="alumni-card-actions">
+                      <a href="#/author/${encodeURIComponent(f.authorName)}" class="alumni-author-btn">
+                        <i class="fa-solid fa-newspaper"></i> Arsip Berita Karya ${escapeHtml(f.name.split(' ')[0])}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Category 2: Management & Editorial Supervisors Alumni -->
+          <div class="alumni-category-section" style="margin-top:36px;">
+            <div class="alumni-category-title-bar">
+              <div class="alumni-cat-icon blue"><i class="fa-solid fa-briefcase"></i></div>
+              <div>
+                <h3>Mantan Tim Manajemen &amp; Supervisor Redaksi</h3>
+                <p>Para pengawal mutu siaran harian, manajer rekrutmen, koresponden kriminal investigatif, dan penggerak liputan kejuaraan motorsport.</p>
+              </div>
+            </div>
+
+            <div class="alumni-cards-grid">
+              ${mgmtFormer.map(f => `
+                <div class="alumni-card blue-border">
+                  <div class="alumni-card-head">
+                    <div class="alumni-photo-box">
+                      <img src="${f.avatar}" alt="${escapeHtml(f.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
+                    </div>
+                    <div class="alumni-head-info">
+                      <span class="alumni-role-tag blue">${escapeHtml(f.badge)}</span>
+                      <h4>${escapeHtml(f.name)}</h4>
+                      <span class="alumni-period"><i class="fa-regular fa-calendar"></i> ${escapeHtml(f.period)}</span>
+                    </div>
+                  </div>
+                  <div class="alumni-card-body">
+                    <div class="alumni-legacy-quote">
+                      <i class="fa-solid fa-quote-left"></i>
+                      <span>${escapeHtml(f.legacy)}</span>
+                    </div>
+                    <p class="alumni-bio">${escapeHtml(f.bio)}</p>
+                    <div class="alumni-card-actions">
+                      <a href="#/author/${encodeURIComponent(f.authorName)}" class="alumni-author-btn">
+                        <i class="fa-solid fa-newspaper"></i> Arsip Berita Karya ${escapeHtml(f.name.split(' ')[0])}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Category 3: Former Operational Staff & Field Reporters -->
+          <div class="alumni-category-section" style="margin-top:36px;">
+            <div class="alumni-category-title-bar">
+              <div class="alumni-cat-icon green"><i class="fa-solid fa-microphone"></i></div>
+              <div>
+                <h3>Mantan Jurnalis Lapangan &amp; Kru Redaksi</h3>
+                <p>Reporter lapangan yang bertugas sigap di garis depan peristiwa darurat, dinamika warga perkotaan, dan dokumentasi visual Los Santos.</p>
+              </div>
+            </div>
+
+            <div class="alumni-cards-grid">
+              ${staffFormer.map(f => `
+                <div class="alumni-card green-border">
+                  <div class="alumni-card-head">
+                    <div class="alumni-photo-box">
+                      <img src="${f.avatar}" alt="${escapeHtml(f.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
+                    </div>
+                    <div class="alumni-head-info">
+                      <span class="alumni-role-tag green">${escapeHtml(f.badge)}</span>
+                      <h4>${escapeHtml(f.name)}</h4>
+                      <span class="alumni-period"><i class="fa-regular fa-calendar"></i> ${escapeHtml(f.period)}</span>
+                    </div>
+                  </div>
+                  <div class="alumni-card-body">
+                    <div class="alumni-legacy-quote">
+                      <i class="fa-solid fa-quote-left"></i>
+                      <span>${escapeHtml(f.legacy)}</span>
+                    </div>
+                    <p class="alumni-bio">${escapeHtml(f.bio)}</p>
+                    <div class="alumni-card-actions">
+                      <a href="#/author/${encodeURIComponent(f.authorName)}" class="alumni-author-btn">
+                        <i class="fa-solid fa-newspaper"></i> Arsip Berita Karya ${escapeHtml(f.name.split(' ')[0])}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Alumni Footer Back to Active Team -->
+          <div class="alumni-footer-banner">
+            <div class="alumni-footer-text">
+              <strong>Ingin melihat jajaran tim aktif periode 2026?</strong>
+              <p>Lihat struktur Dewan Komisaris, CEO, Line Producer, dan kru operasional saat ini.</p>
+            </div>
+            <a href="#/profile" class="foxsa-btn foxsa-btn-primary">
+              <i class="fa-solid fa-users"></i> Buka Struktur Tim Aktif 2026
+            </a>
           </div>
         </div>
       `;
@@ -4199,12 +4942,12 @@
                 <span class="division-badge">RADIO STATION &amp; PODCAST ACADEMY</span>
                 <h3>FoxSA Audio &amp; Radio Station</h3>
                 <p>
-                  Divisi penyiaran audio, radio komunitas San Andreas, dan pusat pelatihan internal <strong>FoxSA Podcast Academy</strong>. Dirancang untuk menemani warga yang sedang berkendara sekaligus mencetak talenta penyiaran profesional.
+                  Saluran radio suara dan siniar (<em>podcast</em>) interaktif FoxSA. Menyajikan segmen talkshow bersama tokoh masyarakat, pembaruan lalu lintas kota, serta akademi penyiaran suara bagi talenta reporter muda di San Andreas.
                 </p>
                 <ul class="division-features">
-                  <li><i class="fa-solid fa-circle-check"></i> Program Talkshow &amp; Diskusi Publik San Andreas</li>
-                  <li><i class="fa-solid fa-circle-check"></i> Podcast Academy: Pelatihan <strong>Presenter</strong></li>
-                  <li><i class="fa-solid fa-circle-check"></i> Pelatihan Teknis <strong>Cameraperson</strong> &amp; <strong>Mixer</strong></li>
+                  <li><i class="fa-solid fa-circle-check"></i> Talkshow Tokoh Publik &amp; Dialog Warga</li>
+                  <li><i class="fa-solid fa-circle-check"></i> Pembaruan Kondisi Lalu Lintas &amp; Cuaca</li>
+                  <li><i class="fa-solid fa-circle-check"></i> Siniar Investigasi Khusus &amp; Wawancara Eksklusif</li>
                 </ul>
               </div>
             </div>
@@ -4213,88 +4956,102 @@
       `;
     }
 
-    // TAB 3: ROADMAP / PROGRAM & RENCANA PENGEMBANGAN
+    // TAB 3: ROADMAP & PROGRAM KERJA
     else if (activeTab === 'roadmap') {
       bodyHtml = `
         <div class="foxsa-profile-section">
-          <div class="foxsa-org-header" style="margin-bottom:22px;">
-            <span class="foxsa-profile-kicker"><i class="fa-solid fa-rocket"></i> ROADMAP &amp; INOVASI</span>
-            <h3 class="foxsa-profile-section-title">Rencana Pengembangan &amp; Pembaruan FoxSA News</h3>
-            <p class="foxsa-profile-lead">FoxSA News tengah menjalankan berbagai langkah strategis untuk meningkatkan kualitas penyajian informasi serta memperluas jangkauan audiens di seluruh San Andreas.</p>
+          <div class="foxsa-org-header" style="margin-bottom:24px;">
+            <span class="foxsa-profile-kicker"><i class="fa-solid fa-road"></i> RENCANA STRATEGIS 2026</span>
+            <h3 class="foxsa-profile-section-title">Roadmap &amp; Program Kerja FoxSA News Agency</h3>
+            <p class="foxsa-profile-lead">Langkah terukur FoxSA News dalam memperluas jangkauan penyiaran, meningkatkan kompetensi staf redaksi, dan memperkuat kemitraan dengan instansi pemerintahan serta aparat di San Andreas.</p>
           </div>
 
-          <div class="foxsa-roadmap-grid">
-            <div class="roadmap-item-card">
-              <span class="roadmap-step-num">PROGRAM 01 • ON-GOING</span>
-              <h4><i class="fa-solid fa-newspaper"></i> Transformasi Newspaper Digital</h4>
-              <ul>
-                <li>Format <em>newspaper</em> dikembangkan menjadi <strong>Berita Harian berbasis teks &amp; web</strong> yang lebih sederhana, informatif, dan mudah diakses kapan saja oleh warga.</li>
-                <li>Konten tidak lagi bergantung pada poster statis seperti Canva, melainkan difokuskan pada penyampaian informasi jurnalistik yang jelas, terstruktur, dan profesional.</li>
-              </ul>
+          <div class="foxsa-roadmap-timeline">
+            <!-- Phase 1 -->
+            <div class="roadmap-step-card">
+              <div class="step-num-badge">01</div>
+              <div class="step-content">
+                <div class="step-meta">
+                  <span class="step-status completed"><i class="fa-solid fa-check"></i> SELESAI</span>
+                  <span class="step-phase">FASE I • KONSOLIDASI &amp; SISTEM WEB</span>
+                </div>
+                <h4>Peluncuran Portal Berita Digital &amp; CMS Redaksi</h4>
+                <p>Pembangunan website modern dengan tata letak editorial Kreeti &amp; AnimeNetwork, sistem autentikasi staf, editor visual ramah pengguna, serta dokumentasi arsip berita.</p>
+              </div>
             </div>
 
-            <div class="roadmap-item-card">
-              <span class="roadmap-step-num">PROGRAM 02 • ON-GOING</span>
-              <h4><i class="fa-solid fa-tv"></i> Penjadwalan Broadcast Harian</h4>
-              <ul>
-                <li>FoxSA News menyusun sistem siaran rutin harian guna menjaga konsistensi penyampaian informasi terkini kepada seluruh audiens di San Andreas.</li>
-                <li><strong>Broadcast dilaksanakan setiap hari</strong> dengan waktu tayang minimal dimulai pada pukul <strong>19.30 WIB</strong> untuk meningkatkan keterlibatan pemirsa.</li>
-              </ul>
+            <!-- Phase 2 -->
+            <div class="roadmap-step-card">
+              <div class="step-num-badge">02</div>
+              <div class="step-content">
+                <div class="step-meta">
+                  <span class="step-status in-progress"><i class="fa-solid fa-arrows-rotate fa-spin"></i> BERJALAN</span>
+                  <span class="step-phase">FASE II • REKRUTMEN &amp; TALENTA BARU</span>
+                </div>
+                <h4>Open Recruitment Akbar &amp; FoxSA Academy</h4>
+                <p>Membuka seleksi terbuka bagi calon jurnalis, juru kamera, dan produser penyiaran dengan kurikulum pelatihan etika jurnalisme dan keselamatan peliputan lapangan.</p>
+              </div>
             </div>
 
-            <div class="roadmap-item-card">
-              <span class="roadmap-step-num">PROGRAM 03 • ON-GOING</span>
-              <h4><i class="fa-solid fa-podcast"></i> Pengembangan Academy melalui Podcast</h4>
-              <ul>
-                <li>Menghadirkan program <strong>Podcast Academy</strong> untuk melatih anggota dalam berbagai peran penting di dunia <em>broadcasting</em>.</li>
-                <li>Fokus pelatihan mencakup peran <strong>Presenter</strong>, <strong>Cameraperson</strong>, serta <strong>Mixer / Audio Engineer</strong>.</li>
-              </ul>
+            <!-- Phase 3 -->
+            <div class="roadmap-step-card">
+              <div class="step-num-badge">03</div>
+              <div class="step-content">
+                <div class="step-meta">
+                  <span class="step-status upcoming"><i class="fa-regular fa-clock"></i> MENDATANG</span>
+                  <span class="step-phase">FASE III • EKSPANSI PENYIARAN</span>
+                </div>
+                <h4>Mobil Siaran Luar Ruang (OB Van) &amp; Studio Live Baru</h4>
+                <p>Pengadaan armada siaran langsung berkecepatan tinggi untuk meliput peristiwa berskala besar, konferensi pers kejaksaan, kejuaraan balap, serta festival musik di San Andreas.</p>
+              </div>
             </div>
 
-            <div class="roadmap-item-card">
-              <span class="roadmap-step-num">PROGRAM 04 • ON-GOING</span>
-              <h4><i class="fa-solid fa-handshake"></i> Kerja Sama Strategis Lintas Instansi</h4>
-              <ul>
-                <li>Memperluas jaringan melalui kolaborasi strategis dengan berbagai <strong>Companies di Valliant</strong>.</li>
-                <li>Membangun kemitraan publikasi dan peliputan resmi bersama <strong>Faction LSPD, LSSD, &amp; LSFD</strong>.</li>
-              </ul>
+            <!-- Phase 4 -->
+            <div class="roadmap-step-card">
+              <div class="step-num-badge">04</div>
+              <div class="step-content">
+                <div class="step-meta">
+                  <span class="step-status upcoming"><i class="fa-regular fa-clock"></i> MENDATANG</span>
+                  <span class="step-phase">FASE IV • SINERGI KOTA &amp; KEMITRAAN</span>
+                </div>
+                <h4>Kemitraan Jurnalistik LSPD, LSFD &amp; Pemerintah Kota</h4>
+                <p>Membangun kerja sama resmi penyampaian peringatan dini bahaya, imbauan kamtibmas, serta transparansi penegakan hukum bagi seluruh warga negara.</p>
+              </div>
             </div>
-          </div>
-
-          <div class="foxsa-roadmap-closing">
-            <i class="fa-solid fa-bullhorn"></i>
-            <p>
-              <strong>Komitmen Pelayanan Informasi:</strong> FoxSA News berkomitmen untuk terus berkembang sebagai media informasi independen yang profesional, terpercaya, dan inovatif bagi seluruh warga San Andreas.
-            </p>
           </div>
         </div>
       `;
     }
 
-    // TAB 4: NEW OPEN RECRUITMENT FOXSA NEWS AGENCY + OFFICIAL POSTER DESIGN
+    // TAB 4: OPEN RECRUITMENT
     else if (activeTab === 'recruitment') {
       bodyHtml = `
         <div class="foxsa-profile-section">
-          <!-- Top Hero Recruitment Banner -->
-          <div class="foxsa-rec-banner">
-            <div class="rec-banner-left">
-              <div class="rec-status-pill">
-                <span class="pulse-dot"></span> RECRUITMENT STATUS: OPEN!
-              </div>
-              <h2>🎙️ START YOUR STORY WITH FOXSA NEWS AGENCY! 🎙️</h2>
-              <p>
-                We are more than just a news network; we are a family of storytellers. FoxSA News is currently looking for passionate individuals who value teamwork, camaraderie, and journalistic integrity. If you are looking for a workplace where colleagues become close friends, this is your home!
-              </p>
+          <!-- Recruitment Top Banner -->
+          <div class="foxsa-recruitment-hero">
+            <div class="rec-hero-kicker"><i class="fa-solid fa-bullhorn"></i> OFFICIAL OPEN RECRUITMENT</div>
+            <h2>We’re Hiring: Join the FoxSA Family!</h2>
+            <p class="rec-hero-lead">Accurate Information. Professional Journalism. Trusted by San Andreas.</p>
+            <div class="rec-hero-badge-row">
+              <span class="rec-status-pill open"><i class="fa-solid fa-circle-check"></i> Status: OPEN!</span>
+              <span class="rec-meta-pill"><i class="fa-regular fa-clock"></i> No Deadline • Open Until Crew Complete</span>
+              <span class="rec-meta-pill"><i class="fa-brands fa-discord"></i> Fast Track via Discord Hub</span>
             </div>
-            <a href="https://discord.gg/rVeaKGzhyy" target="_blank" rel="noopener" class="rec-discord-cta-btn">
-              <i class="fa-brands fa-discord"></i> Join Communication Hub
-            </a>
           </div>
 
-          <!-- 2-Column Showcase: Official Announcement + "WE'RE HIRING!" Poster Design -->
-          <div class="foxsa-rec-showcase-grid">
-            <!-- Left Column: Full Recruitment Details -->
+          <div class="foxsa-recruitment-grid">
+            <!-- Left Column: Details -->
             <div class="foxsa-rec-details-col">
+              <div class="rec-detail-block">
+                <h3><i class="fa-solid fa-handshake-angle"></i> Welcome to FoxSA News!</h3>
+                <p>
+                  At <strong>FoxSA News</strong>, we believe that great stories come from great people. We are not just a news network; we are a family of storytellers, journalists, and media enthusiasts dedicated to keeping San Andreas informed with <em>Integrity, Accuracy, and Professionalism</em>.
+                </p>
+                <p>
+                  As we step into a new chapter of growth, we are looking for passionate, driven, and reliable individuals to join our ranks. Whether you are an experienced journalist or someone looking to break into the media industry, there’s a place for you in our newsroom!
+                </p>
+              </div>
+
               <!-- Departments We Are Hiring For -->
               <div class="rec-detail-block">
                 <h3><i class="fa-solid fa-sitemap"></i> Departments We Are Hiring For</h3>
@@ -4331,58 +5088,33 @@
                 </div>
               </div>
 
-              <!-- Recruitment Timeline -->
-              <div class="rec-detail-block">
-                <h3><i class="fa-regular fa-calendar-check"></i> Recruitment Timeline</h3>
-                <div class="rec-timeline-box">
-                  <div class="rec-timeline-row">
-                    <span class="tl-label">Status:</span>
-                    <span class="tl-badge-open">OPEN!</span>
-                  </div>
-                  <div class="rec-timeline-row">
-                    <span class="tl-label">Deadline:</span>
-                    <span class="tl-text">We are keeping our doors open until we find the right people to complete our crew. Take your time, but don't miss the chance!</span>
-                  </div>
-                </div>
-              </div>
-
               <!-- Next Steps to Join -->
               <div class="rec-detail-block highlight-next-steps">
                 <h3><i class="fa-solid fa-compass"></i> Next Steps to Join</h3>
                 <p>
-                  No lengthy paperwork or forms required just yet! To start your journey with us, simply hop into our communication hub, get to know the crew, and wait for further directions from our Executive Board.
+                  No lengthy paperwork required! Simply hop into our communication hub, get to know the crew, and connect with our Executive Board.
                 </p>
 
                 <div class="rec-official-links-box">
                   <a href="https://discord.gg/rVeaKGzhyy" target="_blank" rel="noopener" class="rec-link-card discord-card">
                     <i class="fa-brands fa-discord"></i>
                     <div>
-                      <small>🔗 Join our Discord</small>
-                      <strong>https://discord.gg/rVeaKGzhyy</strong>
+                      <small>🔗 Official Discord Hub</small>
+                      <strong>discord.gg/rVeaKGzhyy</strong>
                     </div>
                   </a>
-                  <a href="#/" class="rec-link-card web-card">
-                    <i class="fa-solid fa-globe"></i>
+                  <a href="#/register" class="rec-link-card web-card">
+                    <i class="fa-solid fa-id-card"></i>
                     <div>
-                      <small>🌐 Check our Website</small>
-                      <strong>www.foxsanews.blogspot.com</strong>
+                      <small>📝 Anggota Baru?</small>
+                      <strong>Registrasi Akun Anggota &rarr;</strong>
                     </div>
                   </a>
-                </div>
-
-                <div class="rec-closing-quote">
-                  <p>Come for the career, stay for the family. Let’s build something great together! 🤝📰</p>
-                  <div class="rec-hashtags">
-                    <span>#DeliveringTheTruth</span>
-                    <span>#FoxSANews</span>
-                    <span>#MoreThanJustNews</span>
-                    <span class="everyone-tag">(( @everyone ))</span>
-                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Right Column: Official "WE'RE HIRING!" Poster Design -->
+            <!-- Right Column: Official Poster -->
             <div class="foxsa-rec-poster-col">
               <div class="rec-poster-card">
                 <div class="rec-poster-card-head">
@@ -4416,7 +5148,7 @@
                 <i class="fa-solid fa-certificate"></i> OFFICIAL COMPANY PROFILE • LOS SANTOS, SA
               </div>
               <h1>FoxSA News — Independent News Network</h1>
-              <p class="profile-hero-tagline">Portal Informasi Resmi, Jajaran Pimpinan &amp; Tim Redaksi, Divisi Penyiaran, Program Pengembangan &amp; Rekrutmen FoxSA News Agency.</p>
+              <p class="profile-hero-tagline">Portal Informasi Resmi, Jajaran Pimpinan &amp; Tim Redaksi, Galeri Former Staff, Divisi Penyiaran, Program Pengembangan &amp; Rekrutmen FoxSA News Agency.</p>
               <div class="profile-hero-chips">
                 <span><i class="fa-solid fa-tv"></i> FoxSA News Channel</span>
                 <span><i class="fa-solid fa-newspaper"></i> FoxSA News Media</span>
@@ -4433,6 +5165,9 @@
         <div class="foxsa-profile-tabs">
           <a href="#/profile" class="foxsa-profile-tab ${activeTab === 'overview' ? 'is-active' : ''}">
             <i class="fa-regular fa-building"></i> Tentang &amp; Tim Kami
+          </a>
+          <a href="#/profile/former-staff" class="foxsa-profile-tab ${activeTab === 'former-staff' || activeTab === 'alumni' ? 'is-active' : ''}">
+            <i class="fa-solid fa-medal"></i> Former Staff FoxSA
           </a>
           <a href="#/profile/divisions" class="foxsa-profile-tab ${activeTab === 'divisions' ? 'is-active' : ''}">
             <i class="fa-solid fa-tower-broadcast"></i> Divisi Media &amp; Radio
@@ -4452,9 +5187,8 @@
       </div>
     `;
 
-    // Bind Horizontal Carousel Left/Right Buttons, Wheel & Drag-to-Scroll on Overview
+    // Bind slider & modal events for profile overview tab
     if (activeTab === 'overview') {
-      // Leadership Member Cards -> Open Profile Modal
       const leaderModal = document.getElementById('leader-profile-modal');
       const leaderContent = document.getElementById('leader-profile-content');
       const closeLeaderModal = () => {
@@ -4464,26 +5198,29 @@
         document.body.classList.remove('leader-modal-open');
       };
       const openLeaderModal = (memberId) => {
-        const m = FOXSA_TEAM_MEMBERS.find(x => x.id === memberId);
-        if (!m || !leaderModal || !leaderContent) return;
+        const rawM = FOXSA_TEAM_MEMBERS.find(x => x.id === memberId);
+        if (!rawM || !leaderModal || !leaderContent) return;
+        const m = getMemberEffectiveData(rawM);
         const isBoc = m.dept === 'boc';
-        const bodIdx = FOXSA_TEAM_MEMBERS.filter(x => x.dept === 'bod').indexOf(m);
-        const avatar = isBoc ? getCommissionerAvatarSvg() : getDefaultTeamAvatarSvg(bodIdx);
         leaderContent.innerHTML = `
           <div class="leader-profile-grid ${isBoc ? 'is-commissioner' : ''}">
             <div class="leader-profile-photo">
-              <img src="${avatar}" alt="${escapeHtml(m.name)}" />
+              <img src="${m.avatar}" alt="${escapeHtml(m.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
               <span class="leader-member-tag">${isBoc ? '<i class="fa-solid fa-crown"></i> Board of Commissioners' : escapeHtml(m.role)}</span>
             </div>
             <div class="leader-profile-body">
               <span class="leader-profile-kicker">${escapeHtml(isBoc ? 'Dewan Komisaris' : 'Dewan Direksi')} • ${escapeHtml(m.badge)}</span>
               <h3>${escapeHtml(m.name)}</h3>
               <p class="leader-profile-role">${escapeHtml(isBoc ? 'President Commissioner' : m.role)}</p>
-              <blockquote class="leader-profile-quote">“${escapeHtml(LEADER_QUOTES[m.id] || '')}”</blockquote>
+              <div class="leader-profile-discord"><i class="fa-brands fa-discord"></i> &lt;@${escapeHtml(m.discordId)}&gt;</div>
+              <blockquote class="leader-profile-quote">“${escapeHtml(m.quote || 'Setiap berita yang terbit harus akurat, tajam, dan independen.')}”</blockquote>
               <p class="leader-profile-bio">${escapeHtml(m.bio)}</p>
               <h4>${isBoc ? 'Wewenang &amp; Fokus Pengawasan' : 'Fokus &amp; Tanggung Jawab'}</h4>
               <ul class="leader-profile-list">
-                ${(m.highlights || []).map(h => `<li><i class="fa-solid fa-check"></i><span>${escapeHtml(h)}</span></li>`).join('')}
+                ${(m.highlights || [
+                  'Memimpin arah strategis & kebijakan penyiaran FoxSA News Network 24/7',
+                  'Menjaga independensi redaksi dan integritas jurnalisme di San Andreas'
+                ]).map(h => `<li><i class="fa-solid fa-check"></i><span>${escapeHtml(h)}</span></li>`).join('')}
               </ul>
             </div>
           </div>
@@ -4554,33 +5291,6 @@
             viewport.scrollLeft += e.deltaY * 1.4;
           }
         }, { passive: false });
-
-        // Mouse drag-to-scroll support on desktop
-        let isDown = false;
-        let startX = 0;
-        let scrollLeftStart = 0;
-
-        viewport.addEventListener('mousedown', (e) => {
-          isDown = true;
-          viewport.classList.add('is-dragging');
-          startX = e.pageX - viewport.offsetLeft;
-          scrollLeftStart = viewport.scrollLeft;
-        });
-        viewport.addEventListener('mouseleave', () => {
-          isDown = false;
-          viewport.classList.remove('is-dragging');
-        });
-        viewport.addEventListener('mouseup', () => {
-          isDown = false;
-          viewport.classList.remove('is-dragging');
-        });
-        viewport.addEventListener('mousemove', (e) => {
-          if (!isDown) return;
-          e.preventDefault();
-          const x = e.pageX - viewport.offsetLeft;
-          const walk = (x - startX) * 1.4;
-          viewport.scrollLeft = scrollLeftStart - walk;
-        });
       }
     }
   }

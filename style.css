@@ -11490,3 +11490,636 @@ body.leader-modal-open {
   color: #ffffff;
   transform: translateY(-1px);
 }
+
+/* ========================================================
+   CONNECTED ROSTER OFFICER AVATAR PHOTOS
+   ======================================================== */
+.roster-officer-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+.roster-avatar-box {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  background: #f1f5f9;
+}
+.roster-avatar-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.roster-officer-info {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========================================================
+   FORMER STAFF & ALUMNI (HALL OF FAME)
+   ======================================================== */
+.foxsa-former-teaser-banner {
+  margin-top: 36px;
+  background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+  border-radius: 14px;
+  padding: 28px 24px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+}
+.former-teaser-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fbbf24;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.former-teaser-left h3 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
+}
+.former-teaser-left p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #cbd5e1;
+  max-width: 650px;
+  line-height: 1.5;
+}
+.former-teaser-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.former-mini-pill {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  color: #e2e8f0;
+}
+.former-mini-pill strong {
+  color: #ffffff;
+}
+.former-mini-pill span {
+  color: #fbbf24;
+  font-size: 11px;
+}
+.former-teaser-btn {
+  background: #fbbf24;
+  color: #0f172a;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.former-teaser-btn:hover {
+  background: #f59e0b;
+  transform: translateY(-2px);
+  color: #0f172a;
+}
+
+.foxsa-alumni-hero {
+  background: linear-gradient(135deg, #090C1E 0%, #1e1b4b 50%, #0f172a 100%);
+  border-radius: 16px;
+  padding: 36px 30px;
+  color: #ffffff;
+  margin-bottom: 36px;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  box-shadow: 0 12px 32px rgba(9, 12, 30, 0.15);
+}
+.alumni-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fbbf24;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.foxsa-alumni-hero h2 {
+  margin: 0 0 10px;
+  font-size: 26px;
+  font-weight: 800;
+  font-family: 'Poppins', sans-serif;
+  color: #ffffff;
+}
+.alumni-hero-lead {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: #cbd5e1;
+  line-height: 1.6;
+  max-width: 850px;
+}
+.alumni-stats-bar {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.alumni-stat {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  color: #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.alumni-stat i {
+  color: #fbbf24;
+}
+.alumni-stat strong {
+  color: #ffffff;
+}
+
+.alumni-category-section {
+  margin-bottom: 36px;
+}
+.alumni-category-title-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.alumni-cat-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+.alumni-cat-icon.gold { background: #fef3c7; color: #b45309; }
+.alumni-cat-icon.blue { background: #dbeafe; color: #1e40af; }
+.alumni-cat-icon.green { background: #dcfce7; color: #15803d; }
+
+.alumni-category-title-bar h3 {
+  margin: 0 0 2px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.alumni-category-title-bar p {
+  margin: 0;
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+.alumni-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 18px;
+}
+.alumni-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+.alumni-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+.alumni-card.gold-border { border-top: 4px solid #f59e0b; }
+.alumni-card.blue-border { border-top: 4px solid #3b82f6; }
+.alumni-card.green-border { border-top: 4px solid #10b981; }
+
+.alumni-card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.alumni-photo-box {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #e2e8f0;
+  background: #f8fafc;
+}
+.alumni-photo-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.alumni-head-info {
+  display: flex;
+  flex-direction: column;
+}
+.alumni-role-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  width: fit-content;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+}
+.alumni-role-tag.gold { background: #fef3c7; color: #b45309; }
+.alumni-role-tag.blue { background: #dbeafe; color: #1e40af; }
+.alumni-role-tag.green { background: #dcfce7; color: #15803d; }
+
+.alumni-head-info h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.alumni-period {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.alumni-legacy-quote {
+  background: #f8fafc;
+  border-left: 3px solid #cbd5e1;
+  padding: 8px 12px;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-style: italic;
+  color: #475569;
+  display: flex;
+  gap: 8px;
+}
+.alumni-legacy-quote i {
+  color: #94a3b8;
+  font-size: 11px;
+}
+.alumni-bio {
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.5;
+  margin: 0 0 16px;
+  flex: 1;
+}
+.alumni-author-btn {
+  background: #f1f5f9;
+  color: #1e293b;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+.alumni-author-btn:hover {
+  background: #090C1E;
+  color: #ffffff;
+}
+
+.alumni-footer-banner {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 20px;
+}
+.alumni-footer-text strong {
+  font-size: 15px;
+  color: #0f172a;
+  display: block;
+  margin-bottom: 3px;
+}
+.alumni-footer-text p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* ========================================================
+   ADMIN EDIT PROFIL / PROFIL SAYA TAB
+   ======================================================== */
+.foxsa-myprofile-wrap {
+  padding: 4px 0;
+}
+.foxsa-myprofile-header {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.myprofile-header-title h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.myprofile-header-title p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+.myprofile-status-badge {
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.foxsa-myprofile-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+}
+@media (max-width: 900px) {
+  .foxsa-myprofile-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.myprofile-preview-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  height: fit-content;
+}
+.myprofile-card-cover {
+  height: 90px;
+  background: linear-gradient(135deg, #090C1E 0%, #1e293b 100%);
+  position: relative;
+}
+.myprofile-avatar-wrapper {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  margin: -44px auto 12px;
+}
+.myprofile-avatar-wrapper img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #ffffff;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  display: block;
+}
+.myprofile-avatar-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 26px;
+  height: 26px;
+  background: #7c3aed;
+  color: #ffffff;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+.myprofile-card-body {
+  padding: 0 20px 24px;
+  text-align: center;
+}
+.myprofile-card-body h4 {
+  margin: 0 0 2px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+}
+.myprofile-username-tag {
+  font-size: 12.5px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+.myprofile-role-pill {
+  margin-bottom: 12px;
+}
+.myprofile-discord-box {
+  background: #f5f6fe;
+  border: 1px solid #e0e4fd;
+  color: #5865F2;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.myprofile-quote-bubble {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-style: italic;
+  color: #334155;
+  margin-bottom: 14px;
+  text-align: left;
+  border: 1px dashed #cbd5e1;
+}
+.myprofile-quote-bubble i {
+  color: #94a3b8;
+  margin-right: 4px;
+}
+.myprofile-quote-bubble p {
+  margin: 0;
+  display: inline;
+}
+.myprofile-bio-box {
+  text-align: left;
+  margin-bottom: 16px;
+  background: #fbfcfe;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #edf2f7;
+}
+.myprofile-bio-box label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 3px;
+}
+.myprofile-bio-box p {
+  margin: 0;
+  font-size: 12.5px;
+  color: #475569;
+  line-height: 1.45;
+}
+.myprofile-stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 14px;
+}
+.myprofile-stat-item {
+  display: flex;
+  flex-direction: column;
+}
+.myprofile-stat-item strong {
+  font-size: 15px;
+  color: #0f172a;
+}
+.myprofile-stat-item span {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.myprofile-form-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  padding: 28px 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+}
+.myprofile-section-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #090C1E;
+  font-family: 'Poppins', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #edf2f7;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.myprofile-section-title i {
+  color: #F08D39;
+}
+.myprofile-photo-picker-row {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.photo-picker-preview-col {
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #e2e8f0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+.photo-picker-preview-col img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.photo-picker-inputs-col {
+  flex: 1;
+  min-width: 240px;
+}
+.myprofile-or-divider {
+  text-align: center;
+  position: relative;
+  margin: 12px 0;
+}
+.myprofile-or-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e2e8f0;
+}
+.myprofile-or-divider span {
+  position: relative;
+  background: #ffffff;
+  padding: 0 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+.myprofile-upload-btn {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  padding: 9px 14px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+.myprofile-upload-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+.form-hint {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+.myprofile-submit-row {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #edf2f7;
+  display: flex;
+  justify-content: flex-end;
+}
