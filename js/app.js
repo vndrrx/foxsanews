@@ -2965,6 +2965,14 @@
     return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
   }
 
+  const LEADER_QUOTES = {
+    reinhardt: 'Menjaga marwah, independensi redaksi, dan integritas jurnalistik tertinggi FoxSA News.',
+    catherine: 'Kami bukan sekadar jaringan berita, kami adalah keluarga para pencerita.',
+    boniface: 'Operasional yang solid adalah fondasi dari setiap berita yang kami sajikan.',
+    arthur: 'Setiap kata yang terbit harus akurat, tajam, dan dapat dipertanggungjawabkan.',
+    marshall: 'Budaya kerja kekeluargaan melahirkan tim yang profesional dan berintegritas.'
+  };
+
   const FOXSA_TEAM_MEMBERS = [
     {
       id: 'reinhardt',
@@ -3174,10 +3182,7 @@
     if (activeTab === 'overview') {
       const commissioner = FOXSA_TEAM_MEMBERS.find(m => m.dept === 'boc');
       const featuredExecs = FOXSA_TEAM_MEMBERS.filter(m => m.dept === 'bod');
-      const activeExecIndex = typeof state.profileExecIndex === 'number'
-        ? ((state.profileExecIndex % featuredExecs.length) + featuredExecs.length) % featuredExecs.length
-        : 0;
-      const exec = featuredExecs[activeExecIndex] || featuredExecs[0];
+      const leaders = (commissioner ? [commissioner] : []).concat(featuredExecs);
       const crewMembers = FOXSA_TEAM_MEMBERS.filter(m => m.dept !== 'bod' && m.dept !== 'boc');
 
       bodyHtml = `
@@ -3231,105 +3236,45 @@
               <p>Mengenal lebih dekat jajaran Dewan Komisaris, Dewan Direksi (CEO &amp; Board of Directors), manajemen operasional, supervisor, dan kru redaksi FoxSA News Agency.</p>
             </div>
 
-            ${commissioner ? `
-            <!-- 1. Board of Commissioners (Special Prestige Executive Showcase for Reinhardt Harrison) -->
-            <div class="meet-commissioner-special-card">
-              <div class="boc-top-ribbon">
-                <div class="boc-ribbon-left">
-                  <i class="fa-solid fa-crown"></i>
-                  <span>SUPREME SUPERVISORY BOARD • BOARD OF COMMISSIONERS</span>
-                </div>
-                <span class="boc-verified-pill"><i class="fa-solid fa-shield-halved"></i> HIGHEST GOVERNANCE</span>
-              </div>
-
-              <div class="boc-card-body-grid">
-                <div class="boc-portrait-frame">
-                  <span class="boc-floating-crest"><i class="fa-solid fa-award"></i> Commissioner</span>
-                  <img src="${getCommissionerAvatarSvg()}" alt="${escapeHtml(commissioner.name)}" class="boc-portrait-img" />
-                  <div class="boc-portrait-caption">
-                    <strong>${escapeHtml(commissioner.name)}</strong>
-                    <span>President Commissioner • FoxSA News</span>
-                  </div>
-                </div>
-
-                <div class="boc-details-col">
-                  <div class="boc-title-head">
-                    <span class="boc-kicker-gold">DEWAN KOMISARIS UTAMA FOXSA NEWS AGENCY</span>
-                    <h3 class="boc-exec-name">${escapeHtml(commissioner.name)}</h3>
-                  </div>
-
-                  <p class="boc-exec-bio">${escapeHtml(commissioner.bio)}</p>
-
-                  <blockquote class="boc-mandate-quote">
-                    <i class="fa-solid fa-quote-left"></i>
-                    <span>"Menjaga marwah, independensi ruang redaksi, dan integritas jurnalistik tertinggi FoxSA News Agency di seluruh San Andreas."</span>
-                  </blockquote>
-
-                  <h4 class="boc-exp-title"><i class="fa-solid fa-scale-balanced"></i> Wewenang &amp; Fokus Pengawasan Komisaris</h4>
-                  <p class="boc-exp-desc">${escapeHtml(commissioner.experienceIntro)}</p>
-
-                  <ul class="boc-pillars-list">
-                    ${commissioner.highlights.map(item => `
-                      <li>
-                        <span class="boc-check-gold"><i class="fa-solid fa-check"></i></span>
-                        <span>${escapeHtml(item)}</span>
-                      </li>
-                    `).join('')}
-                  </ul>
+            <!-- 1. LEADERSHIP MEMBER SHOWCASE (Board of Commissioners & Board of Directors, JAL "MEMBER" Style) -->
+            <div class="foxsa-leader-member-wrap">
+              <div class="leader-member-hero">
+                <div class="leader-member-hero-overlay"></div>
+                <div class="leader-member-hero-text">
+                  <h2 class="leader-member-title">LEADERSHIP</h2>
+                  <span class="leader-member-title-bar"></span>
+                  <h3 class="leader-member-subtitle">Board of Commissioners &amp; Board of Directors</h3>
+                  <p class="leader-member-lead">Jajaran pengawas dan pimpinan eksekutif yang menjaga arah, integritas, dan masa depan FoxSA News Agency di seluruh San Andreas.</p>
                 </div>
               </div>
+
+              <div class="leader-member-grid">
+                ${leaders.map((m, idx) => `
+                  <article class="leader-member-card ${m.dept === 'boc' ? 'is-commissioner' : ''}" data-leader-id="${escapeHtml(m.id)}" tabindex="0" role="button" aria-label="Lihat profil ${escapeHtml(m.name)}">
+                    <div class="leader-member-photo">
+                      <img src="${m.dept === 'boc' ? getCommissionerAvatarSvg() : getDefaultTeamAvatarSvg(idx - 1)}" alt="${escapeHtml(m.name)}" loading="lazy" />
+                      <span class="leader-member-tag">${m.dept === 'boc' ? '<i class="fa-solid fa-crown"></i> ' : ''}${escapeHtml(m.dept === 'boc' ? 'Board of Commissioners' : m.role)}</span>
+                    </div>
+                    <div class="leader-member-info">
+                      <p class="leader-member-quote">${escapeHtml(LEADER_QUOTES[m.id] || m.experienceIntro || '')}</p>
+                      <span class="leader-member-meta">${escapeHtml(m.dept === 'boc' ? 'Dewan Komisaris' : 'Dewan Direksi')} / ${escapeHtml(m.badge)}</span>
+                      <div class="leader-member-name-row">
+                        <strong>${escapeHtml(m.name)}</strong>
+                        <span>${escapeHtml(m.dept === 'boc' ? 'President Commissioner' : m.role)}</span>
+                      </div>
+                    </div>
+                  </article>
+                `).join('')}
+              </div>
+              <p class="leader-member-note"><i class="fa-regular fa-hand-pointer"></i> Klik kartu untuk melihat profil lengkap.</p>
             </div>
-            ` : ''}
 
-            <!-- 2. CEO & Board of Directors Spotlight (With 1/4 Switcher + Quick Director Tabs) -->
-            <div class="meet-team-featured-card">
-              <div class="meet-featured-portrait-wrap">
-                <span class="meet-floating-role-pill">${escapeHtml(exec.role)}</span>
-                <img src="${getDefaultTeamAvatarSvg(activeExecIndex)}" alt="${escapeHtml(exec.name)}" class="meet-featured-portrait-img" />
-              </div>
-
-              <div class="meet-featured-details">
-                <div class="meet-featured-header-row">
-                  <div>
-                    <span class="meet-exec-kicker">${escapeHtml(exec.badge)}</span>
-                    <h3 class="meet-exec-name">${escapeHtml(exec.name)}</h3>
-                  </div>
-                  <div class="meet-exec-slider-controls" title="Geser CEO &amp; Board of Directors">
-                    <button type="button" class="meet-slide-arrow" id="exec-prev-btn" aria-label="Sebelumnya">
-                      <i class="fa-solid fa-chevron-left"></i>
-                    </button>
-                    <span class="meet-exec-counter">${activeExecIndex + 1} / ${featuredExecs.length}</span>
-                    <button type="button" class="meet-slide-arrow" id="exec-next-btn" aria-label="Selanjutnya">
-                      <i class="fa-solid fa-chevron-right"></i>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Quick Select Pills for CEO & Board of Directors -->
-                <div class="meet-bod-quick-pills">
-                  ${featuredExecs.map((b, i) => `
-                    <button type="button" class="meet-bod-pill ${i === activeExecIndex ? 'active' : ''}" data-select-exec="${i}">
-                      <strong>${escapeHtml(b.name)}</strong>
-                      <span>${escapeHtml(b.role)}</span>
-                    </button>
-                  `).join('')}
-                </div>
-
-                <p class="meet-exec-bio">${escapeHtml(exec.bio)}</p>
-
-                <div class="meet-exec-divider"></div>
-
-                <h4 class="meet-exec-exp-title">${escapeHtml(exec.name)} Experience</h4>
-                <p class="meet-exec-exp-desc">${escapeHtml(exec.experienceIntro)}</p>
-
-                <ul class="meet-exec-check-list">
-                  ${exec.highlights.map(item => `
-                    <li>
-                      <span class="check-circle-dark"><i class="fa-solid fa-check"></i></span>
-                      <span>${escapeHtml(item)}</span>
-                    </li>
-                  `).join('')}
-                </ul>
+            <!-- Leader Profile Modal -->
+            <div class="leader-profile-modal" id="leader-profile-modal" aria-hidden="true">
+              <div class="leader-profile-backdrop" data-close-leader-modal></div>
+              <div class="leader-profile-dialog" role="dialog" aria-modal="true">
+                <button type="button" class="leader-profile-close" data-close-leader-modal aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
+                <div class="leader-profile-content" id="leader-profile-content"></div>
               </div>
             </div>
 
@@ -3689,34 +3634,70 @@
 
     // Bind Horizontal Carousel Left/Right Buttons, Wheel & Drag-to-Scroll on Overview
     if (activeTab === 'overview') {
-      const featuredExecs = FOXSA_TEAM_MEMBERS.filter(m => m.dept === 'bod');
-      const prevExecBtn = document.getElementById('exec-prev-btn');
-      const nextExecBtn = document.getElementById('exec-next-btn');
+      // Leadership Member Cards -> Open Profile Modal
+      const leaderModal = document.getElementById('leader-profile-modal');
+      const leaderContent = document.getElementById('leader-profile-content');
+      const closeLeaderModal = () => {
+        if (!leaderModal) return;
+        leaderModal.classList.remove('is-open');
+        leaderModal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('leader-modal-open');
+      };
+      const openLeaderModal = (memberId) => {
+        const m = FOXSA_TEAM_MEMBERS.find(x => x.id === memberId);
+        if (!m || !leaderModal || !leaderContent) return;
+        const isBoc = m.dept === 'boc';
+        const bodIdx = FOXSA_TEAM_MEMBERS.filter(x => x.dept === 'bod').indexOf(m);
+        const avatar = isBoc ? getCommissionerAvatarSvg() : getDefaultTeamAvatarSvg(bodIdx);
+        leaderContent.innerHTML = `
+          <div class="leader-profile-grid ${isBoc ? 'is-commissioner' : ''}">
+            <div class="leader-profile-photo">
+              <img src="${avatar}" alt="${escapeHtml(m.name)}" />
+              <span class="leader-member-tag">${isBoc ? '<i class="fa-solid fa-crown"></i> Board of Commissioners' : escapeHtml(m.role)}</span>
+            </div>
+            <div class="leader-profile-body">
+              <span class="leader-profile-kicker">${escapeHtml(isBoc ? 'Dewan Komisaris' : 'Dewan Direksi')} • ${escapeHtml(m.badge)}</span>
+              <h3>${escapeHtml(m.name)}</h3>
+              <p class="leader-profile-role">${escapeHtml(isBoc ? 'President Commissioner' : m.role)}</p>
+              <blockquote class="leader-profile-quote">“${escapeHtml(LEADER_QUOTES[m.id] || '')}”</blockquote>
+              <p class="leader-profile-bio">${escapeHtml(m.bio)}</p>
+              <h4>${isBoc ? 'Wewenang &amp; Fokus Pengawasan' : 'Fokus &amp; Tanggung Jawab'}</h4>
+              <ul class="leader-profile-list">
+                ${(m.highlights || []).map(h => `<li><i class="fa-solid fa-check"></i><span>${escapeHtml(h)}</span></li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        `;
+        leaderModal.classList.add('is-open');
+        leaderModal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('leader-modal-open');
+      };
 
-      if (prevExecBtn) {
-        prevExecBtn.addEventListener('click', () => {
-          const cur = typeof state.profileExecIndex === 'number' ? state.profileExecIndex : 0;
-          state.profileExecIndex = (cur - 1 + featuredExecs.length) % featuredExecs.length;
-          renderProfileView('overview');
-        });
-      }
-      if (nextExecBtn) {
-        nextExecBtn.addEventListener('click', () => {
-          const cur = typeof state.profileExecIndex === 'number' ? state.profileExecIndex : 0;
-          state.profileExecIndex = (cur + 1) % featuredExecs.length;
-          renderProfileView('overview');
-        });
-      }
-
-      mainEl.querySelectorAll('[data-select-exec]').forEach(el => {
-        el.addEventListener('click', () => {
-          const idx = parseInt(el.getAttribute('data-select-exec'), 10);
-          if (!isNaN(idx)) {
-            state.profileExecIndex = idx;
-            renderProfileView('overview');
+      mainEl.querySelectorAll('[data-leader-id]').forEach(card => {
+        card.addEventListener('click', () => openLeaderModal(card.getAttribute('data-leader-id')));
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openLeaderModal(card.getAttribute('data-leader-id'));
           }
         });
       });
+      mainEl.querySelectorAll('[data-close-leader-modal]').forEach(el => {
+        el.addEventListener('click', closeLeaderModal);
+      });
+      if (!window.__foxsaLeaderEscBound) {
+        window.__foxsaLeaderEscBound = true;
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            const modal = document.getElementById('leader-profile-modal');
+            if (modal && modal.classList.contains('is-open')) {
+              modal.classList.remove('is-open');
+              modal.setAttribute('aria-hidden', 'true');
+              document.body.classList.remove('leader-modal-open');
+            }
+          }
+        });
+      }
 
       const viewport = document.getElementById('team-slider-viewport');
       const slidePrev = document.getElementById('team-slider-prev');
