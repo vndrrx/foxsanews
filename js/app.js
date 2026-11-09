@@ -18,7 +18,7 @@
   const AUTH_SESSION_KEY = 'foxsa_auth_session_v1';
   const VIEW_MODE_KEY = 'foxsa_news_view_mode_v1';
   const GITHUB_CONFIG_KEY = 'foxsa_github_sync_config';
-  const DEFAULT_AVATAR = 'https://4.bp.blogspot.com/-uCjYgVFIh70/VuOLn-mL7PI/AAAAAAAADUs/Kcu9wJbv790hIo83rI_s7lLW3zkLY01EA/s100/avatar.png';
+  const DEFAULT_AVATAR = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 440" width="400" height="440"><defs><linearGradient id="foxDefGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1e293b"/><stop offset="100%" stop-color="#090C1E"/></linearGradient></defs><rect width="400" height="440" fill="url(#foxDefGrad)"/><circle cx="200" cy="205" r="145" fill="#ffffff" fill-opacity="0.08"/><path d="M62 440 C66 334 118 294 200 294 C282 294 334 334 338 440 Z" fill="#172033"/><polygon points="162,294 238,294 216,440 184,440" fill="#ffffff"/><polygon points="192,306 208,306 214,420 200,438 186,420" fill="#F08D39"/><polygon points="189,294 211,294 207,312 193,312" fill="#F08D39"/><polygon points="160,294 192,388 142,440 116,320" fill="#090C1E"/><polygon points="240,294 208,388 258,440 284,320" fill="#090C1E"/><rect x="178" y="244" width="44" height="58" rx="16" fill="#f1c29b"/><rect x="146" y="112" width="108" height="146" rx="52" fill="#f1c29b"/><path d="M144 168 C140 118 166 94 200 94 C236 94 260 118 256 168 C248 138 230 126 200 126 C170 126 152 138 144 168 Z" fill="#27303f"/><circle cx="176" cy="184" r="5" fill="#1e293b"/><circle cx="224" cy="184" r="5" fill="#1e293b"/><path d="M184 222 Q200 232 216 222" stroke="#b87d56" stroke-width="3.5" stroke-linecap="round" fill="none"/></svg>`);
 
   const DAYS_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const MONTHS_ID = [
@@ -319,8 +319,19 @@
     );
     delete cloned.profileFeedback;
 
+    // Clear out any old Blogger grey silhouettes from localStorage cache
+    if (cloned.authors) {
+      Object.keys(cloned.authors).forEach(k => {
+        if (cloned.authors[k] && cloned.authors[k].avatar && cloned.authors[k].avatar.includes('VuOLn-mL7PI')) {
+          delete cloned.authors[k].avatar;
+        }
+      });
+    }
     cloned.staffAccounts.forEach(acc => {
       if (!acc.status) acc.status = 'approved';
+      if (acc.avatar && acc.avatar.includes('VuOLn-mL7PI')) {
+        acc.avatar = '';
+      }
       const known = cloned.authors[acc.authorName];
       if (known && known.avatar && (!acc.avatar || acc.avatar === DEFAULT_AVATAR || acc.avatar.includes('Arthur%20PP'))) {
         acc.avatar = known.avatar;
@@ -4179,6 +4190,16 @@
     }
   ];
 
+  // Helper: Check if an avatar is a real custom uploaded/provided photo (not a placeholder)
+  function isCustomAvatar(url) {
+    if (!url || typeof url !== 'string') return false;
+    const clean = url.trim();
+    if (!clean) return false;
+    if (clean.includes('VuOLn-mL7PI') || clean.includes('avatar.png') || clean.includes('avatar.jpg')) return false;
+    if (clean === 'assets/logo/foxsa-icon.jpg') return false;
+    return true;
+  }
+
   // Helper: Find connected account in state.data.staffAccounts
   function findStaffAccountForMember(memberOrName) {
     const accounts = (state.data && state.data.staffAccounts) || [];
@@ -4203,21 +4224,27 @@
   }
 
   // Helper: Dynamic data resolution linking team member to account photo, bio, quote & discord
-  function getMemberEffectiveData(m) {
+  function getMemberEffectiveData(m, idx = 0) {
     const acc = findStaffAccountForMember(m);
     const authorsMap = (state.data && state.data.authors) || {};
     const authorObj = (m.name && authorsMap[m.name]) || (acc && acc.authorName && authorsMap[acc.authorName]) || {};
 
-    let avatar = (acc && acc.avatar && acc.avatar.trim() && acc.avatar !== DEFAULT_AVATAR)
-      ? acc.avatar.trim()
-      : (authorObj.avatar && authorObj.avatar.trim())
-        ? authorObj.avatar.trim()
-        : (m.avatar && m.avatar.trim())
-          ? m.avatar.trim()
-          : '';
+    let avatar = '';
 
+    // Check account avatar first (only if it's a real custom uploaded photo)
+    if (acc && isCustomAvatar(acc.avatar)) {
+      avatar = acc.avatar.trim();
+    } else if (authorObj && isCustomAvatar(authorObj.avatar)) {
+      avatar = authorObj.avatar.trim();
+    } else if (m && isCustomAvatar(m.avatar)) {
+      avatar = m.avatar.trim();
+    }
+
+    // If no custom photo has been uploaded, use the previous default SVG avatars (Executive character for BOC, Suit variations for others)
     if (!avatar) {
-      avatar = m.dept === 'boc' ? getCommissionerAvatarSvg() : getDefaultTeamAvatarSvg(1);
+      avatar = (m.dept === 'boc' || (m.role && m.role.toLowerCase().includes('commissioner')))
+        ? getCommissionerAvatarSvg()
+        : getDefaultTeamAvatarSvg(idx);
     }
 
     const discordId = (acc && acc.discordId) || m.discordId || 'Belum terhubung';
@@ -4313,16 +4340,16 @@ const LEADER_QUOTES = {
     // =========================================================================
     if (activeTab === 'overview') {
       const commissionerRaw = FOXSA_TEAM_MEMBERS.find(m => m.dept === 'boc');
-      const commissioner = commissionerRaw ? getMemberEffectiveData(commissionerRaw) : null;
-      const featuredExecs = FOXSA_TEAM_MEMBERS.filter(m => m.dept === 'bod').map(m => getMemberEffectiveData(m));
+      const commissioner = commissionerRaw ? getMemberEffectiveData(commissionerRaw, 0) : null;
+      const featuredExecs = FOXSA_TEAM_MEMBERS.filter(m => m.dept === 'bod').map((m, i) => getMemberEffectiveData(m, i + 1));
       const leaders = (commissioner ? [commissioner] : []).concat(featuredExecs);
-      const crewMembers = FOXSA_TEAM_MEMBERS.filter(m => m.dept !== 'bod' && m.dept !== 'boc').map(m => getMemberEffectiveData(m));
+      const crewMembers = FOXSA_TEAM_MEMBERS.filter(m => m.dept !== 'bod' && m.dept !== 'boc').map((m, i) => getMemberEffectiveData(m, i + 2));
 
       // Resolve active officers for 13-tier Official Member Roster board dynamically from accounts
-      const rReinhardt = getMemberEffectiveData({ id: 'reinhardt', name: 'Reinhardt Harrison', role: 'Board of Commissioners', dept: 'boc' });
-      const rArthur = getMemberEffectiveData({ id: 'arthur', name: 'Arthur Redfields', role: 'Chief Executive Officer', dept: 'bod' });
-      const rPark = getMemberEffectiveData({ id: 'park', name: 'Park Young-Hwan', role: 'Line Producer', dept: 'supervisor' });
-      const rSteven = getMemberEffectiveData({ id: 'steven', name: 'Steven Deluca', role: 'Journalism Intern', dept: 'staff' });
+      const rReinhardt = getMemberEffectiveData({ id: 'reinhardt', name: 'Reinhardt Harrison', role: 'Board of Commissioners', dept: 'boc' }, 0);
+      const rArthur = getMemberEffectiveData({ id: 'arthur', name: 'Arthur Redfields', role: 'Chief Executive Officer', dept: 'bod' }, 1);
+      const rPark = getMemberEffectiveData({ id: 'park', name: 'Park Young-Hwan', role: 'Line Producer', dept: 'supervisor' }, 2);
+      const rSteven = getMemberEffectiveData({ id: 'steven', name: 'Steven Deluca', role: 'Journalism Intern', dept: 'staff' }, 3);
 
       bodyHtml = `
         <div class="foxsa-profile-section">
@@ -4761,11 +4788,13 @@ const LEADER_QUOTES = {
             </div>
 
             <div class="alumni-cards-grid">
-              ${leadershipFormer.map(f => `
+              ${leadershipFormer.map((f, i) => {
+                const fAvatar = isCustomAvatar(f.avatar) ? f.avatar : getDefaultTeamAvatarSvg(i);
+                return `
                 <div class="alumni-card gold-border">
                   <div class="alumni-card-head">
                     <div class="alumni-photo-box">
-                      <img src="${f.avatar}" alt="${escapeHtml(f.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
+                      <img src="${fAvatar}" alt="${escapeHtml(f.name)}" onerror="this.src=getDefaultTeamAvatarSvg(0)" />
                     </div>
                     <div class="alumni-head-info">
                       <span class="alumni-role-tag gold"><i class="fa-solid fa-award"></i> ${escapeHtml(f.badge)}</span>
@@ -4786,7 +4815,8 @@ const LEADER_QUOTES = {
                     </div>
                   </div>
                 </div>
-              `).join('')}
+              `;
+              }).join('')}
             </div>
           </div>
 
@@ -4801,11 +4831,13 @@ const LEADER_QUOTES = {
             </div>
 
             <div class="alumni-cards-grid">
-              ${mgmtFormer.map(f => `
+              ${mgmtFormer.map((f, i) => {
+                const fAvatar = isCustomAvatar(f.avatar) ? f.avatar : getDefaultTeamAvatarSvg(i + 1);
+                return `
                 <div class="alumni-card blue-border">
                   <div class="alumni-card-head">
                     <div class="alumni-photo-box">
-                      <img src="${f.avatar}" alt="${escapeHtml(f.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
+                      <img src="${fAvatar}" alt="${escapeHtml(f.name)}" onerror="this.src=getDefaultTeamAvatarSvg(1)" />
                     </div>
                     <div class="alumni-head-info">
                       <span class="alumni-role-tag blue">${escapeHtml(f.badge)}</span>
@@ -4826,7 +4858,8 @@ const LEADER_QUOTES = {
                     </div>
                   </div>
                 </div>
-              `).join('')}
+              `;
+              }).join('')}
             </div>
           </div>
 
@@ -4841,11 +4874,13 @@ const LEADER_QUOTES = {
             </div>
 
             <div class="alumni-cards-grid">
-              ${staffFormer.map(f => `
+              ${staffFormer.map((f, i) => {
+                const fAvatar = isCustomAvatar(f.avatar) ? f.avatar : getDefaultTeamAvatarSvg(i + 2);
+                return `
                 <div class="alumni-card green-border">
                   <div class="alumni-card-head">
                     <div class="alumni-photo-box">
-                      <img src="${f.avatar}" alt="${escapeHtml(f.name)}" onerror="this.src='assets/logo/foxsa-icon.jpg'" />
+                      <img src="${fAvatar}" alt="${escapeHtml(f.name)}" onerror="this.src=getDefaultTeamAvatarSvg(2)" />
                     </div>
                     <div class="alumni-head-info">
                       <span class="alumni-role-tag green">${escapeHtml(f.badge)}</span>
@@ -4866,7 +4901,8 @@ const LEADER_QUOTES = {
                     </div>
                   </div>
                 </div>
-              `).join('')}
+              `;
+              }).join('')}
             </div>
           </div>
 
