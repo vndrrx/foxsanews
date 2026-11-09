@@ -1367,7 +1367,7 @@
     if (action === 'archive' && param) return { view: 'archive', param };
     if (action === 'author' && param) return { view: 'author', param };
     if (action === 'search') return { view: 'search', param: param || '' };
-    if (action === 'admin') return { view: 'admin', param: param || 'posts' };
+    if (action === 'admin') return { view: 'admin', param: param || null };
     if (action === 'login') return { view: 'admin', param: 'login' };
     if (action === 'register') return { view: 'admin', param: 'register' };
     if (action === 'staff') return { view: 'admin', param: 'staff' };
@@ -2560,8 +2560,10 @@
       return;
     }
 
-    if (state.currentRoute && ['posts', 'editor', 'comments', 'chat', 'profile', 'staff'].includes(state.currentRoute.param)) {
+    if (state.currentRoute && state.currentRoute.param && ['posts', 'editor', 'comments', 'chat', 'profile', 'staff'].includes(state.currentRoute.param)) {
       state.adminTab = state.currentRoute.param;
+    } else if (!state.adminTab) {
+      state.adminTab = 'posts';
     }
 
     document.body.className = 'item';
@@ -3890,6 +3892,12 @@
           state.editingPostId = null;
         }
         state.adminTab = target;
+        if (state.currentRoute) {
+          state.currentRoute.param = target;
+        }
+        try {
+          history.replaceState(null, '', '#/admin/' + target);
+        } catch (e) {}
         renderAdminView();
       });
     });
@@ -3900,6 +3908,12 @@
         state.editingPostId = null;
         state.selectedEditorLabels = ['Crime', 'LSPD'];
         state.adminTab = 'editor';
+        if (state.currentRoute) {
+          state.currentRoute.param = 'editor';
+        }
+        try {
+          history.replaceState(null, '', '#/admin/editor');
+        } catch (e) {}
         renderAdminView();
       });
     }
@@ -3922,6 +3936,12 @@
       btn.addEventListener('click', () => {
         state.editingPostId = btn.getAttribute('data-edit-post');
         state.adminTab = 'editor';
+        if (state.currentRoute) {
+          state.currentRoute.param = 'editor';
+        }
+        try {
+          history.replaceState(null, '', '#/admin/editor');
+        } catch (e) {}
         renderAdminView();
       });
     });
@@ -4357,6 +4377,12 @@
         cancelBtn.addEventListener('click', () => {
           state.editingPostId = null;
           state.adminTab = 'posts';
+          if (state.currentRoute) {
+            state.currentRoute.param = 'posts';
+          }
+          try {
+            history.replaceState(null, '', '#/admin/posts');
+          } catch (e) {}
           renderAdminView();
         });
       }
@@ -4366,6 +4392,12 @@
         backListBtn.addEventListener('click', () => {
           state.editingPostId = null;
           state.adminTab = 'posts';
+          if (state.currentRoute) {
+            state.currentRoute.param = 'posts';
+          }
+          try {
+            history.replaceState(null, '', '#/admin/posts');
+          } catch (e) {}
           renderAdminView();
         });
       }
