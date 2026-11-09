@@ -869,80 +869,122 @@
     // Show full Hero Showcase ONLY on main Home view
     if (state.currentRoute.view !== 'home' || !state.data || !state.data.posts || state.data.posts.length === 0) {
       heroSection.style.display = 'none';
+      clearInterval(state.tickerTimer);
       return;
     }
 
     heroSection.style.display = 'block';
     const posts = state.data.posts;
 
-    // Update Top Ticker Bar
-    updateBinduzTicker();
-
-    // 1. Main Headline
+    // 1. Main Headline (Newest news article, skip "All About FoxSA" overview if there's a newer or news post)
     const newsPosts = posts.filter(p => p.id !== '2526320561083681754');
     const mainPost = newsPosts[0] || posts[0];
 
-    // 2. Floating Sub-Cards (Next 2 stories in bottom right)
-    const remainingPosts = posts.filter(p => p.id !== mainPost.id);
-    const subCards = remainingPosts.slice(0, 2);
+    // 2. Editor's Picks (Next 3 posts)
+    const editorPicks = posts.filter(p => p.id !== mainPost.id).slice(0, 3);
+    const topPick = editorPicks[0] || mainPost;
+    const subPicks = editorPicks.slice(1, 3);
+
+    // 3. Trending Now (Up to 5 popular/recent posts with numbered badges 1-5)
+    let trendingPosts = posts.filter(p => p.popular);
+    if (trendingPosts.length < 5) {
+      const others = posts.filter(p => !trendingPosts.includes(p));
+      trendingPosts = trendingPosts.concat(others);
+    }
+    trendingPosts = trendingPosts.slice(0, 5);
 
     const mainTag = (mainPost.labels && mainPost.labels[0]) || 'News';
-    const thumb = mainPost.featuredImage || state.data.siteInfo.aboutBanner;
-    const authorAvatar = (state.data.authors && state.data.authors[mainPost.author] && state.data.authors[mainPost.author].avatar) || 'assets/logo/foxsa-icon.jpg';
+    const topPickTag = (topPick.labels && topPick.labels[0]) || 'News';
 
     heroSection.innerHTML = `
       <div class="container">
-        <!-- BINDUZ IMMERSIVE HERO SHOWCASE -->
-        <div class="binduz-hero-card">
-          <div class="binduz-hero-bg-wrap">
-            <img class="binduz-hero-bg" src="${escapeHtml(thumb)}" alt="${escapeHtml(mainPost.title)}" />
-          </div>
-          <div class="binduz-hero-overlay"></div>
-
-          <!-- Top Right Weather / City Info -->
-          <div class="binduz-hero-weather">
-            <div class="binduz-weather-icon"><i class="fa-solid fa-cloud-sun"></i></div>
-            <div class="binduz-weather-text">
-              <div class="binduz-weather-temp">Los Santos 24°C / 75°F</div>
-              <div class="binduz-weather-city">San Andreas Network 24/7</div>
+        <!-- 3-COLUMN HERO MAGAZINE GRID (KREETI STYLE) -->
+        <div class="kreeti-hero-grid">
+          <!-- Left Column: Editor's Picks -->
+          <div class="kreeti-col kreeti-col-picks">
+            <div class="kreeti-sec-heading">
+              <span class="heading-line"></span>
+              <h3>Editor's Picks</h3>
             </div>
-          </div>
 
-          <!-- Main Hero Content (Bottom Left) -->
-          <div class="binduz-hero-story">
-            <div class="binduz-story-meta-top">
-              <span class="binduz-cat-pill">${escapeHtml(mainTag)}</span>
-              <span class="binduz-story-date"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(mainPost.published))}</span>
-            </div>
-            <h1 class="binduz-story-title">
-              <a href="${getPostHref(mainPost)}">${escapeHtml(mainPost.title)}</a>
-            </h1>
-            <div class="binduz-story-author-row">
-              <img src="${escapeHtml(authorAvatar)}" class="binduz-author-avatar" alt="${escapeHtml(mainPost.author)}" onerror="this.src='${DEFAULT_AVATAR}'" />
-              <span class="binduz-author-name">By <strong>${escapeHtml(mainPost.author)}</strong></span>
-              <span class="binduz-meta-sep">•</span>
-              <span class="binduz-meta-stat"><i class="fa-regular fa-eye"></i> 2.4k</span>
-              <span class="binduz-meta-sep">•</span>
-              <span class="binduz-meta-stat"><i class="fa-regular fa-comment"></i> ${(mainPost.comments || []).length}</span>
-            </div>
-          </div>
-
-          <!-- Floating Sub-Cards (Bottom Right) -->
-          ${subCards.length > 0 ? `
-            <div class="binduz-hero-floating-cards">
-              ${subCards.map(sc => `
-                <a href="${getPostHref(sc)}" class="binduz-floating-card">
-                  <div class="binduz-float-thumb">
-                    <img src="${escapeHtml(sc.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(sc.title)}" />
+            <div class="kreeti-pick-featured">
+              <a href="${getPostHref(topPick)}" class="pick-featured-link">
+                <img src="${escapeHtml(topPick.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(topPick.title)}" loading="lazy" />
+                <div class="pick-featured-overlay">
+                  <div class="kreeti-badges">
+                    <span class="k-badge-time"><i class="fa-regular fa-clock"></i> ${getReadingTime(topPick.content)}</span>
+                    <span class="k-badge-cat">${escapeHtml(topPickTag)}</span>
                   </div>
-                  <div class="binduz-float-info">
-                    <span class="binduz-float-date"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(sc.published))}</span>
-                    <h4 class="binduz-float-title">${escapeHtml(sc.title)}</h4>
+                  <h4>${escapeHtml(topPick.title)}</h4>
+                </div>
+              </a>
+            </div>
+
+            <div class="kreeti-pick-list">
+              ${subPicks.map(sp => `
+                <div class="kreeti-pick-text-card">
+                  <div class="pick-meta-line">
+                    <span class="pick-read"><i class="fa-regular fa-clock"></i> ${getReadingTime(sp.content)}</span>
+                    <a href="#/label/${encodeURIComponent((sp.labels && sp.labels[0]) || 'News')}" class="pick-cat">${escapeHtml((sp.labels && sp.labels[0]) || 'News')}</a>
+                  </div>
+                  <h4><a href="${getPostHref(sp)}">${escapeHtml(sp.title)}</a></h4>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Center Column: Main News -->
+          <div class="kreeti-col kreeti-col-main">
+            <div class="kreeti-sec-heading">
+              <span class="heading-line"></span>
+              <h3>Headline Utama</h3>
+            </div>
+
+            <div class="kreeti-main-hero-card">
+              <a href="${getPostHref(mainPost)}" class="main-hero-link">
+                <img src="${escapeHtml(mainPost.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(mainPost.title)}" />
+                <div class="main-hero-overlay">
+                  <div class="kreeti-badges">
+                    <span class="k-badge-icon"><i class="fa-solid fa-bolt"></i></span>
+                    <span class="k-badge-time">${getReadingTime(mainPost.content)}</span>
+                    <span class="k-badge-cat">${escapeHtml(mainTag)}</span>
+                  </div>
+                  <h2>${escapeHtml(mainPost.title)}</h2>
+                  <p class="main-hero-excerpt">${escapeHtml(stripHtmlToSnippet(mainPost.content, 120))}</p>
+                  <div class="main-hero-meta">
+                    <span><i class="fa-regular fa-user"></i> ${escapeHtml(mainPost.author)}</span>
+                    <span>•</span>
+                    <span><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(mainPost.published))}</span>
+                    <span>•</span>
+                    <span><i class="fa-regular fa-comments"></i> ${(mainPost.comments || []).length} Komentar</span>
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Column: Trending Now -->
+          <div class="kreeti-col kreeti-col-trending">
+            <div class="kreeti-sec-heading">
+              <span class="heading-line"></span>
+              <h3>Trending Now</h3>
+            </div>
+
+            <div class="kreeti-trending-list">
+              ${trendingPosts.map((tp, idx) => `
+                <a href="${getPostHref(tp)}" class="kreeti-trending-item">
+                  <div class="trending-thumb-wrap">
+                    <img src="${escapeHtml(tp.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(tp.title)}" loading="lazy" />
+                    <span class="trending-rank-badge">${idx + 1}</span>
+                  </div>
+                  <div class="trending-item-info">
+                    <h4>${escapeHtml(tp.title)}</h4>
+                    <span class="trending-item-date">${escapeHtml(formatDateID(tp.published))}</span>
                   </div>
                 </a>
               `).join('')}
             </div>
-          ` : ''}
+          </div>
         </div>
       </div>
     `;
@@ -1029,236 +1071,6 @@
     `;
   }
 
-  function buildBinduzTrendingSectionHtml(posts) {
-    if (!posts || posts.length === 0) return '';
-    const labelCounts = getLabelCounts();
-    const topCategories = Object.keys(labelCounts).slice(0, 5);
-
-    const mainStory = posts[1] || posts[0];
-    const stackedStories = posts.slice(2, 5);
-    if (stackedStories.length === 0 && posts.length > 0) {
-      stackedStories.push(posts[0]);
-    }
-
-    const hubCategories = Object.keys(labelCounts).slice(0, 4);
-
-    return `
-      <section class="binduz-trending-section">
-        <div class="binduz-sec-header">
-          <div class="binduz-sec-title-wrap">
-            <h3 class="binduz-sec-title">Trending News</h3>
-            <span class="binduz-red-line"></span>
-          </div>
-          <div class="binduz-sec-tabs">
-            <a href="#/" class="binduz-sec-tab-pill active">All</a>
-            ${topCategories.map(c => `<a href="#/label/${encodeURIComponent(c)}" class="binduz-sec-tab-pill">${escapeHtml(c)}</a>`).join('')}
-          </div>
-        </div>
-
-        <div class="binduz-trending-grid">
-          <!-- Col 1: Big Featured Story -->
-          <a href="${getPostHref(mainStory)}" class="binduz-trend-main-card">
-            <img src="${escapeHtml(mainStory.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(mainStory.title)}" loading="lazy" />
-            <div class="binduz-trend-main-overlay"></div>
-            <div class="binduz-trend-main-content">
-              <span class="binduz-cat-pill">${escapeHtml((mainStory.labels && mainStory.labels[0]) || 'News')}</span>
-              <span style="color:#cbd5e1;font-size:11.5px;margin-left:8px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(mainStory.published))}</span>
-              <h4 class="binduz-trend-main-title">${escapeHtml(mainStory.title)}</h4>
-            </div>
-          </a>
-
-          <!-- Col 2: Stacked Mini News (3 items) -->
-          <div class="binduz-trend-stacked-list">
-            ${stackedStories.map(p => `
-              <a href="${getPostHref(p)}" class="binduz-mini-card">
-                <div class="binduz-mini-thumb">
-                  <img src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(p.title)}" loading="lazy" />
-                </div>
-                <div class="binduz-mini-body">
-                  <span class="binduz-mini-tag">${escapeHtml((p.labels && p.labels[0]) || 'News')}</span>
-                  <span class="binduz-mini-date"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(p.published))}</span>
-                  <h5 class="binduz-mini-title">${escapeHtml(p.title)}</h5>
-                </div>
-              </a>
-            `).join('')}
-          </div>
-
-          <!-- Col 3: Categories Hub -->
-          <div class="binduz-categories-hub">
-            ${hubCategories.map(cat => {
-              const count = labelCounts[cat] || 1;
-              const postWithCat = posts.find(p => (p.labels || []).includes(cat)) || posts[0];
-              const bgImg = (postWithCat && postWithCat.featuredImage) || state.data.siteInfo.aboutBanner;
-              return `
-                <a href="#/label/${encodeURIComponent(cat)}" class="binduz-cat-tile">
-                  <img src="${escapeHtml(bgImg)}" alt="${escapeHtml(cat)}" loading="lazy" />
-                  <span>${escapeHtml(cat)}</span>
-                  <span class="cat-count">${count} Berita</span>
-                </a>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      </section>
-    `;
-  }
-
-  function buildBinduzFeaturedSectionHtml(posts) {
-    if (!posts || posts.length === 0) return '';
-    const featPrimary = posts[3] || posts[0];
-    const featDark = posts.slice(4, 6);
-    if (featDark.length === 0) {
-      featDark.push(posts[0]);
-      if (posts.length > 1) featDark.push(posts[1]);
-    }
-
-    return `
-      <section class="binduz-featured-section">
-        <div class="binduz-sec-header">
-          <div class="binduz-sec-title-wrap">
-            <h3 class="binduz-sec-title">Featured</h3>
-            <span class="binduz-red-line"></span>
-          </div>
-          <div class="binduz-sec-tabs">
-            <button type="button" class="binduz-ticker-btn" style="width:28px;height:28px;background:#f1f5f9;color:#090C1E;" title="Sebelumnya"><i class="fa-solid fa-chevron-left"></i></button>
-            <button type="button" class="binduz-ticker-btn" style="width:28px;height:28px;background:#f1f5f9;color:#090C1E;" title="Selanjutnya"><i class="fa-solid fa-chevron-right"></i></button>
-          </div>
-        </div>
-
-        <div class="binduz-featured-grid">
-          <!-- Col 1: Primary Featured Card -->
-          <a href="${getPostHref(featPrimary)}" class="binduz-feat-primary-card">
-            <div class="binduz-feat-primary-thumb">
-              <img src="${escapeHtml(featPrimary.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(featPrimary.title)}" loading="lazy" />
-            </div>
-            <div class="binduz-feat-primary-body">
-              <div>
-                <span class="binduz-cat-pill">${escapeHtml((featPrimary.labels && featPrimary.labels[0]) || 'News')}</span>
-                <span style="color:#94a3b8;font-size:11.5px;margin-left:8px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(featPrimary.published))}</span>
-              </div>
-              <h4 class="binduz-feat-primary-title">${escapeHtml(featPrimary.title)}</h4>
-              <p class="binduz-feat-primary-snippet">${escapeHtml(stripHtmlToSnippet(featPrimary.content, 120))}</p>
-            </div>
-          </a>
-
-          <!-- Col 2: 2 Stacked Dark Luxury Cards -->
-          <div class="binduz-feat-dark-stacked">
-            ${featDark.map(p => `
-              <a href="${getPostHref(p)}" class="binduz-dark-card">
-                <img src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(p.title)}" loading="lazy" />
-                <div class="binduz-dark-card-content">
-                  <div>
-                    <span class="binduz-cat-pill" style="background:#e11d48;">${escapeHtml((p.labels && p.labels[0]) || 'News')}</span>
-                    <span style="color:#cbd5e1;font-size:11px;margin-left:8px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(p.published))}</span>
-                  </div>
-                  <h4 class="binduz-dark-title">${escapeHtml(p.title)}</h4>
-                </div>
-              </a>
-            `).join('')}
-          </div>
-
-          <!-- Col 3: Social & Community Feed Widget -->
-          <div class="binduz-social-widget">
-            <a href="https://discord.gg/rVeaKGzhyy" target="_blank" rel="noopener" class="binduz-social-box discord">
-              <div class="social-left">
-                <i class="fa-brands fa-discord"></i>
-                <div>
-                  <div class="social-title">Discord FoxSA</div>
-                  <div class="social-sub">15,000+ Komunitas</div>
-                </div>
-              </div>
-              <span class="social-btn-pill">Gabung</span>
-            </a>
-
-            <div class="binduz-social-box radio">
-              <div class="social-left">
-                <i class="fa-solid fa-radio"></i>
-                <div>
-                  <div class="social-title">FoxSA FM 98.4</div>
-                  <div class="social-sub">Live San Andreas Audio</div>
-                </div>
-              </div>
-              <span class="social-btn-pill"><i class="fa-solid fa-circle" style="color:#4ade80;font-size:8px;"></i> ON AIR</span>
-            </div>
-
-            <a href="#/profile/recruitment" class="binduz-social-box recruitment">
-              <div class="social-left">
-                <i class="fa-solid fa-newspaper" style="color:#F08D39;"></i>
-                <div>
-                  <div class="social-title">Open Recruitment</div>
-                  <div class="social-sub">Jurnalis &amp; Tim Redaksi</div>
-                </div>
-              </div>
-              <span class="social-btn-pill" style="background:#F08D39;color:#090C1E;">Daftar</span>
-            </a>
-          </div>
-        </div>
-      </section>
-    `;
-  }
-
-  function buildBinduzCategoriesSectionHtml(visiblePosts, hasMore, filteredPostsCount) {
-    const labelCounts = getLabelCounts();
-    const topCategories = Object.keys(labelCounts).slice(0, 6);
-
-    const cardsHtml = visiblePosts.map(post => {
-      const tag = (post.labels && post.labels[0]) || 'News';
-      const postHref = getPostHref(post);
-      const thumb = post.featuredImage || state.data.siteInfo.aboutBanner;
-
-      return `
-        <a href="${postHref}" class="binduz-grid-card">
-          <div class="binduz-grid-thumb">
-            <img src="${escapeHtml(thumb)}" alt="${escapeHtml(post.title)}" loading="lazy" />
-          </div>
-          <div class="binduz-grid-body">
-            <div class="binduz-grid-meta">
-              <span class="binduz-cat-pill">${escapeHtml(tag)}</span>
-              <span style="color:#94a3b8;font-size:11px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(post.published))}</span>
-            </div>
-            <h4 class="binduz-grid-title">${escapeHtml(post.title)}</h4>
-            <div class="binduz-grid-author">
-              <i class="fa-regular fa-user"></i> ${escapeHtml(post.author)}
-            </div>
-          </div>
-        </a>
-      `;
-    }).join('');
-
-    const paginationHtml = hasMore
-      ? `<div class="blog-pager" id="blog-pager" style="margin-top:20px;">
-           <a class="blog-pager-older-link load-more" href="javascript:void(0)" id="foxsa-load-more-btn">
-             Muat Berita Lainnya (${filteredPostsCount - visiblePosts.length} lagi)
-           </a>
-         </div>`
-      : (visiblePosts.length > 0
-          ? `<div class="blog-pager" id="blog-pager" style="margin-top:20px;">
-               <span class="no-more load-more" style="display:inline-block;">Semua Berita Telah Ditampilkan</span>
-             </div>`
-          : '');
-
-    return `
-      <section class="binduz-categories-section">
-        <div class="binduz-sec-header">
-          <div class="binduz-sec-title-wrap">
-            <h3 class="binduz-sec-title">Categories</h3>
-            <span class="binduz-red-line"></span>
-          </div>
-          <div class="binduz-sec-tabs">
-            <a href="#/" class="binduz-sec-tab-pill active">Semua</a>
-            ${topCategories.map(c => `<a href="#/label/${encodeURIComponent(c)}" class="binduz-sec-tab-pill">${escapeHtml(c)}</a>`).join('')}
-          </div>
-        </div>
-
-        <div class="binduz-categories-grid">
-          ${cardsHtml}
-        </div>
-
-        ${paginationHtml}
-      </section>
-    `;
-  }
-
   function renderListView() {
     document.body.className = 'index home';
     const mainEl = document.getElementById('main');
@@ -1268,27 +1080,6 @@
     const filteredPosts = getFilteredPosts();
     const visiblePosts = filteredPosts.slice(0, state.visiblePostsCount);
     const hasMore = filteredPosts.length > visiblePosts.length;
-
-    // IF HOME VIEW: Render the complete Binduz 3-sections homepage
-    if (view === 'home') {
-      mainEl.innerHTML = `
-        <div class="widget Blog" id="Blog1">
-          ${buildBinduzTrendingSectionHtml(state.data.posts)}
-          ${buildBinduzFeaturedSectionHtml(state.data.posts)}
-          ${buildBinduzCategoriesSectionHtml(visiblePosts, hasMore, filteredPosts.length)}
-        </div>
-      `;
-
-      const loadMoreBtn = document.getElementById('foxsa-load-more-btn');
-      if (loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          state.visiblePostsCount += 8;
-          renderListView();
-        });
-      }
-      return;
-    }
 
     let filterMessageHtml = '';
     if (view === 'label') {
