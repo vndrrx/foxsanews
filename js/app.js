@@ -215,9 +215,9 @@
     {
       username: 'admin',
       password: 'foxsa2026',
-      displayName: 'Redaksi Utama (Admin)',
+      displayName: 'Arthur Redfields (CEO & Admin)',
       authorName: 'Arthur Redfields',
-      role: 'Managing Editor',
+      role: 'Chief Executive Officer',
       status: 'approved',
       isAdmin: true,
       avatar: 'assets/logo/foxsa-icon.jpg'
@@ -227,27 +227,37 @@
       password: 'arthurfoxsa',
       displayName: 'Arthur Redfields',
       authorName: 'Arthur Redfields',
-      role: 'Managing Editor',
+      role: 'Chief Executive Officer',
       status: 'approved',
       isAdmin: true,
       avatar: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEijelpjGHfXOoTKfqD1mokSIESF0WySrKkFx3EV9rhrMxaQHJmPSkWe7Lj9QbiFJQbVx7z2os7vSHs3TVJFg1nzGX2MTzdqBO1eO-gppMt99EfwrEBOG9BqW1ZrbkNcNNqd-k9pS8vHOItd_EF7yVe_MfaTvhN2EvXpcWmK7ZDpX94RY14/s200/In%20Edward%20Snowden%E2%80%99s%20New%20Memoir,%20the%20Disclosures%20This%20Time%20Are%20Personal%20(Published%202019).jpg'
     },
     {
-      username: 'clarissa',
-      password: 'clarissafoxsa',
-      displayName: 'Clarissa Vencant',
-      authorName: 'Clarissa Vencant',
-      role: 'Senior Reporter',
+      username: 'reinhardt',
+      password: 'reinhardt2026',
+      displayName: 'Reinhardt Harrison',
+      authorName: 'Reinhardt Harrison',
+      role: 'Commissioner',
+      status: 'approved',
+      isAdmin: true,
+      avatar: 'assets/logo/foxsa-icon.jpg'
+    },
+    {
+      username: 'park',
+      password: 'parkyounghwan',
+      displayName: 'Park Young-Hwan',
+      authorName: 'Park Young-Hwan',
+      role: 'Line Producer',
       status: 'approved',
       isAdmin: false,
       avatar: 'assets/logo/foxsa-icon.jpg'
     },
     {
-      username: 'shen',
-      password: 'shenfoxsa',
-      displayName: 'Shen Xander',
-      authorName: 'Shen Xander',
-      role: 'Junior Reporter',
+      username: 'steven',
+      password: 'stevendeluca',
+      displayName: 'Steven Deluca',
+      authorName: 'Steven Deluca',
+      role: 'Journalism Intern',
       status: 'approved',
       isAdmin: false,
       avatar: 'assets/logo/foxsa-icon.jpg'
@@ -3704,10 +3714,7 @@
 
   const LEADER_QUOTES = {
     reinhardt: 'Menjaga marwah, independensi redaksi, dan integritas jurnalistik tertinggi FoxSA News.',
-    catherine: 'Kami bukan sekadar jaringan berita, kami adalah keluarga para pencerita.',
-    boniface: 'Operasional yang solid adalah fondasi dari setiap berita yang kami sajikan.',
-    arthur: 'Setiap kata yang terbit harus akurat, tajam, dan dapat dipertanggungjawabkan.',
-    marshall: 'Budaya kerja kekeluargaan melahirkan tim yang profesional dan berintegritas.'
+    arthur: 'Setiap berita yang terbit harus akurat, tajam, dan menjunjung profesionalisme jurnalisme di San Andreas.'
   };
 
   const FOXSA_TEAM_MEMBERS = [
@@ -3718,6 +3725,7 @@
       badge: 'Board of Commissioners',
       dept: 'boc',
       featured: true,
+      discordId: '797879523726983198',
       bio: 'Dewan Komisaris FoxSA News Agency yang mengawasi tata kelola perusahaan, memberikan nasihat strategis tingkat tinggi kepada Dewan Direksi, serta menjaga marwah dan independensi jaringan media di San Andreas.',
       experienceIntro: 'Berperan sebagai pengawas tertinggi yang memastikan seluruh kebijakan strategis dan operasional FoxSA News berjalan sesuai visi utama perusahaan.',
       highlights: [
@@ -3727,14 +3735,15 @@
       ]
     },
     {
-      id: 'catherine',
-      name: 'Catherine Cecillie',
-      role: 'CEO & Founder Lead',
+      id: 'arthur',
+      name: 'Arthur Redfields',
+      role: 'Chief Executive Officer',
       badge: 'Chief Executive Officer',
       dept: 'bod',
       featured: true,
-      bio: 'Pimpinan tertinggi FoxSA News Agency yang mengarahkan visi strategis, independensi ruang redaksi, serta kemitraan utama jaringan penyiaran di seluruh San Andreas.',
-      experienceIntro: 'Berpengalaman memimpin transformasi media berita modern di San Andreas dengan standar integritas jurnalistik tinggi dan manajemen lintas divisi.',
+      discordId: '797879523726983198',
+      bio: 'Pimpinan tertinggi FoxSA News Agency yang mengarahkan visi strategis, kebijakan penyiaran, independensi ruang redaksi, transformasi digital, serta kemitraan utama jaringan media di seluruh San Andreas.',
+      experienceIntro: 'Memimpin operasional dan strategi ruang redaksi FoxSA News dengan komitmen teguh terhadap integritas, akurasi, dan profesionalisme.',
       highlights: [
         'Memimpin arah strategis & kebijakan penyiaran FoxSA News Network 24/7',
         'Mengintegrasikan 3 ekosistem utama: News Channel, FoxSA Media, & Audio Station',
@@ -3742,166 +3751,24 @@
       ]
     },
     {
-      id: 'boniface',
-      name: 'Boniface Ernest',
-      role: 'Vice CEO',
-      badge: 'Board of Directors',
-      dept: 'bod',
-      featured: true,
-      bio: 'Wakil Chief Executive Officer yang mengawasi jalannya operasional lintas divisi, koordinasi manajemen, serta pengembangan kemitraan strategis perusahaan.',
-      experienceIntro: 'Berfokus pada penguatan struktur internal, tata kelola manajemen eksekutif, serta ekspansi jangkauan publik FoxSA News.',
-      highlights: [
-        'Mengawasi efektivitas operasional harian di seluruh departemen FoxSA News',
-        'Membangun kolaborasi strategis bersama perusahaan & instansi pemerintahan',
-        'Mendampingi kepemimpinan eksekutif dalam pengambilan keputusan redaksi'
-      ]
-    },
-    {
-      id: 'arthur',
-      name: 'Arthur Redfields',
-      role: 'Secretary Chief',
-      badge: 'Board of Directors',
-      dept: 'bod',
-      featured: true,
-      bio: 'Sekretaris Utama & Editor Senior yang mengelola administrasi eksekutif, tata kelola ruang redaksi, serta peliputan investigasi utama di San Andreas.',
-      experienceIntro: 'Memadukan ketajaman penulisan jurnalistik dengan manajemen kesekretariatan perusahaan dan sistem portal digital FoxSA News.',
-      highlights: [
-        'Mengelola administrasi utama & dokumentasi resmi Dewan Direksi FoxSA',
-        'Memimpin penyuntingan artikel utama & liputan khusus berskala kota',
-        'Mengembangkan sistem publikasi berita digital yang cepat dan akurat'
-      ]
-    },
-    {
-      id: 'marshall',
-      name: 'Marshall Swiss',
-      role: 'Executive Director',
-      badge: 'Board of Directors',
-      dept: 'bod',
-      featured: true,
-      bio: 'Jajaran Dewan Direksi FoxSA News Agency yang berperan aktif dalam perumusan kebijakan strategis, pengawasan mutu siaran, dan pengembangan tim.',
-      experienceIntro: 'Berdedikasi tinggi dalam membangun budaya kerja kekeluargaan yang profesional dan berintegritas di lingkungan FoxSA News Agency.',
-      highlights: [
-        'Merumuskan arah kebijakan strategis bersama jajaran Board of Directors',
-        'Membina kultur kerja yang solid, komunikatif, dan menjunjung integritas',
-        'Mendukung inovasi program siaran langsung dan liputan eksklusif'
-      ]
-    },
-    {
-      id: 'nayeon',
-      name: 'Nayeon Park',
-      role: 'HRD Manager',
-      badge: 'Operational Management',
-      dept: 'management',
-      featured: false,
-      bio: 'Manajer Sumber Daya Manusia (HRD) yang bertanggung jawab atas rekrutmen, seleksi talenta baru, serta kesejahteraan seluruh kru FoxSA News.'
-    },
-    {
-      id: 'jeremiah',
-      name: 'Jeremiah Howell',
-      role: 'Event Manager',
-      badge: 'Operational Management',
-      dept: 'management',
-      featured: false,
-      bio: 'Manajer Event & Analis Utama yang memimpin perencanaan liputan akbar, sponsorship, serta kejuaraan Motorsport di San Andreas.'
-    },
-    {
-      id: 'clarissa',
-      name: 'Clarissa Vencant',
-      role: 'Senior Editor',
+      id: 'park',
+      name: 'Park Young-Hwan',
+      role: 'Line Producer',
       badge: 'Supervisor Team',
       dept: 'supervisor',
       featured: false,
-      bio: 'Supervisor Redaksi & Editor Senior yang mengawasi kualitas tata bahasa, akurasi berita, dan standar publikasi artikel harian.'
+      discordId: '797879523726983198',
+      bio: 'Line Producer pada Supervisor Team yang mengoordinasikan eksekusi teknis produksi siaran harian, alur kerja liputan lapangan, serta kelancaran jadwal program berita.'
     },
     {
-      id: 'jesus',
-      name: 'Jesus Conway',
-      role: 'HR & Crime Lead',
-      badge: 'Supervisor Team',
-      dept: 'supervisor',
-      featured: false,
-      bio: 'Staf Divisi HRD sekaligus Koresponden Kriminal senior yang mengawal liputan hukum, operasi kepolisian, dan pembinaan anggota.'
-    },
-    {
-      id: 'franklin',
-      name: 'Franklin Baxter',
-      role: 'HR Supervisor',
-      badge: 'Supervisor Team',
-      dept: 'supervisor',
-      featured: false,
-      bio: 'Staf Divisi HRD yang mendampingi proses orientasi kru baru, evaluasi berkala, serta pelatihan internal FoxSA Academy.'
-    },
-    {
-      id: 'bryan',
-      name: 'Bryan Andregaz',
-      role: 'Field Reporter',
+      id: 'steven',
+      name: 'Steven Deluca',
+      role: 'Journalism Intern',
       badge: 'Operational Staff',
       dept: 'staff',
       featured: false,
-      bio: 'Jurnalis Lapangan & Fotografer Dokumentasi yang sigap meliput berbagai peristiwa langsung dari lokasi kejadian di San Andreas.'
-    },
-    {
-      id: 'shen',
-      name: 'Shen Xander',
-      role: 'Journalist',
-      badge: 'Operational Staff',
-      dept: 'staff',
-      featured: false,
-      bio: 'Jurnalis Harian FoxSA News yang aktif menyusun laporan berita terkini, wawancara warga, dan liputan peristiwa kota.'
-    },
-    {
-      id: 'jareel',
-      name: 'Jareel Sancho',
-      role: 'Junior Staff',
-      badge: 'Operational Staff',
-      dept: 'staff',
-      featured: false,
-      bio: 'Staf Operasional & Tim Penyiaran yang mendukung kelancaran produksi berita harian dan program siaran langsung.'
-    },
-    {
-      id: 'niver',
-      name: 'Niver Richardson',
-      role: 'Junior Staff',
-      badge: 'Operational Staff',
-      dept: 'staff',
-      featured: false,
-      bio: 'Staf Operasional & Kru Liputan yang bertugas dalam dokumentasi visual serta dukungan teknis di lapangan.'
-    },
-    {
-      id: 'mendoza',
-      name: 'Mendoza Souza',
-      role: 'Broadcast Crew',
-      badge: 'Operational Staff',
-      dept: 'staff',
-      featured: false,
-      bio: 'Kru Operasional & Jurnalis Muda yang tergabung dalam program pengembangan talenta penyiaran FoxSA News.'
-    },
-    {
-      id: 'aaron',
-      name: 'Aaron Qroy',
-      role: 'Broadcast Crew',
-      badge: 'Operational Staff',
-      dept: 'staff',
-      featured: false,
-      bio: 'Kru Operasional & Penyiaran yang mendukung produksi konten lapangan serta program komunitas warga San Andreas.'
-    },
-    {
-      id: 'sashura',
-      name: 'Sashura Soloveva',
-      role: 'Editorial Crew',
-      badge: 'Operational Staff',
-      dept: 'staff',
-      featured: false,
-      bio: 'Kru Operasional & Redaksi yang berperan dalam riset informasi, pengumpulan data, dan dokumentasi berita.'
-    },
-    {
-      id: 'giovani',
-      name: 'Giovani Marino',
-      role: 'Media Crew',
-      badge: 'Operational Staff',
-      dept: 'staff',
-      featured: false,
-      bio: 'Kru Operasional & Media yang turut mendukung kelancaran teknis siaran serta peliputan agenda publik.'
+      discordId: '1302277024425185380',
+      bio: 'Journalism Intern pada Operational Staff yang aktif membantu riset lapangan, peliputan peristiwa aktual, serta dokumentasi berita di kawasan Los Santos.'
     }
   ];
 
@@ -3954,11 +3821,11 @@
               </div>
               <ul class="profile-quick-facts">
                 <li><span>Tanggal Berdiri</span><strong>17 November 2025</strong></li>
-                <li><span>Pendiri Pertama</span><strong>Messiah Dillard</strong></li>
                 <li><span>Board of Commissioners</span><strong>Reinhardt Harrison</strong></li>
-                <li><span>CEO Saat Ini</span><strong>Catherine Cecillie</strong></li>
-                <li><span>Vice CEO</span><strong>Boniface Ernest</strong></li>
-                <li><span>Secretary Chief</span><strong>Arthur Redfields</strong></li>
+                <li><span>Chief Executive Officer</span><strong>Arthur Redfields</strong></li>
+                <li><span>Line Producer</span><strong>Park Young-Hwan</strong></li>
+                <li><span>Journalism Intern</span><strong>Steven Deluca</strong></li>
+                <li><span>Status Roster</span><strong>Official Roster 2026</strong></li>
                 <li><span>Kantor Pusat</span><strong>Los Santos, SA</strong></li>
               </ul>
             </div>
@@ -4052,7 +3919,223 @@
                   `).join('')}
                 </div>
               </div>
+            
+            <!-- 4. OFFICIAL MEMBER ROSTER (COMPREHENSIVE 13 TIERS) -->
+            <div class="foxsa-roster-board">
+              <div class="roster-board-header">
+                <div class="roster-header-brand">
+                  <div class="roster-badge"><i class="fa-solid fa-microphone-lines"></i> FOXSA NEWS AGENCY</div>
+                  <h3>OFFICIAL MEMBER ROSTER</h3>
+                  <p class="roster-motto">“Accurate Information. Professional Journalism. Trusted by San Andreas.”</p>
+                </div>
+                <div class="roster-header-meta">
+                  <span class="roster-tag"><i class="fa-solid fa-calendar-check"></i> Active Period 2026</span>
+                  <span class="roster-tag"><i class="fa-solid fa-users-gear"></i> Official Structure</span>
+                </div>
+              </div>
+
+              <div class="roster-tier-list">
+                <!-- TIER: BOARD OF COMMISSIONERS -->
+                <div class="roster-tier-block tier-commissioner">
+                  <div class="roster-tier-label">
+                    <span class="tier-icon"><i class="fa-solid fa-crown"></i></span>
+                    <h4>BOARD OF COMMISSIONERS</h4>
+                    <span class="tier-pill red">Supervisory Council</span>
+                  </div>
+                  <div class="roster-tier-grid">
+                    <div class="roster-card active">
+                      <div class="roster-card-head">
+                        <span class="roster-pos-title">Board of Commissioners</span>
+                        <span class="roster-status-badge active"><i class="fa-solid fa-circle-check"></i> Active</span>
+                      </div>
+                      <div class="roster-officer-name">Reinhardt Harrison</div>
+                      <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@797879523726983198&gt;</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- TIER: BOARD OF DIRECTORS -->
+                <div class="roster-tier-block tier-directors">
+                  <div class="roster-tier-label">
+                    <span class="tier-icon"><i class="fa-solid fa-shield-halved"></i></span>
+                    <h4>BOARD OF DIRECTORS</h4>
+                    <span class="tier-pill purple">Executive Leadership</span>
+                  </div>
+                  <div class="roster-tier-grid">
+                    <div class="roster-card active">
+                      <div class="roster-card-head">
+                        <span class="roster-pos-num">01</span>
+                        <span class="roster-pos-title">Chief Executive Officer</span>
+                        <span class="roster-status-badge active"><i class="fa-solid fa-circle-check"></i> Active</span>
+                      </div>
+                      <div class="roster-officer-name">Arthur Redfields</div>
+                      <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@797879523726983198&gt;</div>
+                    </div>
+
+                    <div class="roster-card vacant">
+                      <div class="roster-card-head">
+                        <span class="roster-pos-num">02</span>
+                        <span class="roster-pos-title">Chief Operational Officer</span>
+                        <span class="roster-status-badge vacant">VACANT</span>
+                      </div>
+                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
+                      <div class="roster-vacant-note">Posisi Terbuka untuk Promosi</div>
+                    </div>
+
+                    <div class="roster-card vacant">
+                      <div class="roster-card-head">
+                        <span class="roster-pos-num">03</span>
+                        <span class="roster-pos-title">Vice President</span>
+                        <span class="roster-status-badge vacant">VACANT</span>
+                      </div>
+                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
+                      <div class="roster-vacant-note">Posisi Terbuka untuk Promosi</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- TIER: OPERATIONAL MANAGEMENT -->
+                <div class="roster-tier-block tier-management">
+                  <div class="roster-tier-label">
+                    <span class="tier-icon"><i class="fa-solid fa-briefcase"></i></span>
+                    <h4>OPERATIONAL MANAGEMENT</h4>
+                    <span class="tier-pill blue">Department Leads</span>
+                  </div>
+                  <div class="roster-tier-grid">
+                    <div class="roster-card vacant">
+                      <div class="roster-card-head">
+                        <span class="roster-pos-num">04</span>
+                        <span class="roster-pos-title">General Manager</span>
+                        <span class="roster-status-badge vacant">VACANT</span>
+                      </div>
+                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
+                      <div class="roster-vacant-note">Open Position</div>
+                    </div>
+
+                    <div class="roster-card vacant">
+                      <div class="roster-card-head">
+                        <span class="roster-pos-num">05</span>
+                        <span class="roster-pos-title">Executive Producer</span>
+                        <span class="roster-status-badge vacant">VACANT</span>
+                      </div>
+                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
+                      <div class="roster-vacant-note">Open Position</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- TIER: SUPERVISOR TEAM -->
+                <div class="roster-tier-block tier-supervisor">
+                  <div class="roster-tier-label">
+                    <span class="tier-icon"><i class="fa-solid fa-clapperboard"></i></span>
+                    <h4>SUPERVISOR TEAM</h4>
+                    <span class="tier-pill teal">Field &amp; Production Leads</span>
+                  </div>
+                  <div class="roster-tier-grid">
+                    <div class="roster-card vacant">
+                      <div class="roster-card-head">
+                        <span class="roster-pos-num">06</span>
+                        <span class="roster-pos-title">Managing Editor</span>
+                        <span class="roster-status-badge vacant">VACANT</span>
+                      </div>
+                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
+                      <div class="roster-vacant-note">Open Position</div>
+                    </div>
+
+                    <div class="roster-card vacant">
+                      <div class="roster-card-head">
+                        <span class="roster-pos-num">07</span>
+                        <span class="roster-pos-title">Senior Producer</span>
+                        <span class="roster-status-badge vacant">VACANT</span>
+                      </div>
+                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
+                      <div class="roster-vacant-note">Open Position</div>
+                    </div>
+
+                    <div class="roster-card active">
+                      <div class="roster-card-head">
+                        <span class="roster-pos-num">08</span>
+                        <span class="roster-pos-title">Line Producer</span>
+                        <span class="roster-status-badge active"><i class="fa-solid fa-circle-check"></i> Active</span>
+                      </div>
+                      <div class="roster-officer-name">Park Young-Hwan</div>
+                      <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@797879523726983198&gt;</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- TIER: OPERATIONAL STAFF -->
+                <div class="roster-tier-block tier-staff">
+                  <div class="roster-tier-label">
+                    <span class="tier-icon"><i class="fa-solid fa-microphone"></i></span>
+                    <h4>OPERATIONAL STAFF</h4>
+                    <span class="tier-pill green">Newsroom Reporters &amp; Crew</span>
+                  </div>
+                  <div class="roster-tier-grid">
+                    <div class="roster-card vacant">
+                      <div class="roster-card-head">
+                        <span class="roster-pos-num">09</span>
+                        <span class="roster-pos-title">Head Reporter</span>
+                        <span class="roster-status-badge vacant">VACANT</span>
+                      </div>
+                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
+                      <div class="roster-vacant-note">Open Position</div>
+                    </div>
+
+                    <div class="roster-card vacant">
+                      <div class="roster-card-head">
+                        <span class="roster-pos-num">10</span>
+                        <span class="roster-pos-title">Senior Reporter</span>
+                        <span class="roster-status-badge vacant">VACANT</span>
+                      </div>
+                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
+                      <div class="roster-vacant-note">Open Position</div>
+                    </div>
+
+                    <div class="roster-card vacant">
+                      <div class="roster-card-head">
+                        <span class="roster-pos-num">11</span>
+                        <span class="roster-pos-title">Staff Reporter</span>
+                        <span class="roster-status-badge vacant">VACANT</span>
+                      </div>
+                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
+                      <div class="roster-vacant-note">Open Position</div>
+                    </div>
+
+                    <div class="roster-card vacant">
+                      <div class="roster-card-head">
+                        <span class="roster-pos-num">12</span>
+                        <span class="roster-pos-title">Junior Reporter</span>
+                        <span class="roster-status-badge vacant">VACANT</span>
+                      </div>
+                      <div class="roster-officer-name vacant">— Belum Terisi —</div>
+                      <div class="roster-vacant-note">Open Position</div>
+                    </div>
+
+                    <div class="roster-card active">
+                      <div class="roster-card-head">
+                        <span class="roster-pos-num">13</span>
+                        <span class="roster-pos-title">Journalism Intern</span>
+                        <span class="roster-status-badge active"><i class="fa-solid fa-circle-check"></i> Active</span>
+                      </div>
+                      <div class="roster-officer-name">Steven Deluca</div>
+                      <div class="roster-discord-id"><i class="fa-brands fa-discord"></i> &lt;@1302277024425185380&gt;</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="roster-board-footer">
+                <div class="roster-footer-left">
+                  <strong>FoxSA News Management</strong>
+                  <span>Integrity • Accuracy • Professionalism</span>
+                </div>
+                <a href="#/profile/recruitment" class="roster-join-btn">
+                  <i class="fa-solid fa-user-plus"></i> Gabung FoxSA News (Open Recruitment)
+                </a>
+              </div>
             </div>
+</div>
           </div>
         </div>
       `;

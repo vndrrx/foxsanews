@@ -11243,3 +11243,250 @@ body.leader-modal-open {
     align-items: flex-start;
   }
 }
+
+/* ========================================================
+   OFFICIAL MEMBER ROSTER BOARD (13 TIERS)
+   ======================================================== */
+.foxsa-roster-board {
+  margin-top: 40px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(9, 12, 30, 0.05);
+  overflow: hidden;
+}
+.roster-board-header {
+  background: linear-gradient(135deg, #090C1E 0%, #1e293b 100%);
+  color: #ffffff;
+  padding: 32px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-bottom: 3px solid #F08D39;
+}
+.roster-header-brand h3 {
+  margin: 8px 0 4px;
+  font-size: 22px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+}
+.roster-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #F08D39;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.roster-motto {
+  margin: 0;
+  font-size: 13px;
+  color: #cbd5e1;
+  font-style: italic;
+}
+.roster-header-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.roster-tag {
+  background: rgba(255, 255, 255, 0.12);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.roster-tier-list {
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.roster-tier-block {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #edf2f7;
+}
+.roster-tier-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.tier-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+.tier-commissioner .tier-icon { background: #fee2e2; color: #dc2626; }
+.tier-directors .tier-icon { background: #ede9fe; color: #7c3aed; }
+.tier-management .tier-icon { background: #dbeafe; color: #2563eb; }
+.tier-supervisor .tier-icon { background: #ccfbf1; color: #0d9488; }
+.tier-staff .tier-icon { background: #dcfce7; color: #16a34a; }
+
+.roster-tier-label h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  color: #0f172a;
+}
+.tier-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.tier-pill.red { background: #fee2e2; color: #991b1b; }
+.tier-pill.purple { background: #ede9fe; color: #5b21b6; }
+.tier-pill.blue { background: #dbeafe; color: #1e40af; }
+.tier-pill.teal { background: #ccfbf1; color: #115e59; }
+.tier-pill.green { background: #dcfce7; color: #166534; }
+
+.roster-tier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+.roster-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+.roster-card.active {
+  border-left: 4px solid #16a34a;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.08);
+}
+.tier-commissioner .roster-card.active { border-left-color: #dc2626; }
+.tier-directors .roster-card.active { border-left-color: #7c3aed; }
+.tier-supervisor .roster-card.active { border-left-color: #0d9488; }
+.tier-staff .roster-card.active { border-left-color: #16a34a; }
+
+.roster-card.vacant {
+  border-left: 4px solid #cbd5e1;
+  background: #fbfcfe;
+  opacity: 0.85;
+}
+.roster-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 6px;
+}
+.roster-pos-num {
+  font-size: 11px;
+  font-weight: 800;
+  color: #94a3b8;
+  font-family: monospace;
+}
+.roster-pos-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex: 1;
+}
+.roster-status-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.roster-status-badge.active {
+  background: #dcfce7;
+  color: #15803d;
+}
+.roster-status-badge.vacant {
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+.roster-officer-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  font-family: 'Poppins', sans-serif;
+  margin-bottom: 4px;
+}
+.roster-officer-name.vacant {
+  color: #94a3b8;
+  font-weight: 500;
+  font-style: italic;
+}
+.roster-discord-id {
+  font-size: 11.5px;
+  color: #5865F2;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.roster-vacant-note {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.roster-board-footer {
+  background: #f8fafc;
+  padding: 20px 24px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.roster-footer-left {
+  display: flex;
+  flex-direction: column;
+}
+.roster-footer-left strong {
+  font-size: 13.5px;
+  color: #0f172a;
+}
+.roster-footer-left span {
+  font-size: 12px;
+  color: #64748b;
+  font-style: italic;
+}
+.roster-join-btn {
+  background: #090C1E;
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+.roster-join-btn:hover {
+  background: #F08D39;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
