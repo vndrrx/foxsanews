@@ -769,25 +769,29 @@
         .select('*')
         .order('published', { ascending: false });
 
-      if (!postErr && Array.isArray(dbPosts) && dbPosts.length > 0) {
-        state.data.posts = dbPosts.map(p => ({
-          id: p.id,
-          slug: p.slug,
-          title: p.title,
-          published: p.published,
-          updated: p.updated,
-          author: p.author,
-          authorAvatar: p.author_avatar,
-          authorBio: p.author_bio,
-          labels: Array.isArray(p.labels) ? p.labels : [],
-          featuredImage: p.featured_image,
-          snippet: p.snippet,
-          content: p.content,
-          originalUrl: p.original_url,
-          popular: Boolean(p.popular),
-          comments: Array.isArray(p.comments) ? p.comments : []
-        }));
-        hasChanges = true;
+      if (!postErr && Array.isArray(dbPosts)) {
+        if (dbPosts.length > 0) {
+          state.data.posts = dbPosts.map(p => ({
+            id: p.id,
+            slug: p.slug,
+            title: p.title,
+            published: p.published,
+            updated: p.updated,
+            author: p.author,
+            authorAvatar: p.author_avatar,
+            authorBio: p.author_bio,
+            labels: Array.isArray(p.labels) ? p.labels : [],
+            featuredImage: p.featured_image,
+            snippet: p.snippet,
+            content: p.content,
+            originalUrl: p.original_url,
+            popular: Boolean(p.popular),
+            comments: Array.isArray(p.comments) ? p.comments : []
+          }));
+          hasChanges = true;
+        } else {
+          await seedInitialPostsToSupabase(sb);
+        }
       }
 
       // 1. Ambil Akun Staff & Jurnalis
@@ -870,6 +874,48 @@
     } catch (err) {
       console.warn('Sync dari Supabase terganggu:', err);
       return false;
+    }
+  }
+
+  async function seedInitialPostsToSupabase(sb) {
+    try {
+      const postsToSeed = (window.FOXSA_INITIAL_DATA && Array.isArray(window.FOXSA_INITIAL_DATA.posts) && window.FOXSA_INITIAL_DATA.posts.length > 0)
+        ? window.FOXSA_INITIAL_DATA.posts
+        : (state.data && Array.isArray(state.data.posts) ? state.data.posts : []);
+      if (!postsToSeed || !postsToSeed.length) return;
+      const records = postsToSeed.map(p => ({
+        id: String(p.id),
+        slug: p.slug || 'post-' + p.id,
+        title: p.title || '',
+        published: p.published || new Date().toISOString(),
+        updated: p.updated || new Date().toISOString(),
+        author: p.author || 'Redaksi FoxSA News',
+        author_avatar: p.authorAvatar || '',
+        author_bio: p.authorBio || '',
+        labels: p.labels || [],
+        featured_image: p.featuredImage || '',
+        snippet: p.snippet || '',
+        content: p.content || '',
+        original_url: p.originalUrl || '',
+        popular: Boolean(p.popular),
+        comments: p.comments || []
+      }));
+      await sb.from('foxsa_posts').upsert(records, { onConflict: 'id' });
+    } catch (e) {
+      console.warn('Gagal seed berita ke Supabase:', e);
+    }
+  }
+
+  async function syncPostCommentsToSupabase(post) {
+    const sb = getSupabaseClient();
+    if (!sb || !post || !post.id) return;
+    try {
+      await sb
+        .from('foxsa_posts')
+        .update({ comments: post.comments || [] })
+        .eq('id', post.id);
+    } catch (e) {
+      console.warn('Gagal sync komentar berita ke Supabase:', e);
     }
   }
 
@@ -2184,6 +2230,7 @@
         if (!Array.isArray(post.comments)) post.comments = [];
         post.comments.push(newComment);
         saveDataToLocal(true);
+        syncPostCommentsToSupabase(post);
         showToast('Komentar berhasil ditambahkan!');
         renderSinglePostView(post.id);
       });
@@ -2196,6 +2243,7 @@
           if (!confirm('Hapus komentar ini?')) return;
           post.comments = (post.comments || []).filter(c => String(c.id) !== String(cId));
           saveDataToLocal(true);
+          syncPostCommentsToSupabase(post);
           showToast('Komentar telah dihapus.');
           renderSinglePostView(post.id);
         });
