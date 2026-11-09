@@ -866,7 +866,6 @@
     const heroSection = document.getElementById('foxsa-hero-showcase');
     if (!heroSection) return;
 
-    // Show full Hero Showcase ONLY on main Home view
     if (state.currentRoute.view !== 'home' || !state.data || !state.data.posts || state.data.posts.length === 0) {
       heroSection.style.display = 'none';
       return;
@@ -874,75 +873,63 @@
 
     heroSection.style.display = 'block';
     const posts = state.data.posts;
+    const leadStory = posts[0] || {};
+    const tickerStories = posts.slice(1, 4);
+    if (tickerStories.length === 0) tickerStories.push(leadStory);
 
-    // Update Top Ticker Bar
-    updateBinduzTicker();
-
-    // 1. Main Headline
-    const newsPosts = posts.filter(p => p.id !== '2526320561083681754');
-    const mainPost = newsPosts[0] || posts[0];
-
-    // 2. Floating Sub-Cards (Next 2 stories in bottom right)
-    const remainingPosts = posts.filter(p => p.id !== mainPost.id);
-    const subCards = remainingPosts.slice(0, 2);
-
-    const mainTag = (mainPost.labels && mainPost.labels[0]) || 'News';
-    const thumb = mainPost.featuredImage || state.data.siteInfo.aboutBanner;
-    const authorAvatar = (state.data.authors && state.data.authors[mainPost.author] && state.data.authors[mainPost.author].avatar) || 'assets/logo/foxsa-icon.jpg';
+    const leadTag = (leadStory.labels && leadStory.labels[0]) || 'Crime & Investigation';
+    const thumb = leadStory.featuredImage || state.data.siteInfo.aboutBanner;
 
     heroSection.innerHTML = `
-      <div class="container">
-        <!-- BINDUZ IMMERSIVE HERO SHOWCASE -->
-        <div class="binduz-hero-card">
-          <div class="binduz-hero-bg-wrap">
-            <img class="binduz-hero-bg" src="${escapeHtml(thumb)}" alt="${escapeHtml(mainPost.title)}" />
-          </div>
-          <div class="binduz-hero-overlay"></div>
+      <!-- USA TODAY FULL-BLEED DARK HERO BANNER -->
+      <div class="usat-hero-banner">
+        <div class="container">
+          <div class="usat-hero-grid">
+            <!-- Left: Lead Story Details -->
+            <div class="usat-hero-story-col">
+              <div class="usat-hero-tag-row">
+                <span class="usat-brand-dot" style="width:8px;height:8px;"></span>
+                <span class="usat-hero-cat-tag">${escapeHtml(leadTag)}</span>
+              </div>
+              <h1 class="usat-hero-headline">
+                <a href="${getPostHref(leadStory)}">${escapeHtml(leadStory.title)}</a>
+              </h1>
+              <div class="usat-hero-byline">
+                <span>By <strong>${escapeHtml(leadStory.author || 'FoxSA News')}</strong></span>
+                <span>•</span>
+                <span>${escapeHtml(formatDateID(leadStory.published))}</span>
+              </div>
+              <p class="usat-hero-excerpt">
+                ${escapeHtml(stripHtmlToSnippet(leadStory.content, 190))}
+              </p>
+            </div>
 
-          <!-- Top Right Weather / City Info -->
-          <div class="binduz-hero-weather">
-            <div class="binduz-weather-icon"><i class="fa-solid fa-cloud-sun"></i></div>
-            <div class="binduz-weather-text">
-              <div class="binduz-weather-temp">Los Santos 24°C / 75°F</div>
-              <div class="binduz-weather-city">San Andreas Network 24/7</div>
+            <!-- Right: Sharp Lead Photo -->
+            <div class="usat-hero-photo-col">
+              <a href="${getPostHref(leadStory)}" style="display:block;width:100%;height:100%;">
+                <img src="${escapeHtml(thumb)}" alt="${escapeHtml(leadStory.title)}" />
+                <div class="usat-hero-photo-overlay"></div>
+              </a>
             </div>
           </div>
+        </div>
 
-          <!-- Main Hero Content (Bottom Left) -->
-          <div class="binduz-hero-story">
-            <div class="binduz-story-meta-top">
-              <span class="binduz-cat-pill">${escapeHtml(mainTag)}</span>
-              <span class="binduz-story-date"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(mainPost.published))}</span>
+        <!-- Hero Bottom Ticker Strip -->
+        <div class="usat-hero-ticker">
+          <div class="container" style="display:flex;align-items:stretch;width:100%;padding:0;">
+            <div class="usat-ticker-weather">
+              <i class="fa-solid fa-cloud-sun"></i>
+              <span>Los Santos, SA 24°C / 75°F</span>
             </div>
-            <h1 class="binduz-story-title">
-              <a href="${getPostHref(mainPost)}">${escapeHtml(mainPost.title)}</a>
-            </h1>
-            <div class="binduz-story-author-row">
-              <img src="${escapeHtml(authorAvatar)}" class="binduz-author-avatar" alt="${escapeHtml(mainPost.author)}" onerror="this.src='${DEFAULT_AVATAR}'" />
-              <span class="binduz-author-name">By <strong>${escapeHtml(mainPost.author)}</strong></span>
-              <span class="binduz-meta-sep">•</span>
-              <span class="binduz-meta-stat"><i class="fa-regular fa-eye"></i> 2.4k</span>
-              <span class="binduz-meta-sep">•</span>
-              <span class="binduz-meta-stat"><i class="fa-regular fa-comment"></i> ${(mainPost.comments || []).length}</span>
-            </div>
-          </div>
-
-          <!-- Floating Sub-Cards (Bottom Right) -->
-          ${subCards.length > 0 ? `
-            <div class="binduz-hero-floating-cards">
-              ${subCards.map(sc => `
-                <a href="${getPostHref(sc)}" class="binduz-floating-card">
-                  <div class="binduz-float-thumb">
-                    <img src="${escapeHtml(sc.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(sc.title)}" />
-                  </div>
-                  <div class="binduz-float-info">
-                    <span class="binduz-float-date"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(sc.published))}</span>
-                    <h4 class="binduz-float-title">${escapeHtml(sc.title)}</h4>
-                  </div>
+            <div class="usat-ticker-items">
+              ${tickerStories.map(ts => `
+                <a href="${getPostHref(ts)}" class="usat-ticker-link">
+                  <span class="arrow">&gt;</span>
+                  <span>${escapeHtml(ts.title)}</span>
                 </a>
               `).join('')}
             </div>
-          ` : ''}
+          </div>
         </div>
       </div>
     `;
@@ -1029,233 +1016,180 @@
     `;
   }
 
-  function buildBinduzTrendingSectionHtml(posts) {
+  function buildUsaTodayHomepageHtml(posts) {
     if (!posts || posts.length === 0) return '';
-    const labelCounts = getLabelCounts();
-    const topCategories = Object.keys(labelCounts).slice(0, 5);
-
-    const mainStory = posts[1] || posts[0];
-    const stackedStories = posts.slice(2, 5);
-    if (stackedStories.length === 0 && posts.length > 0) {
-      stackedStories.push(posts[0]);
+    const breakingStory = posts[1] || posts[0];
+    const grid2x2 = posts.slice(1, 5);
+    if (grid2x2.length === 0) grid2x2.push(posts[0]);
+    const lower3Col = posts.slice(4, 7);
+    if (lower3Col.length === 0) {
+      lower3Col.push(posts[0]);
+      if (posts.length > 1) lower3Col.push(posts[1]);
     }
-
-    const hubCategories = Object.keys(labelCounts).slice(0, 4);
+    const moreStories = posts.slice(0, 4);
 
     return `
-      <section class="binduz-trending-section">
-        <div class="binduz-sec-header">
-          <div class="binduz-sec-title-wrap">
-            <h3 class="binduz-sec-title">Trending News</h3>
-            <span class="binduz-red-line"></span>
-          </div>
-          <div class="binduz-sec-tabs">
-            <a href="#/" class="binduz-sec-tab-pill active">All</a>
-            ${topCategories.map(c => `<a href="#/label/${encodeURIComponent(c)}" class="binduz-sec-tab-pill">${escapeHtml(c)}</a>`).join('')}
-          </div>
-        </div>
-
-        <div class="binduz-trending-grid">
-          <!-- Col 1: Big Featured Story -->
-          <a href="${getPostHref(mainStory)}" class="binduz-trend-main-card">
-            <img src="${escapeHtml(mainStory.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(mainStory.title)}" loading="lazy" />
-            <div class="binduz-trend-main-overlay"></div>
-            <div class="binduz-trend-main-content">
-              <span class="binduz-cat-pill">${escapeHtml((mainStory.labels && mainStory.labels[0]) || 'News')}</span>
-              <span style="color:#cbd5e1;font-size:11.5px;margin-left:8px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(mainStory.published))}</span>
-              <h4 class="binduz-trend-main-title">${escapeHtml(mainStory.title)}</h4>
-            </div>
+      <!-- SUBHEAD BAR: SEARCH & GIANT BREAKING SERIF HEADLINE -->
+      <div class="usat-subhead-bar">
+        <div class="usat-subhead-search-row">
+          <a href="#/" class="usat-subhead-brand">
+            <span class="usat-brand-dot" style="width:11px;height:11px;"></span>
+            <span>FOXSA TODAY</span>
           </a>
-
-          <!-- Col 2: Stacked Mini News (3 items) -->
-          <div class="binduz-trend-stacked-list">
-            ${stackedStories.map(p => `
-              <a href="${getPostHref(p)}" class="binduz-mini-card">
-                <div class="binduz-mini-thumb">
-                  <img src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(p.title)}" loading="lazy" />
-                </div>
-                <div class="binduz-mini-body">
-                  <span class="binduz-mini-tag">${escapeHtml((p.labels && p.labels[0]) || 'News')}</span>
-                  <span class="binduz-mini-date"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(p.published))}</span>
-                  <h5 class="binduz-mini-title">${escapeHtml(p.title)}</h5>
-                </div>
-              </a>
-            `).join('')}
-          </div>
-
-          <!-- Col 3: Categories Hub -->
-          <div class="binduz-categories-hub">
-            ${hubCategories.map(cat => {
-              const count = labelCounts[cat] || 1;
-              const postWithCat = posts.find(p => (p.labels || []).includes(cat)) || posts[0];
-              const bgImg = (postWithCat && postWithCat.featuredImage) || state.data.siteInfo.aboutBanner;
-              return `
-                <a href="#/label/${encodeURIComponent(cat)}" class="binduz-cat-tile">
-                  <img src="${escapeHtml(bgImg)}" alt="${escapeHtml(cat)}" loading="lazy" />
-                  <span>${escapeHtml(cat)}</span>
-                  <span class="cat-count">${count} Berita</span>
-                </a>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      </section>
-    `;
-  }
-
-  function buildBinduzFeaturedSectionHtml(posts) {
-    if (!posts || posts.length === 0) return '';
-    const featPrimary = posts[3] || posts[0];
-    const featDark = posts.slice(4, 6);
-    if (featDark.length === 0) {
-      featDark.push(posts[0]);
-      if (posts.length > 1) featDark.push(posts[1]);
-    }
-
-    return `
-      <section class="binduz-featured-section">
-        <div class="binduz-sec-header">
-          <div class="binduz-sec-title-wrap">
-            <h3 class="binduz-sec-title">Featured</h3>
-            <span class="binduz-red-line"></span>
-          </div>
-          <div class="binduz-sec-tabs">
-            <button type="button" class="binduz-ticker-btn" style="width:28px;height:28px;background:#f1f5f9;color:#090C1E;" title="Sebelumnya"><i class="fa-solid fa-chevron-left"></i></button>
-            <button type="button" class="binduz-ticker-btn" style="width:28px;height:28px;background:#f1f5f9;color:#090C1E;" title="Selanjutnya"><i class="fa-solid fa-chevron-right"></i></button>
+          <form class="usat-subhead-search-form" id="usat-search-inline-form">
+            <input type="search" id="usat-search-input" placeholder="Search a story to see all articles posted throughout San Andreas..." autocomplete="off" />
+            <button type="submit" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
+          </form>
+          <div class="usat-subhead-tags">
+            <span style="color:#64748b;font-weight:700;">TRENDING:</span>
+            <a href="#/label/Crime">#Crime</a>
+            <a href="#/label/Motorsport">#Motorsport</a>
+            <a href="#/label/LSPD">#LSPD</a>
           </div>
         </div>
 
-        <div class="binduz-featured-grid">
-          <!-- Col 1: Primary Featured Card -->
-          <a href="${getPostHref(featPrimary)}" class="binduz-feat-primary-card">
-            <div class="binduz-feat-primary-thumb">
-              <img src="${escapeHtml(featPrimary.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(featPrimary.title)}" loading="lazy" />
-            </div>
-            <div class="binduz-feat-primary-body">
-              <div>
-                <span class="binduz-cat-pill">${escapeHtml((featPrimary.labels && featPrimary.labels[0]) || 'News')}</span>
-                <span style="color:#94a3b8;font-size:11.5px;margin-left:8px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(featPrimary.published))}</span>
-              </div>
-              <h4 class="binduz-feat-primary-title">${escapeHtml(featPrimary.title)}</h4>
-              <p class="binduz-feat-primary-snippet">${escapeHtml(stripHtmlToSnippet(featPrimary.content, 120))}</p>
-            </div>
-          </a>
+        <div class="usat-breaking-story-box">
+          <h2 class="usat-breaking-headline">
+            <a href="${getPostHref(breakingStory)}">${escapeHtml(breakingStory.title)}</a>
+          </h2>
+        </div>
+      </div>
 
-          <!-- Col 2: 2 Stacked Dark Luxury Cards -->
-          <div class="binduz-feat-dark-stacked">
-            ${featDark.map(p => `
-              <a href="${getPostHref(p)}" class="binduz-dark-card">
+      <!-- MAIN 2-COLUMN EDITORIAL CONTAINER -->
+      <div class="usat-main-container">
+        <!-- LEFT COLUMN (68%): CATEGORY TABS + 2x2 GRID + 3-COL GRID + MORE STRIP -->
+        <div class="usat-left-col">
+          <!-- Category Tabs with Blue Dot -->
+          <div class="usat-tabs-bar">
+            <a href="#/" class="usat-tab-link active">
+              <span class="usat-tab-dot"></span> HEADLINES
+            </a>
+            <a href="#/popular" class="usat-tab-link">FOXSA PICKS</a>
+            <a href="#/popular" class="usat-tab-link">MOST POPULAR</a>
+            <a href="#/label/Crime" class="usat-tab-link">CRIME &amp; POLICE</a>
+            <a href="#/label/Motorsport" class="usat-tab-link">MOTORSPORT</a>
+          </div>
+
+          <!-- 2x2 FEATURED PHOTO GRID -->
+          <div class="usat-2x2-grid">
+            ${grid2x2.map(p => `
+              <a href="${getPostHref(p)}" class="usat-card-rect">
                 <img src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(p.title)}" loading="lazy" />
-                <div class="binduz-dark-card-content">
-                  <div>
-                    <span class="binduz-cat-pill" style="background:#e11d48;">${escapeHtml((p.labels && p.labels[0]) || 'News')}</span>
-                    <span style="color:#cbd5e1;font-size:11px;margin-left:8px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(p.published))}</span>
-                  </div>
-                  <h4 class="binduz-dark-title">${escapeHtml(p.title)}</h4>
+                <div class="usat-card-overlay">
+                  <span class="usat-card-cat-badge">${escapeHtml((p.labels && p.labels[0]) || 'News')}</span>
+                  <h3 class="usat-card-title">${escapeHtml(p.title)}</h3>
+                  <span class="usat-card-byline">By ${escapeHtml(p.author || 'FoxSA Staff')}</span>
                 </div>
               </a>
             `).join('')}
           </div>
 
-          <!-- Col 3: Social & Community Feed Widget -->
-          <div class="binduz-social-widget">
-            <a href="https://discord.gg/rVeaKGzhyy" target="_blank" rel="noopener" class="binduz-social-box discord">
-              <div class="social-left">
-                <i class="fa-brands fa-discord"></i>
-                <div>
-                  <div class="social-title">Discord FoxSA</div>
-                  <div class="social-sub">15,000+ Komunitas</div>
+          <!-- LOWER 3-COLUMN GRID -->
+          <div class="usat-3col-grid">
+            ${lower3Col.map(p => `
+              <a href="${getPostHref(p)}" class="usat-card-rect small">
+                <img src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(p.title)}" loading="lazy" />
+                <div class="usat-card-overlay">
+                  <span class="usat-card-cat-badge">${escapeHtml((p.labels && p.labels[0]) || 'News')}</span>
+                  <h4 class="usat-card-title">${escapeHtml(p.title)}</h4>
+                  <span class="usat-card-byline">By ${escapeHtml(p.author || 'FoxSA Staff')}</span>
                 </div>
-              </div>
-              <span class="social-btn-pill">Gabung</span>
-            </a>
+              </a>
+            `).join('')}
+          </div>
 
-            <div class="binduz-social-box radio">
-              <div class="social-left">
-                <i class="fa-solid fa-radio"></i>
-                <div>
-                  <div class="social-title">FoxSA FM 98.4</div>
-                  <div class="social-sub">Live San Andreas Audio</div>
-                </div>
-              </div>
-              <span class="social-btn-pill"><i class="fa-solid fa-circle" style="color:#4ade80;font-size:8px;"></i> ON AIR</span>
+          <!-- MORE FROM LOS SANTOS STRIP -->
+          <div class="usat-more-section">
+            <div class="usat-more-header">
+              <h3 class="usat-more-title">MORE FROM LOS SANTOS</h3>
+              <span style="font-size:11px;font-weight:700;color:#64748b;">UPDATED 24/7</span>
             </div>
-
-            <a href="#/profile/recruitment" class="binduz-social-box recruitment">
-              <div class="social-left">
-                <i class="fa-solid fa-newspaper" style="color:#F08D39;"></i>
-                <div>
-                  <div class="social-title">Open Recruitment</div>
-                  <div class="social-sub">Jurnalis &amp; Tim Redaksi</div>
-                </div>
-              </div>
-              <span class="social-btn-pill" style="background:#F08D39;color:#090C1E;">Daftar</span>
-            </a>
-          </div>
-        </div>
-      </section>
-    `;
-  }
-
-  function buildBinduzCategoriesSectionHtml(visiblePosts, hasMore, filteredPostsCount) {
-    const labelCounts = getLabelCounts();
-    const topCategories = Object.keys(labelCounts).slice(0, 6);
-
-    const cardsHtml = visiblePosts.map(post => {
-      const tag = (post.labels && post.labels[0]) || 'News';
-      const postHref = getPostHref(post);
-      const thumb = post.featuredImage || state.data.siteInfo.aboutBanner;
-
-      return `
-        <a href="${postHref}" class="binduz-grid-card">
-          <div class="binduz-grid-thumb">
-            <img src="${escapeHtml(thumb)}" alt="${escapeHtml(post.title)}" loading="lazy" />
-          </div>
-          <div class="binduz-grid-body">
-            <div class="binduz-grid-meta">
-              <span class="binduz-cat-pill">${escapeHtml(tag)}</span>
-              <span style="color:#94a3b8;font-size:11px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(formatDateID(post.published))}</span>
+            <div class="usat-more-grid">
+              ${moreStories.map(p => `
+                <a href="${getPostHref(p)}" class="usat-more-card">
+                  <div class="usat-more-thumb">
+                    <img src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(p.title)}" loading="lazy" />
+                  </div>
+                  <span class="usat-more-date">${escapeHtml(formatDateID(p.published))}</span>
+                  <h4 class="usat-more-card-title">${escapeHtml(p.title)}</h4>
+                </a>
+              `).join('')}
             </div>
-            <h4 class="binduz-grid-title">${escapeHtml(post.title)}</h4>
-            <div class="binduz-grid-author">
-              <i class="fa-regular fa-user"></i> ${escapeHtml(post.author)}
-            </div>
-          </div>
-        </a>
-      `;
-    }).join('');
-
-    const paginationHtml = hasMore
-      ? `<div class="blog-pager" id="blog-pager" style="margin-top:20px;">
-           <a class="blog-pager-older-link load-more" href="javascript:void(0)" id="foxsa-load-more-btn">
-             Muat Berita Lainnya (${filteredPostsCount - visiblePosts.length} lagi)
-           </a>
-         </div>`
-      : (visiblePosts.length > 0
-          ? `<div class="blog-pager" id="blog-pager" style="margin-top:20px;">
-               <span class="no-more load-more" style="display:inline-block;">Semua Berita Telah Ditampilkan</span>
-             </div>`
-          : '');
-
-    return `
-      <section class="binduz-categories-section">
-        <div class="binduz-sec-header">
-          <div class="binduz-sec-title-wrap">
-            <h3 class="binduz-sec-title">Categories</h3>
-            <span class="binduz-red-line"></span>
-          </div>
-          <div class="binduz-sec-tabs">
-            <a href="#/" class="binduz-sec-tab-pill active">Semua</a>
-            ${topCategories.map(c => `<a href="#/label/${encodeURIComponent(c)}" class="binduz-sec-tab-pill">${escapeHtml(c)}</a>`).join('')}
+            <button type="button" class="usat-load-more-btn" id="foxsa-load-more-btn">
+              MUAT LEBIH BANYAK BERITA
+            </button>
           </div>
         </div>
 
-        <div class="binduz-categories-grid">
-          ${cardsHtml}
-        </div>
+        <!-- RIGHT COLUMN (32%): WHAT YOU WANT TO KNOW SIDEBAR -->
+        <div class="usat-right-col">
+          <div class="usat-sidebar-header">
+            <h3 class="usat-sidebar-title">WHAT YOU WANT TO KNOW</h3>
+            <span class="usat-sidebar-dot"></span>
+          </div>
 
-        ${paginationHtml}
-      </section>
+          <!-- 1. Fast News Wire -->
+          <ul class="usat-wire-list">
+            ${posts.slice(0, 5).map(p => `
+              <li class="usat-wire-item">
+                <a href="${getPostHref(p)}" class="usat-wire-link">
+                  <div class="usat-wire-meta">
+                    <span class="usat-wire-badge">${escapeHtml((p.labels && p.labels[0]) || 'Flash')}</span>
+                    <span>•</span>
+                    <span>${escapeHtml(formatDateID(p.published))}</span>
+                  </div>
+                  <h4 class="usat-wire-text">${escapeHtml(p.title)}</h4>
+                </a>
+              </li>
+            `).join('')}
+          </ul>
+
+          <!-- 2. Sports / Championship Scorecard -->
+          <div class="usat-scorecard-box">
+            <div class="usat-scorecard-title">
+              <i class="fa-solid fa-flag-checkered" style="color:#ef4444;"></i>
+              <span>MOTORSPORT CHAMPIONSHIP</span>
+            </div>
+            <div class="usat-scorecard-match">
+              <span>Akio Asakura (JP)</span>
+              <span class="usat-scorecard-tag">#1 POLE</span>
+            </div>
+            <div class="usat-scorecard-match">
+              <span>Jeremiah Howell (US)</span>
+              <span style="font-size:12px;color:#64748b;">+0.428s</span>
+            </div>
+            <div class="usat-scorecard-match">
+              <span>Los Santos GP Circuit</span>
+              <span style="font-size:11px;color:#10b981;font-weight:700;">FINAL</span>
+            </div>
+          </div>
+
+          <!-- 3. FoxSA Opinion Box -->
+          <div class="usat-opinion-box">
+            <div class="usat-opinion-header">FOXSA OPINION</div>
+            <div class="usat-opinion-flex">
+              <img src="assets/logo/foxsa-icon.jpg" class="usat-opinion-avatar" alt="Catherine Cecillie" />
+              <div>
+                <p class="usat-opinion-quote">
+                  "Independensi dan integritas berita kami adalah wujud komitmen utama bagi seluruh warga San Andreas."
+                </p>
+                <div class="usat-opinion-author">Catherine Cecillie • CEO &amp; Founder</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Vibrant Blue Newsletter Box -->
+          <div class="usat-newsletter-box">
+            <div class="usat-newsletter-label">SUBSCRIBE TO FOXSA TODAY</div>
+            <h4 class="usat-newsletter-heading">Sign up to get:</h4>
+            <p class="usat-newsletter-desc">
+              Top stories, breaking crime alerts, and live investigative broadcasts sent directly to your inbox.
+            </p>
+            <input type="email" class="usat-newsletter-input" placeholder="Enter your email..." />
+            <button type="button" class="usat-newsletter-btn">SUBSCRIBE NOW</button>
+          </div>
+        </div>
+      </div>
     `;
   }
 
@@ -1269,15 +1203,22 @@
     const visiblePosts = filteredPosts.slice(0, state.visiblePostsCount);
     const hasMore = filteredPosts.length > visiblePosts.length;
 
-    // IF HOME VIEW: Render the complete Binduz 3-sections homepage
+    // IF HOME VIEW: Render the complete USA TODAY Editorial Homepage
     if (view === 'home') {
       mainEl.innerHTML = `
         <div class="widget Blog" id="Blog1">
-          ${buildBinduzTrendingSectionHtml(state.data.posts)}
-          ${buildBinduzFeaturedSectionHtml(state.data.posts)}
-          ${buildBinduzCategoriesSectionHtml(visiblePosts, hasMore, filteredPosts.length)}
+          ${buildUsaTodayHomepageHtml(state.data.posts)}
         </div>
       `;
+
+      const searchForm = document.getElementById('usat-search-inline-form');
+      if (searchForm) {
+        searchForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const q = (document.getElementById('usat-search-input').value || '').trim();
+          if (q) window.location.hash = '#/search/' + encodeURIComponent(q);
+        });
+      }
 
       const loadMoreBtn = document.getElementById('foxsa-load-more-btn');
       if (loadMoreBtn) {
@@ -1293,206 +1234,83 @@
     let filterMessageHtml = '';
     if (view === 'label') {
       filterMessageHtml = `
-        <div class="queryMessage">
-          <span class="query-info query-label query-success">
+        <div class="queryMessage" style="border-radius:0;">
+          <span class="query-info query-label query-success" style="border-radius:0;">
             Kategori: <strong>#${escapeHtml(param)}</strong> (${filteredPosts.length} berita)
-            <a class="show-more" href="#/">Reset Filter</a>
+            <a class="show-more" href="#/" style="border-radius:0;">Reset Filter</a>
           </span>
         </div>`;
     } else if (view === 'popular') {
       filterMessageHtml = `
-        <div class="queryMessage">
-          <span class="query-info query-success">
+        <div class="queryMessage" style="border-radius:0;">
+          <span class="query-info query-success" style="border-radius:0;">
             Menampilkan: <strong>🔥 Berita Terpopuler FoxSA News</strong> (${filteredPosts.length} berita)
-            <a class="show-more" href="#/">Tampilkan Semua</a>
+            <a class="show-more" href="#/" style="border-radius:0;">Tampilkan Semua</a>
           </span>
         </div>`;
     } else if (view === 'archive') {
       filterMessageHtml = `
-        <div class="queryMessage">
-          <span class="query-info query-success">
+        <div class="queryMessage" style="border-radius:0;">
+          <span class="query-info query-success" style="border-radius:0;">
             Arsip Bulan: <strong>${escapeHtml(formatArchiveLabel(param))}</strong> (${filteredPosts.length} berita)
-            <a class="show-more" href="#/">Tampilkan Semua</a>
+            <a class="show-more" href="#/" style="border-radius:0;">Tampilkan Semua</a>
           </span>
         </div>`;
     } else if (view === 'author') {
       filterMessageHtml = `
-        <div class="queryMessage">
-          <span class="query-info query-success">
+        <div class="queryMessage" style="border-radius:0;">
+          <span class="query-info query-success" style="border-radius:0;">
             Jurnalis: <strong>${escapeHtml(param)}</strong> (${filteredPosts.length} berita)
-            <a class="show-more" href="#/">Tampilkan Semua</a>
+            <a class="show-more" href="#/" style="border-radius:0;">Tampilkan Semua</a>
           </span>
         </div>`;
     } else if (view === 'search') {
       filterMessageHtml = `
-        <div class="queryMessage">
-          <span class="query-info query-success">
-            Hasil pencarian: <strong>"${escapeHtml(param)}"</strong> (${filteredPosts.length} ditemukan)
-            <a class="show-more" href="#/">Reset Pencarian</a>
+        <div class="queryMessage" style="border-radius:0;">
+          <span class="query-info query-success" style="border-radius:0;">
+            Hasil Pencarian: "<strong>${escapeHtml(param)}</strong>" (${filteredPosts.length} berita ditemukan)
+            <a class="show-more" href="#/" style="border-radius:0;">Reset Pencarian</a>
           </span>
         </div>`;
     }
 
-    const postsCardsHtml = visiblePosts.length === 0
-      ? `<div class="queryEmpty">
-           <i class="fa-regular fa-folder-open" style="font-size:32px;color:#ccc;display:block;margin-bottom:10px;"></i>
-           Tidak ada berita yang ditemukan pada filter ini.
-           <div style="margin-top:12px;"><a href="#/" class="foxsa-btn" style="text-decoration:none;">Kembali ke Semua Berita</a></div>
+    const postsHtml = visiblePosts.length === 0
+      ? `<div class="no-posts-found" style="border-radius:0;">
+           <i class="fa-solid fa-newspaper" style="font-size:36px;color:#94a3b8;margin-bottom:12px;"></i>
+           <h4>Tidak Ada Berita yang Sesuai</h4>
+           <p>Coba gunakan kata kunci lain atau pilih kategori berita lainnya.</p>
+           <a href="#/" class="foxsa-btn foxsa-btn-primary" style="margin-top:14px;border-radius:0;">Kembali ke Beranda</a>
          </div>`
-      : visiblePosts.map((post) => {
-          const labels = Array.isArray(post.labels) && post.labels.length > 0 ? post.labels : ['News'];
-          const primaryTag = labels[0];
-          const commentCount = (post.comments || []).length;
-          const postHref = getPostHref(post);
-          const snippet = post.snippet || stripHtmlToSnippet(post.content, 165);
-          const thumb = post.featuredImage || state.data.siteInfo.aboutBanner;
-
-          // AnimeNetwork Clean News Card (supports both 'list' and 'grid' modes via CSS)
-          return `
-            <article class="an-news-card">
-              <div class="an-news-thumb-wrap">
-                <a href="${postHref}" class="an-news-thumb-link">
-                  <img src="${escapeHtml(thumb)}" alt="${escapeHtml(post.title)}" loading="lazy" />
-                  <span class="an-thumb-read"><i class="fa-regular fa-clock"></i> ${getReadingTime(post.content)}</span>
-                </a>
-              </div>
-              <div class="an-news-body">
-                <div class="an-news-meta-top">
-                  <a href="#/label/${encodeURIComponent(primaryTag)}" class="an-news-cat">${escapeHtml(primaryTag)}</a>
-                  ${labels.slice(1, 3).map(t => `<a href="#/label/${encodeURIComponent(t)}" class="an-news-subcat">#${escapeHtml(t)}</a>`).join('')}
-                  <span class="an-news-date">Posted on ${escapeHtml(formatDateID(post.published))} • <a href="#/author/${encodeURIComponent(post.author)}">${escapeHtml(post.author)}</a></span>
-                </div>
-                <h2 class="an-news-title">
-                  <a href="${postHref}">${escapeHtml(post.title)}</a>
-                </h2>
-                <p class="an-news-excerpt">${escapeHtml(snippet)}</p>
-                <div class="an-news-footer">
-                  <a href="${postHref}" class="an-continue-link">Baca selengkapnya...</a>
-                  <a href="${postHref}" class="an-comment-count">
-                    <i class="fa-solid fa-message"></i> ${commentCount} komentar
-                  </a>
-                </div>
-              </div>
-            </article>
-          `;
-        }).join('');
-
-    const paginationHtml = hasMore
-      ? `<div class="blog-pager" id="blog-pager">
-           <a class="blog-pager-older-link load-more" href="javascript:void(0)" id="foxsa-load-more-btn">
-             Muat Berita Lainnya (${filteredPosts.length - visiblePosts.length} lagi)
-           </a>
-         </div>`
-      : (filteredPosts.length > 0
-          ? `<div class="blog-pager" id="blog-pager">
-               <span class="no-more load-more" style="display:inline-block;">Semua Berita Telah Ditampilkan</span>
-             </div>`
-          : '');
+      : `<div class="usat-2x2-grid" style="margin-top:16px;">
+           ${visiblePosts.map(p => `
+             <a href="${getPostHref(p)}" class="usat-card-rect">
+               <img src="${escapeHtml(p.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(p.title)}" loading="lazy" />
+               <div class="usat-card-overlay">
+                 <span class="usat-card-cat-badge">${escapeHtml((p.labels && p.labels[0]) || 'News')}</span>
+                 <h3 class="usat-card-title">${escapeHtml(p.title)}</h3>
+                 <span class="usat-card-byline">By ${escapeHtml(p.author || 'FoxSA Staff')}</span>
+               </div>
+             </a>
+           `).join('')}
+         </div>`;
 
     mainEl.innerHTML = `
       <div class="widget Blog" id="Blog1">
-        ${buildAnimeNetworkCategoryToolbarHtml()}
         ${filterMessageHtml}
-
-        <div class="an-section-header">
-          <h3><span class="heading-line"></span> Berita Terkini (Recent News)</h3>
-          ${state.currentUser ? `<a href="#/admin" class="an-quick-add-link" id="home-quick-new-post"><i class="fa-solid fa-plus"></i> Tulis Berita Baru</a>` : `<span class="an-total-label">${filteredPosts.length} Artikel</span>`}
-        </div>
-
-        <div class="an-news-feed layout-${state.feedLayout}">
-          ${postsCardsHtml}
-        </div>
-
-        ${paginationHtml}
+        ${postsHtml}
+        ${hasMore ? `
+          <button type="button" class="usat-load-more-btn" id="foxsa-load-more-btn">
+            MUAT LEBIH BANYAK BERITA
+          </button>
+        ` : ''}
       </div>
     `;
 
-    // Bind Category Bar Horizontal Scroll on PC (Left/Right Buttons + Mouse Wheel + Drag)
-    const catScroll = document.getElementById('foxsa-cat-pills-scroll');
-    const catLeftBtn = document.getElementById('cat-scroll-left');
-    const catRightBtn = document.getElementById('cat-scroll-right');
-    if (catScroll) {
-      if (catLeftBtn) {
-        catLeftBtn.addEventListener('click', () => {
-          catScroll.scrollBy({ left: -240, behavior: 'smooth' });
-        });
-      }
-      if (catRightBtn) {
-        catRightBtn.addEventListener('click', () => {
-          catScroll.scrollBy({ left: 240, behavior: 'smooth' });
-        });
-      }
-      catScroll.addEventListener('wheel', (e) => {
-        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-          e.preventDefault();
-          catScroll.scrollLeft += e.deltaY * 1.4;
-        }
-      }, { passive: false });
-
-      let isCatDown = false;
-      let catStartX = 0;
-      let catScrollStart = 0;
-      let catDragged = false;
-      catScroll.addEventListener('mousedown', (e) => {
-        isCatDown = true;
-        catDragged = false;
-        catScroll.classList.add('is-dragging');
-        catStartX = e.pageX - catScroll.offsetLeft;
-        catScrollStart = catScroll.scrollLeft;
-      });
-      catScroll.addEventListener('mouseleave', () => {
-        isCatDown = false;
-        catScroll.classList.remove('is-dragging');
-      });
-      catScroll.addEventListener('mouseup', () => {
-        isCatDown = false;
-        catScroll.classList.remove('is-dragging');
-      });
-      catScroll.addEventListener('mousemove', (e) => {
-        if (!isCatDown) return;
-        const x = e.pageX - catScroll.offsetLeft;
-        const walk = (x - catStartX) * 1.3;
-        if (Math.abs(walk) > 6) {
-          catDragged = true;
-          e.preventDefault();
-          catScroll.scrollLeft = catScrollStart - walk;
-        }
-      });
-      catScroll.addEventListener('click', (e) => {
-        if (catDragged) {
-          e.preventDefault();
-          e.stopPropagation();
-          catDragged = false;
-        }
-      }, true);
-    }
-
-    // Bind Grid / List View Switcher
-    mainEl.querySelectorAll('[data-set-layout]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const mode = btn.getAttribute('data-set-layout');
-        state.feedLayout = mode;
-        localStorage.setItem(VIEW_MODE_KEY, mode);
-        renderListView();
-      });
-    });
-
-    // Quick "+ Tulis Berita Baru" if logged in
-    const quickNewBtn = document.getElementById('home-quick-new-post');
-    if (quickNewBtn) {
-      quickNewBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        state.editingPostId = null;
-        state.adminTab = 'editor';
-        window.location.hash = '#/admin';
-      });
-    }
-
     const loadMoreBtn = document.getElementById('foxsa-load-more-btn');
     if (loadMoreBtn) {
-      loadMoreBtn.addEventListener('click', function (e) {
+      loadMoreBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        state.visiblePostsCount += 5;
+        state.visiblePostsCount += 8;
         renderListView();
       });
     }
@@ -1516,11 +1334,11 @@
     if (!post) {
       mainEl.innerHTML = `
         <div class="widget Blog" id="Blog1">
-          <div class="errorWrap">
+          <div class="errorWrap" style="border-radius:0;">
             <h3>404</h3>
             <h4>Berita Tidak Ditemukan</h4>
             <p>Maaf, artikel yang Anda cari tidak tersedia atau telah dihapus.</p>
-            <a class="homepage" href="#/"><i class="fa fa-home"></i> Kembali ke Beranda</a>
+            <a class="homepage" href="#/" style="border-radius:0;"><i class="fa fa-home"></i> Kembali ke Beranda</a>
           </div>
         </div>
       `;
@@ -1543,35 +1361,26 @@
       p.id !== post.id &&
       (p.labels || []).some(l => (post.labels || []).includes(l))
     );
-    if (related.length < 3) {
+    if (related.length < 4) {
       const fillers = state.data.posts.filter(p => p.id !== post.id && !related.includes(p));
       related = related.concat(fillers);
     }
-    related = related.slice(0, 3);
-
-    const labelsHtml = (post.labels && post.labels.length > 0)
-      ? `<div class="post-labels">
-           <div class="labels-Edges">
-             <span style="font-size:12px;font-weight:700;color:#090C1E;margin-right:8px;"><i class="fa-solid fa-tags" style="color:#F08D39;"></i> Kategori:</span>
-             ${post.labels.map(l => `<a class="label-link" href="#/label/${encodeURIComponent(l)}" rel="tag">#${escapeHtml(l)}</a>`).join('')}
-           </div>
-         </div>`
-      : '';
+    related = related.slice(0, 4);
 
     const shareUrl = encodeURIComponent(window.location.href);
     const shareTitle = encodeURIComponent(post.title);
 
     const comments = Array.isArray(post.comments) ? post.comments : [];
     const commentsListHtml = comments.length === 0
-      ? `<div class="foxsa-no-comments">Belum ada komentar pada berita ini. Jadilah yang pertama memberikan tanggapan!</div>`
+      ? `<div class="foxsa-no-comments" style="border-radius:0;">Belum ada komentar pada berita ini. Jadilah yang pertama memberikan tanggapan!</div>`
       : `<div class="foxsa-comment-list">
            ${comments.map(c => `
-             <div class="foxsa-comment-item" data-comment-id="${escapeHtml(c.id)}">
-               <img class="foxsa-comment-avatar" src="${escapeHtml(c.avatar || DEFAULT_AVATAR)}" alt="${escapeHtml(c.author)}" onerror="this.src='${DEFAULT_AVATAR}'"/>
+             <div class="foxsa-comment-item" data-comment-id="${escapeHtml(c.id)}" style="border-radius:0;">
+               <img class="foxsa-comment-avatar" src="${escapeHtml(c.avatar || DEFAULT_AVATAR)}" alt="${escapeHtml(c.author)}" onerror="this.src='${DEFAULT_AVATAR}'" style="border-radius:0;"/>
                <div class="foxsa-comment-content">
                  <div class="foxsa-comment-meta">
                    <span class="foxsa-comment-author">${escapeHtml(c.author)}</span>
-                   ${c.role ? `<span class="foxsa-comment-role">${escapeHtml(c.role)}</span>` : ''}
+                   ${c.role ? `<span class="foxsa-comment-role" style="border-radius:0;">${escapeHtml(c.role)}</span>` : ''}
                    <span class="foxsa-comment-date">${escapeHtml(formatDateTimeID(c.date))}</span>
                    ${isStaffLoggedIn
                      ? `<button type="button" class="foxsa-comment-delete" data-del-comment="${escapeHtml(c.id)}" title="Hapus Komentar (Khusus Staff)">
@@ -1579,223 +1388,180 @@
                         </button>`
                      : ''}
                  </div>
-                 <div class="foxsa-comment-body">${escapeHtml(c.body).replace(/\n/g, '<br/>')}</div>
+                 <div class="foxsa-comment-body" style="text-align:justify;">${escapeHtml(c.body).replace(/\n/g, '<br/>')}</div>
                </div>
              </div>
            `).join('')}
          </div>`;
 
+    // Process raw body and add USA TODAY Drop Cap to the first paragraph
+    let bodyHtml = processPostContentHtml(post.content);
+    // Add dropcap to the first letter if clean paragraph
+    const pMatch = bodyHtml.match(/<p([^>]*)>([A-Za-z0-9])(.*?)<\/p>/);
+    if (pMatch) {
+      const fullP = pMatch[0];
+      const pAttr = pMatch[1];
+      const firstLetter = pMatch[2];
+      const restText = pMatch[3];
+      const dropP = `<p${pAttr}><span class="usat-dropcap">${firstLetter}</span>${restText}</p>`;
+      bodyHtml = bodyHtml.replace(fullP, dropP);
+    }
+
     mainEl.innerHTML = `
       <div class="widget Blog" id="Blog1">
-        <div class="blog-posts hfeed item-post-wrap">
-          <article class="blog-post hentry item-post foxsa-clean-article-card">
-            <div class="post-item-inner">
-              <div class="post-header">
-                <nav id="breadcrumb">
-                  <a href="#/"><i class="fa-solid fa-house"></i> Beranda</a>
-                  <em class="delimiter"></em>
-                  <a class="b-label" href="#/label/${encodeURIComponent(primaryCategory)}">${escapeHtml(primaryCategory)}</a>
-                  <em class="delimiter"></em>
-                  <span class="current">${escapeHtml(post.title)}</span>
-                </nav>
+        <div class="usat-article-wrap">
+          <!-- Top Breadcrumb with Blue Dot -->
+          <div class="usat-article-breadcrumb">
+            <span class="usat-brand-dot" style="width:8px;height:8px;"></span>
+            <a href="#/label/${encodeURIComponent(primaryCategory)}" style="color:#009bff;text-decoration:none;">${escapeHtml(primaryCategory)}</a>
+            <span style="color:#94a3b8;">/</span>
+            <span style="color:#64748b;">San Andreas Regional News</span>
+          </div>
 
-                <div class="article-top-badges">
-                  ${(post.labels || ['News']).map(l => `<a href="#/label/${encodeURIComponent(l)}" class="article-cat-pill">${escapeHtml(l)}</a>`).join('')}
-                  <span class="article-read-time"><i class="fa-regular fa-clock"></i> ${getReadingTime(post.content)}</span>
-                </div>
+          <!-- Giant Editorial Serif Headline -->
+          <h1 class="usat-article-headline">${escapeHtml(post.title)}</h1>
 
-                <h1 class="post-title">${escapeHtml(post.title)}</h1>
+          <!-- Byline & Utility Bar -->
+          <div class="usat-article-byline-bar">
+            <div class="usat-article-byline-left">
+              <span>By <strong>${escapeHtml(post.author)}</strong></span>
+              <span>•</span>
+              <span>${escapeHtml(formatDateID(post.published))}</span>
+              <span>•</span>
+              <span><i class="fa-regular fa-clock"></i> ${getReadingTime(post.content)}</span>
+              ${post.authorBio ? `<span style="color:#009bff;font-weight:700;">[${escapeHtml(post.authorBio)}]</span>` : ''}
+            </div>
+            <div class="usat-article-tools">
+              <button type="button" class="usat-tool-btn" id="art-font-dec" title="Perkecil Teks">A-</button>
+              <button type="button" class="usat-tool-btn" id="art-font-inc" title="Perbesar Teks">A+</button>
+              <button type="button" class="usat-tool-btn" onclick="window.print()" title="Cetak Berita"><i class="fa-solid fa-print"></i></button>
+              <button type="button" class="usat-tool-btn" id="foxsa-copy-link-btn" title="Salin Link"><i class="fa-solid fa-share-nodes"></i> Share</button>
+              ${isStaffLoggedIn
+                ? `<button type="button" id="foxsa-quick-edit-post" class="usat-tool-btn" style="background:#111111;color:#ffffff;">
+                     <i class="fa-solid fa-pen"></i> Edit
+                   </button>`
+                : ''}
+            </div>
+          </div>
 
-                <div class="article-byline-bar">
-                  <div class="byline-author-left">
-                    <img src="${escapeHtml(authorInfo.avatar || DEFAULT_AVATAR)}" alt="${escapeHtml(post.author)}" onerror="this.src='${DEFAULT_AVATAR}'" />
-                    <div>
-                      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                        <a href="#/author/${encodeURIComponent(post.author)}" class="byline-author-name">${escapeHtml(post.author)}</a>
-                        ${post.authorBio ? renderRoleBadgeHtml(post.authorBio) : ''}
-                      </div>
-                      <div class="byline-date-meta">
-                        <span>Dipublikasikan ${escapeHtml(formatDateID(post.published))}</span>
-                        <span>•</span>
-                        <span style="color:#F08D39;font-weight:700;"><i class="fa-regular fa-comments"></i> ${comments.length} Komentar</span>
-                      </div>
-                    </div>
+          <!-- 2-Column Split: Left Rail (More Stories) + Main Reading Column -->
+          <div class="usat-article-grid">
+            <!-- Left Rail: More Stories -->
+            <aside class="usat-article-left-rail">
+              <div class="usat-rail-title">MORE STORIES</div>
+              ${related.map(rp => `
+                <a href="${getPostHref(rp)}" class="usat-rail-story">
+                  <div class="usat-rail-thumb">
+                    <img src="${escapeHtml(rp.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(rp.title)}" loading="lazy" />
                   </div>
-                  ${isStaffLoggedIn
-                    ? `<button type="button" id="foxsa-quick-edit-post" class="foxsa-btn foxsa-btn-outline" style="padding:6px 12px;font-size:12px;">
-                         <i class="fa-solid fa-pen"></i> Edit Berita
-                       </button>`
-                    : ''}
+                  <span style="font-size:10px;color:#009bff;font-weight:800;text-transform:uppercase;">${escapeHtml((rp.labels && rp.labels[0]) || 'News')}</span>
+                  <h4 class="usat-rail-headline">${escapeHtml(rp.title)}</h4>
+                </a>
+              `).join('')}
+            </aside>
+
+            <!-- Main Reading Column -->
+            <div class="usat-article-main-body">
+              <!-- Giant Sharp Lead Photo with Caption -->
+              <div class="usat-lead-photo-wrap">
+                <img src="${escapeHtml(post.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(post.title)}" class="usat-lead-photo" />
+                <div class="usat-lead-caption">
+                  <span><i class="fa-solid fa-camera" style="margin-right:6px;color:#009bff;"></i> Foto Dokumentasi: FoxSA News Media Agency San Andreas</span>
+                  <span>${escapeHtml(formatDateID(post.published))}</span>
                 </div>
               </div>
 
-              <div class="post-body post-content foxsa-clean-prose">
-                ${processPostContentHtml(post.content)}
+              <!-- Article Justified Prose with Dropcap -->
+              <div class="usat-article-text" id="article-body-text">
+                ${bodyHtml}
               </div>
 
-              <div class="post-footer">
-                ${labelsHtml}
+              <!-- Dark Quote Slider Callout -->
+              <div class="usat-quote-slider-box">
+                <img src="${escapeHtml(authorInfo.avatar || DEFAULT_AVATAR)}" class="usat-quote-avatar" alt="${escapeHtml(post.author)}" onerror="this.src='${DEFAULT_AVATAR}'"/>
+                <div>
+                  <p class="usat-quote-text">
+                    "Setiap peristiwa yang kami laporkan telah diverifikasi secara ketat untuk menyajikan fakta jurnalisme yang berimbang di San Andreas."
+                  </p>
+                  <div class="usat-quote-speaker">${escapeHtml(post.author)} • ${escapeHtml(post.authorBio || 'FoxSA Editorial Team')}</div>
+                </div>
+                <div class="usat-quote-controls">
+                  <button type="button" class="usat-quote-btn" title="Sebelumnya"><i class="fa-solid fa-chevron-up"></i></button>
+                  <button type="button" class="usat-quote-btn" title="Selanjutnya"><i class="fa-solid fa-chevron-down"></i></button>
+                </div>
+              </div>
 
-                <div class="post-share">
-                  <ul class="share-links social social-color">
-                    <li class="share-icon"><span class="s-icon"></span></li>
-                    <li class="facebook"><a class="facebook" href="https://www.facebook.com/sharer.php?u=${shareUrl}" target="_blank" rel="noopener" title="Share to Facebook"></a></li>
-                    <li class="twitter"><a class="twitter" href="https://twitter.com/intent/tweet?text=${shareTitle}&url=${shareUrl}" target="_blank" rel="noopener" title="Share to X/Twitter"></a></li>
-                    <li class="whatsapp whatsapp-desktop"><a class="whatsapp" href="https://api.whatsapp.com/send?text=${shareTitle}%20-%20${shareUrl}" target="_blank" rel="noopener" title="Share to WhatsApp"></a></li>
-                    <li class="email"><a class="email" href="javascript:void(0)" id="foxsa-copy-link-btn" title="Salin Link Berita"></a></li>
-                  </ul>
+              <!-- Author Bio Card (Sharp Rectangular) -->
+              <div class="about-author" style="border-radius:0;border:1px solid #e5e5e5;background:#fafafa;padding:20px;margin:28px 0;">
+                <div class="avatar-container" style="border-radius:0;">
+                  <img alt="${escapeHtml(authorInfo.name)}" class="author-avatar" src="${escapeHtml(authorInfo.avatar || DEFAULT_AVATAR)}" onerror="this.src='${DEFAULT_AVATAR}'" style="border-radius:0;"/>
+                </div>
+                <h3 class="author-name">
+                  <span>Jurnalis Penulis:</span>
+                  <a href="#/author/${encodeURIComponent(authorInfo.name)}">${escapeHtml(authorInfo.name)}</a>
+                </h3>
+                <span class="author-description">${escapeHtml(authorInfo.bio)}</span>
+              </div>
+
+              <!-- Interactive Comments Section -->
+              <div class="foxsa-comments-wrap" id="comments-section" style="border-radius:0;border:1px solid #e5e5e5;padding:24px;margin-top:32px;">
+                <div class="foxsa-comments-header" style="border-bottom:2px solid #111111;padding-bottom:12px;margin-bottom:20px;">
+                  <h3 style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;text-transform:uppercase;"><i class="fa-regular fa-comments" style="color:#009bff;margin-right:8px;"></i> Tanggapan &amp; Komentar Pembaca</h3>
+                  <span class="foxsa-badge" style="border-radius:0;background:#111111;color:#ffffff;">${comments.length} Komentar</span>
                 </div>
 
-                <ul class="post-nav">
-                  <li class="post-next">
-                    ${newerPost
-                      ? `<a class="next-post-link" href="${getPostHref(newerPost)}" id="Blog1_blog-pager-newer-link" rel="next">
-                           <div class="post-nav-inner"><span>Berita Berikutnya</span><p>${escapeHtml(newerPost.title)}</p></div>
-                         </a>`
-                      : `<div class="post-nav-inner"><span>Berita Berikutnya</span><p>Ini adalah berita terbaru</p></div>`}
-                  </li>
-                  <li class="post-prev">
-                    ${olderPost
-                      ? `<a class="prev-post-link" href="${getPostHref(olderPost)}" id="Blog1_blog-pager-older-link" rel="prev">
-                           <div class="post-nav-inner"><span>Berita Sebelumnya</span><p>${escapeHtml(olderPost.title)}</p></div>
-                         </a>`
-                      : `<div class="post-nav-inner"><span>Berita Sebelumnya</span><p>Ini adalah berita pertama</p></div>`}
-                  </li>
-                </ul>
+                ${commentsListHtml}
 
-                <div class="about-author">
-                  <div class="avatar-container">
-                    <img alt="${escapeHtml(authorInfo.name)}" class="author-avatar" src="${escapeHtml(authorInfo.avatar || DEFAULT_AVATAR)}" onerror="this.src='${DEFAULT_AVATAR}'"/>
-                  </div>
-                  <h3 class="author-name">
-                    <span>Jurnalis / Penulis:</span>
-                    <a href="#/author/${encodeURIComponent(authorInfo.name)}">${escapeHtml(authorInfo.name)}</a>
-                  </h3>
-                  <span class="author-description">${escapeHtml(authorInfo.bio)}</span>
-                </div>
-
-                <div id="related-wrap">
-                  <div class="title-wrap">
-                    <h3>Berita Terkait Lainnya</h3>
-                  </div>
-                  <div class="related-ready">
-                    <ul class="related-posts">
-                      ${related.map((rp, idx) => `
-                        <li class="related-item item-${idx}">
-                          <div class="post-image-wrap">
-                            <a class="post-image-link" href="${getPostHref(rp)}">
-                              <img class="post-thumb" src="${escapeHtml(rp.featuredImage || state.data.siteInfo.aboutBanner)}" alt="${escapeHtml(rp.title)}" loading="lazy"/>
-                            </a>
-                          </div>
-                          <h2 class="post-title"><a href="${getPostHref(rp)}">${escapeHtml(rp.title)}</a></h2>
-                          <div class="post-meta">
-                            <span class="post-date">${escapeHtml(formatDateID(rp.published))}</span>
-                          </div>
-                        </li>
-                      `).join('')}
-                    </ul>
-                  </div>
-                </div>
-
-                <!-- Interactive Comments Section -->
-                <div class="foxsa-comments-wrap" id="comments-section">
-                  <div class="foxsa-comments-header">
-                    <h3><i class="fa-regular fa-comments"></i> Tanggapan &amp; Komentar Pembaca</h3>
-                    <span class="foxsa-badge">${comments.length} Komentar</span>
-                  </div>
-
-                  ${commentsListHtml}
-
-                  <form class="foxsa-comment-form" id="foxsa-add-comment-form">
-                    <h4><i class="fa-solid fa-reply" style="color:#F08D39;margin-right:6px;"></i> Tulis Komentar (IC / Warga San Andreas)</h4>
-                    <div class="foxsa-form-row">
-                      <div class="foxsa-form-group">
-                        <label for="comment-author-input">Nama Anda / Karakter IC *</label>
-                        <input type="text" id="comment-author-input" class="foxsa-input" value="${state.currentUser ? escapeHtml(state.currentUser.displayName) : ''}" placeholder="Contoh: Akio Asakura / Warga Los Santos" required />
-                      </div>
-                      <div class="foxsa-form-group">
-                        <label for="comment-role-input">Afiliasi / Status (Opsional)</label>
-                        <input type="text" id="comment-role-input" class="foxsa-input" value="${state.currentUser ? 'FoxSA News Staff' : ''}" placeholder="Contoh: Citizen / LSPD / LSFD / Pembalap" />
-                      </div>
+                <form class="foxsa-comment-form" id="foxsa-add-comment-form" style="border-radius:0;margin-top:24px;">
+                  <h4 style="font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;margin-bottom:14px;"><i class="fa-solid fa-reply" style="color:#009bff;margin-right:6px;"></i> Tulis Komentar (IC / Warga San Andreas)</h4>
+                  <div class="foxsa-form-row">
+                    <div class="foxsa-form-group">
+                      <label for="comment-author-input" style="font-size:12px;font-weight:700;">Nama Anda / Karakter IC *</label>
+                      <input type="text" id="comment-author-input" class="foxsa-input" value="${state.currentUser ? escapeHtml(state.currentUser.displayName) : ''}" placeholder="Contoh: Akio Asakura / Warga Los Santos" required style="border-radius:0;" />
                     </div>
                     <div class="foxsa-form-group">
-                      <label for="comment-body-input">Isi Komentar *</label>
-                      <textarea id="comment-body-input" class="foxsa-textarea" rows="3" placeholder="Tulis tanggapan atau komentar Anda mengenai berita ini..." required></textarea>
+                      <label for="comment-role-input" style="font-size:12px;font-weight:700;">Afiliasi / Status (Opsional)</label>
+                      <input type="text" id="comment-role-input" class="foxsa-input" value="${state.currentUser ? 'FoxSA News Staff' : ''}" placeholder="Contoh: Citizen / LSPD / LSFD / Pembalap" style="border-radius:0;" />
                     </div>
-                    <button type="submit" class="foxsa-btn">
-                      <i class="fa-solid fa-paper-plane"></i> Kirim Komentar
-                    </button>
-                  </form>
-                </div>
-
+                  </div>
+                  <div class="foxsa-form-group">
+                    <label for="comment-body-input" style="font-size:12px;font-weight:700;">Isi Tanggapan / Opini Berita *</label>
+                    <textarea id="comment-body-input" class="foxsa-textarea" rows="3" placeholder="Tuliskan komentar atau opini Anda mengenai peristiwa ini secara santun..." required style="border-radius:0;"></textarea>
+                  </div>
+                  <button type="submit" class="foxsa-btn foxsa-btn-primary" style="border-radius:0;background:#111111;color:#ffffff;font-weight:700;padding:12px 24px;">
+                    <i class="fa-solid fa-paper-plane"></i> Kirim Komentar
+                  </button>
+                </form>
               </div>
             </div>
-          </article>
+          </div>
         </div>
       </div>
     `;
 
-    const quickEditBtn = document.getElementById('foxsa-quick-edit-post');
-    if (quickEditBtn && isStaffLoggedIn) {
-      quickEditBtn.addEventListener('click', () => {
-        state.editingPostId = post.id;
-        state.adminTab = 'editor';
-        window.location.hash = '#/admin';
+    // Bind font sizing buttons
+    const fontInc = document.getElementById('art-font-inc');
+    const fontDec = document.getElementById('art-font-dec');
+    const bodyText = document.getElementById('article-body-text');
+    let currentFontSize = 16.5;
+    if (fontInc && bodyText) {
+      fontInc.addEventListener('click', () => {
+        if (currentFontSize < 22) {
+          currentFontSize += 1.5;
+          bodyText.style.fontSize = currentFontSize + 'px';
+        }
+      });
+    }
+    if (fontDec && bodyText) {
+      fontDec.addEventListener('click', () => {
+        if (currentFontSize > 13) {
+          currentFontSize -= 1.5;
+          bodyText.style.fontSize = currentFontSize + 'px';
+        }
       });
     }
 
-    const copyLinkBtn = document.getElementById('foxsa-copy-link-btn');
-    if (copyLinkBtn) {
-      copyLinkBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        navigator.clipboard.writeText(window.location.href).then(() => {
-          showToast('Tautan berita berhasil disalin!');
-        });
-      });
-    }
-
-    const commentForm = document.getElementById('foxsa-add-comment-form');
-    if (commentForm) {
-      commentForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const authorVal = document.getElementById('comment-author-input').value.trim();
-        const roleVal = document.getElementById('comment-role-input').value.trim();
-        const bodyVal = document.getElementById('comment-body-input').value.trim();
-
-        if (!authorVal || !bodyVal) return;
-
-        const knownAuthor = state.data.authors[authorVal];
-        const avatarUrl = (knownAuthor && knownAuthor.avatar) ? knownAuthor.avatar : DEFAULT_AVATAR;
-
-        const newComment = {
-          id: 'c-' + Date.now(),
-          author: authorVal,
-          role: roleVal || '',
-          avatar: avatarUrl,
-          date: new Date().toISOString(),
-          body: bodyVal
-        };
-
-        if (!Array.isArray(post.comments)) post.comments = [];
-        post.comments.push(newComment);
-        saveDataToLocal(true);
-        showToast('Komentar berhasil ditambahkan!');
-        renderSinglePostView(post.id);
-      });
-    }
-
-    if (isStaffLoggedIn) {
-      mainEl.querySelectorAll('[data-del-comment]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const cId = btn.getAttribute('data-del-comment');
-          if (!confirm('Hapus komentar ini?')) return;
-          post.comments = (post.comments || []).filter(c => String(c.id) !== String(cId));
-          saveDataToLocal(true);
-          showToast('Komentar telah dihapus.');
-          renderSinglePostView(post.id);
-        });
-      });
-    }
+    bindPostInteractions(post);
   }
 
   // =========================================================================
