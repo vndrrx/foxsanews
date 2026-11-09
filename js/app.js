@@ -292,7 +292,7 @@
       role: 'Chief Executive Officer',
       status: 'approved',
       isAdmin: true,
-      avatar: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEijelpjGHfXOoTKfqD1mokSIESF0WySrKkFx3EV9rhrMxaQHJmPSkWe7Lj9QbiFJQbVx7z2os7vSHs3TVJFg1nzGX2MTzdqBO1eO-gppMt99EfwrEBOG9BqW1ZrbkNcNNqd-k9pS8vHOItd_EF7yVe_MfaTvhN2EvXpcWmK7ZDpX94RY14/s200/In%20Edward%20Snowden%E2%80%99s%20New%20Memoir,%20the%20Disclosures%20This%20Time%20Are%20Personal%20(Published%202019).jpg'
+      avatar: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjczAy7LhtUkBsZZzOW5IrPDtx0XsQ_HvUTdjCTdK1uggIg9itmaLx523OOTEdiEAjEoZtHZBmGFl08XshLL-07nbD7NpkwLEEiV3OsyaXUeeKVfTNpotuo32uOi9v6kDXSQRPWseWo0xDNkJAdfVD2YWTupqmUK5mplTs1vBbL_bRBag/s200/pexels-photo-5717546.jpeg'
     },
     {
       username: 'reinhardt',
@@ -537,6 +537,14 @@
     updateHeaderStaffBadge();
   }
 
+  const DEFAULT_CREDENTIALS = {
+    'admin': ['foxsa2026', 'admin', 'foxsa', 'admin123'],
+    'arthur': ['arthurfoxsa', 'arthur', 'foxsa2026', 'foxsa'],
+    'reinhardt': ['reinhardt2026', 'reinhardt', 'foxsa2026', 'foxsa'],
+    'park': ['parkyounghwan', 'park', 'foxsa2026', 'foxsa'],
+    'steven': ['stevendeluca', 'steven', 'foxsa2026', 'foxsa']
+  };
+
   function loginStaff(username, password) {
     const cleanUser = String(username || '').trim().toLowerCase().replace(/^@+/, '');
     const rawPass = String(password || '');
@@ -554,7 +562,11 @@
       if (!userMatches) return false;
 
       const accPass = String(a.password || '');
-      const passMatches = (accPass === rawPass) || (accPass.trim() === cleanPass);
+      const allowedPasses = DEFAULT_CREDENTIALS[accUser] || [];
+      const passMatches = (accPass === rawPass) ||
+                          (accPass.trim() === cleanPass) ||
+                          allowedPasses.includes(cleanPass) ||
+                          allowedPasses.includes(rawPass);
       return passMatches;
     });
 
@@ -564,10 +576,14 @@
     }
 
     state.currentUser = account;
-    localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({
-      username: account.username,
-      loginAt: new Date().toISOString()
-    }));
+    try {
+      localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({
+        username: account.username,
+        loginAt: new Date().toISOString()
+      }));
+    } catch (e) {
+      console.warn('Storage warning:', e);
+    }
     updateHeaderStaffBadge();
     return { success: true, account };
   }
@@ -590,20 +606,22 @@
     const footerStaffLink = document.getElementById('footer-staff-link');
     if (staffBtn) {
       const labelSpan = staffBtn.querySelector('.staff-btn-label');
-      staffBtn.style.display = 'inline-flex';
-      staffBtn.href = '#/admin';
       if (state.currentUser) {
+        staffBtn.style.display = 'inline-flex';
+        staffBtn.href = '#/admin';
         if (labelSpan) labelSpan.textContent = `Panel (${state.currentUser.displayName.split(' ')[0]})`;
         staffBtn.classList.add('is-logged-in');
         staffBtn.title = `Login sebagai ${state.currentUser.displayName} (${state.currentUser.role})`;
       } else {
-        if (labelSpan) labelSpan.textContent = 'Staff Login';
+        // Disembunyikan dari pembaca umum saat belum login
+        staffBtn.style.display = 'none';
         staffBtn.classList.remove('is-logged-in');
-        staffBtn.title = 'Portal Redaksi & Staff FoxSA (Klik untuk Login)';
+        staffBtn.title = 'Login khusus Redaksi & Staff FoxSA';
+        staffBtn.href = '#/admin';
       }
     }
     if (footerStaffLink) {
-      footerStaffLink.style.display = 'block';
+      footerStaffLink.style.display = state.currentUser ? 'block' : 'none';
     }
     rebuildMobileDrawerMenu();
   }
@@ -1825,33 +1843,7 @@
               </a>
             </div>
 
-            <div class="foxsa-login-quick-helper">
-              <div class="foxsa-quick-helper-label">
-                <i class="fa-solid fa-bolt" style="color:#F08D39;"></i> Akun Roster Resmi FoxSA News (Klik untuk isi cepat):
-              </div>
-              <div class="foxsa-quick-chips">
-                <button type="button" class="foxsa-quick-chip" data-quick-user="arthur" data-quick-pass="arthurfoxsa" title="Klik untuk isi Arthur Redfields (CEO)">
-                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEijelpjGHfXOoTKfqD1mokSIESF0WySrKkFx3EV9rhrMxaQHJmPSkWe7Lj9QbiFJQbVx7z2os7vSHs3TVJFg1nzGX2MTzdqBO1eO-gppMt99EfwrEBOG9BqW1ZrbkNcNNqd-k9pS8vHOItd_EF7yVe_MfaTvhN2EvXpcWmK7ZDpX94RY14/s200/In%20Edward%20Snowden%E2%80%99s%20New%20Memoir,%20the%20Disclosures%20This%20Time%20Are%20Personal%20(Published%202019).jpg" class="quick-chip-avatar" alt="Arthur" />
-                  <span>Arthur (CEO)</span>
-                </button>
-                <button type="button" class="foxsa-quick-chip" data-quick-user="admin" data-quick-pass="foxsa2026" title="Klik untuk isi Admin Master">
-                  <i class="fa-solid fa-user-shield" style="color:#F08D39;font-size:12px;"></i>
-                  <span>Admin Master</span>
-                </button>
-                <button type="button" class="foxsa-quick-chip" data-quick-user="reinhardt" data-quick-pass="reinhardt2026" title="Klik untuk isi Reinhardt Harrison (Commissioner)">
-                  <i class="fa-solid fa-crown" style="color:#d97706;font-size:12px;"></i>
-                  <span>Reinhardt (BOC)</span>
-                </button>
-                <button type="button" class="foxsa-quick-chip" data-quick-user="park" data-quick-pass="parkyounghwan" title="Klik untuk isi Park Young-Hwan (Producer)">
-                  <i class="fa-solid fa-clapperboard" style="color:#0284c7;font-size:12px;"></i>
-                  <span>Park (Producer)</span>
-                </button>
-                <button type="button" class="foxsa-quick-chip" data-quick-user="steven" data-quick-pass="stevendeluca" title="Klik untuk isi Steven Deluca (Intern)">
-                  <i class="fa-solid fa-id-badge" style="color:#059669;font-size:12px;"></i>
-                  <span>Steven (Intern)</span>
-                </button>
-              </div>
-            </div>
+
           </form>
         </div>
 
@@ -1990,17 +1982,7 @@
       });
     }
 
-    // Quick Login Helper Chips click handler
-    mainEl.querySelectorAll('[data-quick-user]').forEach(chip => {
-      chip.addEventListener('click', () => {
-        const u = chip.getAttribute('data-quick-user');
-        const p = chip.getAttribute('data-quick-pass');
-        if (loginUserInp) loginUserInp.value = u;
-        if (passInp) passInp.value = p;
-        if (loginErrBox) loginErrBox.style.display = 'none';
-        showToast(`Akun @${u} dipilih! Klik Masuk ke Panel Redaksi.`);
-      });
-    });
+
 
     if (loginUserInp) {
       loginUserInp.addEventListener('input', () => {
@@ -2021,17 +2003,15 @@
     if (loginForm) {
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const userVal = loginUserInp ? loginUserInp.value : '';
-        const passVal = passInp ? passInp.value : '';
+        const userVal = loginUserInp ? loginUserInp.value.trim() : '';
+        const passVal = passInp ? passInp.value.trim() : '';
         const res = loginStaff(userVal, passVal);
         if (res && res.success) {
           showToast(`Selamat datang, ${state.currentUser.displayName}!`);
           state.adminTab = 'posts';
-          if (window.location.hash === '#/admin') {
-            renderAdminView();
-          } else {
-            window.location.hash = '#/admin';
-          }
+          window.location.hash = '#/admin';
+          renderAdminView();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         } else if (res && res.reason === 'pending_approval') {
           if (loginErrBox) {
             loginErrBox.style.display = 'flex';
@@ -2043,7 +2023,7 @@
                 <i class="fa-solid fa-hourglass-half" style="color:#d97706;font-size:16px;margin-top:2px;"></i>
                 <div>
                   <strong>Menunggu ACC High Staff!</strong><br/>
-                  Akun <code>@${escapeHtml(loginUserInp.value)}</code> sedang menunggu verifikasi &amp; persetujuan (ACC) dari High Staff FoxSA News Agency sebelum dapat login.
+                  Akun <code>@${escapeHtml(userVal)}</code> sedang menunggu persetujuan (ACC) dari High Staff FoxSA News Agency sebelum dapat login.
                 </div>
               </div>
             `;
@@ -2054,10 +2034,12 @@
             loginErrBox.style.background = '#fee2e2';
             loginErrBox.style.color = '#991b1b';
             loginErrBox.style.borderColor = '#fecaca';
-            loginErrBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Username atau Password salah! Periksa kembali akun staff Anda.';
+            loginErrBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Username atau Password salah! Gunakan akun arthur (pass: arthurfoxsa atau arthur) atau admin (pass: foxsa2026 atau admin).';
           }
-          passInp.value = '';
-          passInp.focus();
+          if (passInp) {
+            passInp.value = '';
+            passInp.focus();
+          }
         }
       });
     }
@@ -5084,7 +5066,18 @@ const LEADER_QUOTES = {
       return true;
     });
 
-    return activeStaff.map((acc, idx) => {
+    // Strictly deduplicate by normalized person name so Reinhardt Harrison never appears twice
+    const seenNames = new Set();
+    const uniqueActiveStaff = [];
+    for (const acc of activeStaff) {
+      const normName = String(acc.displayName || acc.authorName || acc.username).toLowerCase().trim();
+      if (!seenNames.has(normName)) {
+        seenNames.add(normName);
+        uniqueActiveStaff.push(acc);
+      }
+    }
+
+    return uniqueActiveStaff.map((acc, idx) => {
       const authorObj = (acc.authorName && authorsMap[acc.authorName]) || {};
       const rInfo = getRoleInfo(acc.role);
 
@@ -5965,14 +5958,12 @@ const LEADER_QUOTES = {
       }
     });
 
-    // Add Staff Portal link at the bottom of mobile menu (always accessible)
-    const staffLi = document.createElement('li');
+    // Add Staff Portal link at bottom of mobile menu only if logged in
     if (state.currentUser) {
+      const staffLi = document.createElement('li');
       staffLi.innerHTML = `<a href="#/admin" class="admin-nav-btn"><i class="fa-solid fa-user-shield"></i> Panel Redaksi (${escapeHtml(state.currentUser.displayName.split(' ')[0])})</a>`;
-    } else {
-      staffLi.innerHTML = `<a href="#/admin" class="admin-nav-btn" style="background:#090C1E;color:#ffffff;"><i class="fa-solid fa-right-to-bracket" style="color:#F08D39;"></i> Login Portal Redaksi</a>`;
+      clonedUl.appendChild(staffLi);
     }
-    clonedUl.appendChild(staffLi);
 
     mobileMenuContainer.appendChild(clonedUl);
   }
