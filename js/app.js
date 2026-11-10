@@ -469,9 +469,14 @@
       ];
     }
 
-    // Initialize Former Staff if not present
-    if (!Array.isArray(cloned.formerStaff) || cloned.formerStaff.length === 0) {
+    // Initialize Former Staff from official roster
+    if (!Array.isArray(cloned.formerStaff) || cloned.formerStaff.length !== FOXSA_FORMER_STAFF.length || cloned.formerStaff.some(f => f.id === 'messiah')) {
       cloned.formerStaff = JSON.parse(JSON.stringify(FOXSA_FORMER_STAFF));
+    }
+
+    if (!cloned.authors) cloned.authors = {};
+    if (cloned.authors['Arthur Redfields']) {
+      cloned.authors['Arthur Redfields'].bio = 'Chief Executive Officer';
     }
 
     // Clear out any old Blogger grey silhouettes from localStorage cache
@@ -490,6 +495,14 @@
       const known = cloned.authors[acc.authorName];
       if (known && known.avatar && (!acc.avatar || acc.avatar === DEFAULT_AVATAR || acc.avatar.includes('Arthur%20PP'))) {
         acc.avatar = known.avatar;
+      }
+      const aName = acc.authorName || acc.displayName;
+      if (aName && acc.role) {
+        if (!cloned.authors[aName]) {
+          cloned.authors[aName] = { name: aName, avatar: acc.avatar || DEFAULT_AVATAR, bio: acc.role };
+        } else {
+          cloned.authors[aName].bio = acc.role;
+        }
       }
     });
 
@@ -512,6 +525,9 @@
       post.comments.forEach(c => {
         c.body = repairMojibakeText(c.body);
       });
+      if (post.author === 'Arthur Redfields') {
+        post.authorBio = 'Chief Executive Officer';
+      }
       if (!post.authorAvatar) {
         const knownAuthor = cloned.authors[post.author];
         post.authorAvatar = (knownAuthor && knownAuthor.avatar) ? knownAuthor.avatar : DEFAULT_AVATAR;
@@ -526,6 +542,37 @@
 
     cloned.posts.sort((a, b) => new Date(b.published) - new Date(a.published));
     return cloned;
+  }
+
+  function getAuthorCurrentBio(authorName, fallbackBio) {
+    if (!authorName) return fallbackBio || 'Staff Redaksi';
+    const target = String(authorName).trim().toLowerCase();
+    if (target === 'arthur redfields') return 'Chief Executive Officer';
+
+    // 1. Check in staffAccounts (live registered active staff)
+    const staff = (state.data && state.data.staffAccounts || []).find(s => {
+      const dn = String(s.displayName || '').trim().toLowerCase();
+      const an = String(s.authorName || '').trim().toLowerCase();
+      const un = String(s.username || '').trim().toLowerCase();
+      return dn === target || an === target || un === target;
+    });
+    if (staff && staff.role) return staff.role;
+
+    // 2. Check in formerStaff (official former staff chart)
+    const former = (state.data && state.data.formerStaff || []).find(f => {
+      const fn = String(f.name || '').trim().toLowerCase();
+      return fn === target;
+    });
+    if (former && (former.formerRole || former.role || former.lastRole || former.last_role)) {
+      return former.formerRole || former.role || former.lastRole || former.last_role;
+    }
+
+    // 3. Check authors in data
+    if (state.data && state.data.authors && state.data.authors[authorName] && state.data.authors[authorName].bio) {
+      return state.data.authors[authorName].bio;
+    }
+
+    return fallbackBio || 'Staff Redaksi';
   }
 
   function loadData() {
@@ -903,6 +950,7 @@
       }
 
       if (hasChanges) {
+        state.data = normalizeData(state.data);
         saveDataToLocal(false);
         loadAuthSession();
         if (forceRerender) {
@@ -2023,10 +2071,11 @@
     const olderPost = (postIdx >= 0 && postIdx < state.data.posts.length - 1) ? state.data.posts[postIdx + 1] : null;
 
     const primaryCategory = (post.labels && post.labels.length > 0) ? post.labels[0] : 'News';
-    const authorInfo = state.data.authors[post.author] || {
+    const liveBio = getAuthorCurrentBio(post.author, post.authorBio);
+    const authorInfo = {
       name: post.author,
-      avatar: post.authorAvatar || DEFAULT_AVATAR,
-      bio: post.authorBio || 'Jurnalis & Tim Redaksi FoxSA News.'
+      avatar: (state.data.authors && state.data.authors[post.author] && state.data.authors[post.author].avatar) || post.authorAvatar || DEFAULT_AVATAR,
+      bio: liveBio
     };
 
     let related = state.data.posts.filter(p =>
@@ -2102,7 +2151,7 @@
                     <div>
                       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                         <a href="#/author/${encodeURIComponent(post.author)}" class="byline-author-name">${escapeHtml(post.author)}</a>
-                        ${post.authorBio ? renderRoleBadgeHtml(post.authorBio) : ''}
+                        ${authorInfo.bio ? renderRoleBadgeHtml(authorInfo.bio) : ''}
                       </div>
                       <div class="byline-date-meta">
                         <span>Dipublikasikan ${escapeHtml(formatDateID(post.published))}</span>
@@ -5430,140 +5479,145 @@
 
   
   // =========================================================================
-  // FOXSA FORMER STAFF & HONORARY ALUMNI (HALL OF FAME)
+  // FOXSA FORMER STAFF & HONORARY ALUMNI (EXACT CHART IMAGE ROSTER)
   // =========================================================================
   const FOXSA_FORMER_STAFF = [
-    {
-      id: 'messiah',
-      name: 'Messiah Dillard',
-      formerRole: 'Founder & 1st Chief Executive Officer',
-      category: 'leadership',
-      badge: 'Founder & 1st CEO',
-      period: '17 Nov 2025 – Era Rintisan',
-      avatar: 'assets/logo/foxsa-icon.jpg',
-      bio: 'Pendiri pertama FoxSA News Agency yang meletakkan dasar jurnalisme berani, independen, dan lugas di San Andreas. Membangun fondasi stasiun penyiaran 24 jam.',
-      legacy: 'Perintis berdirinya FoxSA News & peletak nilai independensi media.',
-      authorName: 'Messiah Dillard'
-    },
+    // 👑 High Executive Team
     {
       id: 'catherine',
       name: 'Catherine Cecillie',
-      formerRole: 'Former Chief Executive Officer (CEO)',
+      formerRole: 'Chief Executive Officer',
       category: 'leadership',
       badge: 'Former CEO',
       period: '2025 – 2026',
       avatar: 'assets/logo/foxsa-icon.jpg',
-      bio: 'Mantan CEO yang memimpin era ekspansi jaringan siaran televisi kabel, transformasi studio digital, serta perintisan 3 ekosistem utama penyiaran FoxSA News Network.',
-      legacy: 'Memimpin ekspansi siaran kabel, modernisasi newsroom, dan regenerasi talenta.',
-      authorName: 'Catherine Cecilie'
+      bio: 'Mantan CEO yang memimpin era ekspansi jaringan siaran televisi kabel dan modernisasi newsroom FoxSA News.',
+      legacy: 'Pimpinan era ekspansi siaran kabel dan penataan manajemen eksekutif FoxSA News.',
+      authorName: 'Catherine Cecillie'
     },
     {
       id: 'boniface',
       name: 'Boniface Ernest',
-      formerRole: 'Former Vice CEO & Board of Directors',
+      formerRole: 'V. Chief Executive Officer',
       category: 'leadership',
-      badge: 'Former Vice CEO',
+      badge: 'Former V. CEO',
       period: '2025 – 2026',
       avatar: 'assets/logo/foxsa-icon.jpg',
-      bio: 'Mantan Wakil CEO yang mengawal efektivitas tata kelola manajemen eksekutif, koordinasi lintas departemen, dan kemitraan strategis perusahaan di San Andreas.',
-      legacy: 'Penguatan struktur internal dan tata kelola operasional eksekutif.',
+      bio: 'Mantan Wakil CEO yang mengawal efektivitas tata kelola eksekutif dan koordinasi divisi.',
+      legacy: 'Penguatan struktur internal dan tata kelola eksekutif.',
       authorName: 'Boniface Ernest'
     },
-    {
-      id: 'marshall',
-      name: 'Marshall Swiss',
-      formerRole: 'Former Executive Director',
-      category: 'leadership',
-      badge: 'Former Executive Director',
-      period: '2025 – 2026',
-      avatar: 'assets/logo/foxsa-icon.jpg',
-      bio: 'Anggota Dewan Direksi kehormatan yang menanamkan budaya kerja kekeluargaan yang solid, etika komunikasi, dan profesionalisme di FoxSA News.',
-      legacy: 'Pembangun kultur kekeluargaan para pencerita (family of storytellers).',
-      authorName: 'Marshall Swiss'
-    },
-    {
-      id: 'jesus',
-      name: 'Jesus Conway',
-      formerRole: 'Former Command / Senior Crime Supervisor',
-      category: 'management',
-      badge: 'Former Command FoxSA',
-      period: '2025 – 2026',
-      avatar: 'assets/logo/foxsa-icon.jpg',
-      bio: 'Pimpinan operasional & koresponden kriminal legendaris yang memimpin liputan investigasi berisiko tinggi bersama LSPD dan penegak hukum di Los Santos.',
-      legacy: 'Pelopor liputan kriminal investigatif dan koordinasi lapangan tangguh.',
-      authorName: 'Jesus Conway'
-    },
-    {
-      id: 'jeremiah',
-      name: 'Jeremiah Howell',
-      formerRole: 'Former Event Manager & Chief Analyst',
-      category: 'management',
-      badge: 'Former Event Manager',
-      period: '2025 – 2026',
-      avatar: 'assets/logo/foxsa-icon.jpg',
-      bio: 'Manajer liputan event besar dan analis utama olahraga bermotor yang memelopori liputan San Andreas Motorsport Championship.',
-      legacy: 'Liputan kejuaraan balap San Andreas & siaran langsung event kota.',
-      authorName: 'Jeremiah Howell'
-    },
+
+    // 📋 HR Division Team
     {
       id: 'nayeon',
       name: 'Nayeon Park',
-      formerRole: 'Former HRD Manager',
-      category: 'management',
+      formerRole: 'Manager of Division (HRD)',
+      category: 'hr',
       badge: 'Former HRD Manager',
       period: '2025 – 2026',
       avatar: 'assets/logo/foxsa-icon.jpg',
-      bio: 'Manajer HRD pertama yang menyusun kerangka rekrutmen resmi, standardisasi kualifikasi kru, serta pembinaan awal FoxSA Academy.',
+      bio: 'Manajer HRD pertama yang menyusun kerangka rekrutmen resmi dan standardisasi kualifikasi kru.',
       legacy: 'Standardisasi proses rekrutmen dan tata tertib anggota redaksi.',
       authorName: 'Nayeon Park'
     },
     {
-      id: 'clarissa',
-      name: 'Clarissa Vencant',
-      formerRole: 'Former Senior Editor & Supervisor',
-      category: 'supervisor',
-      badge: 'Former Senior Editor',
+      id: 'jesus',
+      name: 'Jesus Conway',
+      formerRole: 'HR Staff',
+      category: 'hr',
+      badge: 'Former HR Staff',
       period: '2025 – 2026',
-      avatar: 'assets/logo/foxsa-icon.jpg',
-      bio: 'Supervisor redaksi yang mengawal kualitas bahasa, akurasi fakta, serta pembimbingan jurnalis muda dalam penulisan artikel harian.',
-      legacy: 'Standar penyuntingan berita berimbang, tajam, dan akurat.',
-      authorName: 'Clarissa Vencant'
+      avatar: 'https://4.bp.blogspot.com/-uCjYgVFIh70/VuOLn-mL7PI/AAAAAAAADUs/Kcu9wJbv790hIo83rI_s7lLW3zkLY01EA/s100/avatar.png',
+      bio: 'Staf HRD dan pimpinan liputan lapangan legendaris yang berdedikasi tinggi.',
+      legacy: 'Dedikasi pengkaderan dan koordinasi lapangan tangguh di Los Santos.',
+      authorName: 'Jesus Conway'
     },
     {
       id: 'franklin',
       name: 'Franklin Baxter',
-      formerRole: 'Former HR Supervisor',
-      category: 'supervisor',
-      badge: 'Former HR Supervisor',
+      formerRole: 'HR Staff',
+      category: 'hr',
+      badge: 'Former HR Staff',
       period: '2025 – 2026',
       avatar: 'assets/logo/foxsa-icon.jpg',
-      bio: 'Supervisor HRD yang mendampingi program orientasi, pelatihan siaran, serta kesiapan mental kru jurnalis baru di lapangan.',
+      bio: 'Staf HRD yang mendampingi program orientasi dan kesiapan mental kru jurnalis baru.',
       legacy: 'Pengembangan kurikulum pelatihan jurnalis lapangan FoxSA.',
       authorName: 'Franklin Baxter'
     },
+
+    // 🛠️ Operational Staff
     {
-      id: 'bryan',
-      name: 'Bryan Andregaz',
-      formerRole: 'Former Senior Field Reporter',
-      category: 'staff',
-      badge: 'Former Field Reporter',
+      id: 'jareel',
+      name: 'Jareel Sancho',
+      formerRole: 'Junior Staff',
+      category: 'operational',
+      badge: 'Former Junior Staff',
       period: '2025 – 2026',
       avatar: 'assets/logo/foxsa-icon.jpg',
-      bio: 'Jurnalis lapangan tanggap darurat yang kerap hadir pertama di lokasi kebakaran, operasi penegakan hukum, serta akademi darurat San Andreas.',
-      legacy: 'Liputan sigap dari garis depan peristiwa darurat Los Santos.',
-      authorName: 'Bryan Andregaz'
+      bio: 'Staf operasional lapangan yang aktif mengawal kelancaran siaran dan logistik liputan harian.',
+      legacy: 'Dukungan operasional handal di garda depan ruang redaksi.',
+      authorName: 'Jareel Sancho'
     },
     {
-      id: 'shen',
-      name: 'Shen Xander',
-      formerRole: 'Former Staff Journalist',
-      category: 'staff',
-      badge: 'Former Journalist',
+      id: 'niver',
+      name: 'Niver Richardson',
+      formerRole: 'Junior Staff',
+      category: 'operational',
+      badge: 'Former Junior Staff',
       period: '2025 – 2026',
       avatar: 'assets/logo/foxsa-icon.jpg',
-      bio: 'Jurnalis harian yang berkontribusi aktif meliput dinamika sosial masyarakat, komunitas warga, dan dokumentasi peristiwa perkotaan.',
-      legacy: 'Laporan jurnalisme warga dan dokumentasi kehidupan kota.',
-      authorName: 'Shen Xander'
+      bio: 'Staf operasional muda yang berdedikasi tinggi dalam peliputan dan dokumentasi berita San Andreas.',
+      legacy: 'Kontribusi prima dalam operasional penyiaran berita harian.',
+      authorName: 'Niver Richardson'
+    },
+    {
+      id: 'mendoza',
+      name: 'Mendoza Souza',
+      formerRole: 'Internship',
+      category: 'operational',
+      badge: 'Former Intern',
+      period: '2025 – 2026',
+      avatar: 'assets/logo/foxsa-icon.jpg',
+      bio: 'Alumni program magang operasional FoxSA News yang telah menuntaskan masa bakti jurnalistik.',
+      legacy: 'Semangat belajar dan kontribusi aktif selama masa magang pers.',
+      authorName: 'Mendoza Souza'
+    },
+    {
+      id: 'aaron',
+      name: 'Aaron Qroy',
+      formerRole: 'Internship',
+      category: 'operational',
+      badge: 'Former Intern',
+      period: '2025 – 2026',
+      avatar: 'assets/logo/foxsa-icon.jpg',
+      bio: 'Alumni program magang operasional FoxSA News yang berdedikasi dalam liputan kota.',
+      legacy: 'Partisipasi aktif dalam kegiatan produksi berita ruang redaksi.',
+      authorName: 'Aaron Qroy'
+    },
+    {
+      id: 'sashura',
+      name: 'Sashura Soloveva',
+      formerRole: 'Internship',
+      category: 'operational',
+      badge: 'Former Intern',
+      period: '2025 – 2026',
+      avatar: 'assets/logo/foxsa-icon.jpg',
+      bio: 'Alumni program magang operasional dengan dedikasi tinggi pada ketepatan dan kerja tim.',
+      legacy: 'Kerja keras dan dedikasi jurnalistik selama masa pelatihan.',
+      authorName: 'Sashura Soloveva'
+    },
+    {
+      id: 'giovani',
+      name: 'Giovani Marino',
+      formerRole: 'Internship',
+      category: 'operational',
+      badge: 'Former Intern',
+      period: '2025 – 2026',
+      avatar: 'assets/logo/foxsa-icon.jpg',
+      bio: 'Alumni program magang operasional FoxSA News yang telah menyelesaikan masa baktinya.',
+      legacy: 'Dukungan operasional dan loyalitas tinggi pada nilai jurnalisme independen.',
+      authorName: 'Giovani Marino'
     }
   ];
 
@@ -6090,11 +6144,11 @@ const LEADER_QUOTES = {
                 <h3>Purna Tugas &amp; Penghormatan Former Staff FoxSA</h3>
                 <p>Apresiasi setinggi-tingginya bagi para pendiri, mantan pimpinan eksekutif, serta jurnalis yang telah meletakkan fondasi dan mendedikasikan karyanya untuk FoxSA News Agency di San Andreas.</p>
                 <div class="former-teaser-pills">
-                  <span class="former-mini-pill"><strong>Messiah Dillard</strong> (Founder &amp; 1st CEO)</span>
                   <span class="former-mini-pill"><strong>Catherine Cecillie</strong> (Former CEO)</span>
-                  <span class="former-mini-pill"><strong>Boniface Ernest</strong> (Former Vice CEO)</span>
-                  <span class="former-mini-pill"><strong>Marshall Swiss</strong> (Former Director)</span>
-                  <span class="former-mini-pill"><strong>Jesus Conway</strong> (Former Command)</span>
+                  <span class="former-mini-pill"><strong>Boniface Ernest</strong> (Former V. CEO)</span>
+                  <span class="former-mini-pill"><strong>Nayeon Park</strong> (Former HRD Manager)</span>
+                  <span class="former-mini-pill"><strong>Jesus Conway</strong> (Former HR Staff)</span>
+                  <span class="former-mini-pill"><strong>Franklin Baxter</strong> (Former HR Staff)</span>
                 </div>
               </div>
               <div class="former-teaser-right">
@@ -6117,8 +6171,8 @@ const LEADER_QUOTES = {
         ? state.data.formerStaff
         : FOXSA_FORMER_STAFF;
       const leadershipFormer = formerList.filter(f => f.category === 'leadership');
-      const mgmtFormer = formerList.filter(f => f.category === 'management' || f.category === 'supervisor');
-      const staffFormer = formerList.filter(f => f.category === 'staff');
+      const hrFormer = formerList.filter(f => f.category === 'hr' || f.category === 'management' || f.category === 'supervisor');
+      const operationalFormer = formerList.filter(f => f.category === 'operational' || f.category === 'staff');
 
       bodyHtml = `
         <div class="foxsa-profile-section">
@@ -6127,7 +6181,7 @@ const LEADER_QUOTES = {
             <div class="alumni-hero-badge"><i class="fa-solid fa-medal"></i> FOXSA NEWS HALL OF FAME • HONORARY ALUMNI</div>
             <h2>Jajaran Purna Tugas &amp; Former Staff FoxSA News</h2>
             <p class="alumni-hero-lead">
-              Penghormatan dan apresiasi setinggi-tingginya bagi para pendiri, mantan pimpinan eksekutif, manajer, supervisor, dan staf jurnalis yang telah menorehkan karya jurnalistik terbaik di San Andreas. Terima kasih atas dedikasi, integritas, dan semangat kekeluargaan yang telah kalian wariskan bagi FoxSA News Agency.
+              Penghormatan dan apresiasi setinggi-tingginya bagi para pimpinan eksekutif, manajer divisi, serta staf operasional yang telah mendedikasikan karyanya untuk FoxSA News Agency di San Andreas. Terima kasih atas integritas dan pengabdian yang telah diwariskan bagi ruang redaksi FoxSA.
             </p>
             <div class="alumni-stats-bar">
               <span class="alumni-stat"><i class="fa-solid fa-users"></i> <strong>${formerList.length}</strong> Tokoh Kehormatan</span>
@@ -6136,13 +6190,13 @@ const LEADER_QUOTES = {
             </div>
           </div>
 
-          <!-- Category 1: Founder & Leadership Alumni -->
+          <!-- Category 1: High Executive Team -->
           <div class="alumni-category-section">
             <div class="alumni-category-title-bar">
               <div class="alumni-cat-icon gold"><i class="fa-solid fa-crown"></i></div>
               <div>
-                <h3>Dewan Pendiri &amp; Mantan Pimpinan Eksekutif</h3>
-                <p>Tokoh pilar yang mendirikan FoxSA News, mengarahkan visi independensi, dan memimpin era transformasi penyiaran 24 jam di San Andreas.</p>
+                <h3>High Executive Team</h3>
+                <p>Mantan jajaran pimpinan eksekutif tertinggi FoxSA News yang meletakkan arah visi independensi, kepemimpinan, dan tata kelola organisasi.</p>
               </div>
             </div>
 
@@ -6156,19 +6210,19 @@ const LEADER_QUOTES = {
                       <img src="${fAvatar}" alt="${escapeHtml(f.name)}" onerror="this.src=getDefaultTeamAvatarSvg(0)" />
                     </div>
                     <div class="alumni-head-info">
-                      <span class="alumni-role-tag gold"><i class="fa-solid fa-award"></i> ${escapeHtml(f.badge)}</span>
+                      <span class="alumni-role-tag gold"><i class="fa-solid fa-award"></i> ${escapeHtml(f.badge || f.formerRole)}</span>
                       <h4>${escapeHtml(f.name)}</h4>
-                      <span class="alumni-period"><i class="fa-regular fa-calendar"></i> ${escapeHtml(f.period)}</span>
+                      <span class="alumni-period"><i class="fa-regular fa-calendar"></i> ${escapeHtml(f.period || '2025 – 2026')}</span>
                     </div>
                   </div>
                   <div class="alumni-card-body">
                     <div class="alumni-legacy-quote">
                       <i class="fa-solid fa-quote-left"></i>
-                      <span>${escapeHtml(f.legacy)}</span>
+                      <span>${escapeHtml(f.legacy || f.bio)}</span>
                     </div>
-                    <p class="alumni-bio">${escapeHtml(f.bio)}</p>
+                    <p class="alumni-bio">${escapeHtml(f.bio || '')}</p>
                     <div class="alumni-card-actions">
-                      <a href="#/author/${encodeURIComponent(f.authorName)}" class="alumni-author-btn">
+                      <a href="#/author/${encodeURIComponent(f.authorName || f.name)}" class="alumni-author-btn">
                         <i class="fa-solid fa-newspaper"></i> Arsip Berita Karya ${escapeHtml(f.name.split(' ')[0])}
                       </a>
                     </div>
@@ -6179,18 +6233,18 @@ const LEADER_QUOTES = {
             </div>
           </div>
 
-          <!-- Category 2: Management & Editorial Supervisors Alumni -->
+          <!-- Category 2: HR Division Team -->
           <div class="alumni-category-section" style="margin-top:36px;">
             <div class="alumni-category-title-bar">
-              <div class="alumni-cat-icon blue"><i class="fa-solid fa-briefcase"></i></div>
+              <div class="alumni-cat-icon blue"><i class="fa-solid fa-users-gear"></i></div>
               <div>
-                <h3>Mantan Tim Manajemen &amp; Supervisor Redaksi</h3>
-                <p>Para pengawal mutu siaran harian, manajer rekrutmen, koresponden kriminal investigatif, dan penggerak liputan kejuaraan motorsport.</p>
+                <h3>HR Division Team</h3>
+                <p>Mantan manajer divisi HRD dan staf human resources yang mengawal standardisasi rekrutmen, pembinaan kredibilitas jurnalis, serta tata tertib redaksi.</p>
               </div>
             </div>
 
             <div class="alumni-cards-grid">
-              ${mgmtFormer.map((f, i) => {
+              ${hrFormer.map((f, i) => {
                 const fAvatar = isCustomAvatar(f.avatar) ? f.avatar : getDefaultTeamAvatarSvg(i + 1);
                 return `
                 <div class="alumni-card blue-border">
@@ -6199,19 +6253,19 @@ const LEADER_QUOTES = {
                       <img src="${fAvatar}" alt="${escapeHtml(f.name)}" onerror="this.src=getDefaultTeamAvatarSvg(1)" />
                     </div>
                     <div class="alumni-head-info">
-                      <span class="alumni-role-tag blue">${escapeHtml(f.badge)}</span>
+                      <span class="alumni-role-tag blue">${escapeHtml(f.badge || f.formerRole)}</span>
                       <h4>${escapeHtml(f.name)}</h4>
-                      <span class="alumni-period"><i class="fa-regular fa-calendar"></i> ${escapeHtml(f.period)}</span>
+                      <span class="alumni-period"><i class="fa-regular fa-calendar"></i> ${escapeHtml(f.period || '2025 – 2026')}</span>
                     </div>
                   </div>
                   <div class="alumni-card-body">
                     <div class="alumni-legacy-quote">
                       <i class="fa-solid fa-quote-left"></i>
-                      <span>${escapeHtml(f.legacy)}</span>
+                      <span>${escapeHtml(f.legacy || f.bio)}</span>
                     </div>
-                    <p class="alumni-bio">${escapeHtml(f.bio)}</p>
+                    <p class="alumni-bio">${escapeHtml(f.bio || '')}</p>
                     <div class="alumni-card-actions">
-                      <a href="#/author/${encodeURIComponent(f.authorName)}" class="alumni-author-btn">
+                      <a href="#/author/${encodeURIComponent(f.authorName || f.name)}" class="alumni-author-btn">
                         <i class="fa-solid fa-newspaper"></i> Arsip Berita Karya ${escapeHtml(f.name.split(' ')[0])}
                       </a>
                     </div>
@@ -6222,18 +6276,18 @@ const LEADER_QUOTES = {
             </div>
           </div>
 
-          <!-- Category 3: Former Operational Staff & Field Reporters -->
+          <!-- Category 3: Operational Staff -->
           <div class="alumni-category-section" style="margin-top:36px;">
             <div class="alumni-category-title-bar">
-              <div class="alumni-cat-icon green"><i class="fa-solid fa-microphone"></i></div>
+              <div class="alumni-cat-icon green"><i class="fa-solid fa-clipboard-check"></i></div>
               <div>
-                <h3>Mantan Jurnalis Lapangan &amp; Kru Redaksi</h3>
-                <p>Reporter lapangan yang bertugas sigap di garis depan peristiwa darurat, dinamika warga perkotaan, dan dokumentasi visual Los Santos.</p>
+                <h3>Operational Staff</h3>
+                <p>Mantan jajaran staf operasional, junior staff, dan jajaran magang (internship) yang berkontribusi aktif dan sigap dalam operasional ruang redaksi FoxSA News.</p>
               </div>
             </div>
 
             <div class="alumni-cards-grid">
-              ${staffFormer.map((f, i) => {
+              ${operationalFormer.map((f, i) => {
                 const fAvatar = isCustomAvatar(f.avatar) ? f.avatar : getDefaultTeamAvatarSvg(i + 2);
                 return `
                 <div class="alumni-card green-border">
@@ -6242,19 +6296,19 @@ const LEADER_QUOTES = {
                       <img src="${fAvatar}" alt="${escapeHtml(f.name)}" onerror="this.src=getDefaultTeamAvatarSvg(2)" />
                     </div>
                     <div class="alumni-head-info">
-                      <span class="alumni-role-tag green">${escapeHtml(f.badge)}</span>
+                      <span class="alumni-role-tag green">${escapeHtml(f.badge || f.formerRole)}</span>
                       <h4>${escapeHtml(f.name)}</h4>
-                      <span class="alumni-period"><i class="fa-regular fa-calendar"></i> ${escapeHtml(f.period)}</span>
+                      <span class="alumni-period"><i class="fa-regular fa-calendar"></i> ${escapeHtml(f.period || '2025 – 2026')}</span>
                     </div>
                   </div>
                   <div class="alumni-card-body">
                     <div class="alumni-legacy-quote">
                       <i class="fa-solid fa-quote-left"></i>
-                      <span>${escapeHtml(f.legacy)}</span>
+                      <span>${escapeHtml(f.legacy || f.bio)}</span>
                     </div>
-                    <p class="alumni-bio">${escapeHtml(f.bio)}</p>
+                    <p class="alumni-bio">${escapeHtml(f.bio || '')}</p>
                     <div class="alumni-card-actions">
-                      <a href="#/author/${encodeURIComponent(f.authorName)}" class="alumni-author-btn">
+                      <a href="#/author/${encodeURIComponent(f.authorName || f.name)}" class="alumni-author-btn">
                         <i class="fa-solid fa-newspaper"></i> Arsip Berita Karya ${escapeHtml(f.name.split(' ')[0])}
                       </a>
                     </div>

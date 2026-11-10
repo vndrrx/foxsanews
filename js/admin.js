@@ -212,7 +212,9 @@
       const fn = String(f.name || '').toLowerCase().trim();
       return fn === authorName;
     });
-    if (former && (former.role || former.last_role)) return former.role || former.last_role;
+    if (former && (former.formerRole || former.role || former.last_role || former.badge)) {
+      return former.formerRole || former.role || former.last_role || former.badge;
+    }
 
     // 3. Fall back to post.authorBio
     return post.authorBio || 'Staff Redaksi';

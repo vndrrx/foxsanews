@@ -223,5 +223,129 @@ window.FOXSA_INITIAL_DATA = {
       "popular": false,
       "comments": []
     }
-  ]
+  ],
+  "formerStaff": [
+  {
+    "id": "catherine",
+    "name": "Catherine Cecillie",
+    "formerRole": "Chief Executive Officer",
+    "category": "leadership",
+    "badge": "Former CEO",
+    "period": "2025 – 2026",
+    "avatar": "assets/logo/foxsa-icon.jpg",
+    "bio": "Mantan CEO yang memimpin era ekspansi jaringan siaran televisi kabel dan modernisasi newsroom FoxSA News.",
+    "legacy": "Pimpinan era ekspansi siaran kabel dan penataan manajemen eksekutif FoxSA News."
+  },
+  {
+    "id": "boniface",
+    "name": "Boniface Ernest",
+    "formerRole": "V. Chief Executive Officer",
+    "category": "leadership",
+    "badge": "Former V. CEO",
+    "period": "2025 – 2026",
+    "avatar": "assets/logo/foxsa-icon.jpg",
+    "bio": "Mantan Wakil CEO yang mengawal efektivitas tata kelola eksekutif dan koordinasi divisi.",
+    "legacy": "Penguatan struktur internal dan tata kelola eksekutif."
+  },
+  {
+    "id": "nayeon",
+    "name": "Nayeon Park",
+    "formerRole": "Manager of Division (HRD)",
+    "category": "hr",
+    "badge": "Former HRD Manager",
+    "period": "2025 – 2026",
+    "avatar": "assets/logo/foxsa-icon.jpg",
+    "bio": "Manajer HRD pertama yang menyusun kerangka rekrutmen resmi dan standardisasi kualifikasi kru.",
+    "legacy": "Standardisasi proses rekrutmen dan tata tertib anggota redaksi."
+  },
+  {
+    "id": "jesus",
+    "name": "Jesus Conway",
+    "formerRole": "HR Staff",
+    "category": "hr",
+    "badge": "Former HR Staff",
+    "period": "2025 – 2026",
+    "avatar": "https://4.bp.blogspot.com/-uCjYgVFIh70/VuOLn-mL7PI/AAAAAAAADUs/Kcu9wJbv790hIo83rI_s7lLW3zkLY01EA/s100/avatar.png",
+    "bio": "Staf HRD dan pimpinan liputan lapangan legendaris yang berdedikasi tinggi.",
+    "legacy": "Dedikasi pengkaderan dan koordinasi lapangan tangguh di Los Santos."
+  },
+  {
+    "id": "franklin",
+    "name": "Franklin Baxter",
+    "formerRole": "HR Staff",
+    "category": "hr",
+    "badge": "Former HR Staff",
+    "period": "2025 – 2026",
+    "avatar": "assets/logo/foxsa-icon.jpg",
+    "bio": "Staf HRD yang mendampingi program orientasi dan kesiapan mental kru jurnalis baru.",
+    "legacy": "Pengembangan kurikulum pelatihan jurnalis lapangan FoxSA."
+  },
+  {
+    "id": "jareel",
+    "name": "Jareel Sancho",
+    "formerRole": "Junior Staff",
+    "category": "operational",
+    "badge": "Former Junior Staff",
+    "period": "2025 – 2026",
+    "avatar": "assets/logo/foxsa-icon.jpg",
+    "bio": "Staf operasional lapangan yang aktif mengawal kelancaran siaran dan logistik liputan harian.",
+    "legacy": "Dukungan operasional handal di garda depan ruang redaksi."
+  },
+  {
+    "id": "niver",
+    "name": "Niver Richardson",
+    "formerRole": "Junior Staff",
+    "category": "operational",
+    "badge": "Former Junior Staff",
+    "period": "2025 – 2026",
+    "avatar": "assets/logo/foxsa-icon.jpg",
+    "bio": "Staf operasional muda yang berdedikasi tinggi dalam peliputan dan dokumentasi berita San Andreas.",
+    "legacy": "Kontribusi prima dalam operasional penyiaran berita harian."
+  },
+  {
+    "id": "mendoza",
+    "name": "Mendoza Souza",
+    "formerRole": "Internship",
+    "category": "operational",
+    "badge": "Former Intern",
+    "period": "2025 – 2026",
+    "avatar": "assets/logo/foxsa-icon.jpg",
+    "bio": "Alumni program magang operasional FoxSA News yang telah menuntaskan masa bakti jurnalistik.",
+    "legacy": "Semangat belajar dan kontribusi aktif selama masa magang pers."
+  },
+  {
+    "id": "aaron",
+    "name": "Aaron Qroy",
+    "formerRole": "Internship",
+    "category": "operational",
+    "badge": "Former Intern",
+    "period": "2025 – 2026",
+    "avatar": "assets/logo/foxsa-icon.jpg",
+    "bio": "Alumni program magang operasional FoxSA News yang berdedikasi dalam liputan kota.",
+    "legacy": "Partisipasi aktif dalam kegiatan produksi berita ruang redaksi."
+  },
+  {
+    "id": "sashura",
+    "name": "Sashura Soloveva",
+    "formerRole": "Internship",
+    "category": "operational",
+    "badge": "Former Intern",
+    "period": "2025 – 2026",
+    "avatar": "assets/logo/foxsa-icon.jpg",
+    "bio": "Alumni program magang operasional dengan dedikasi tinggi pada ketepatan dan kerja tim.",
+    "legacy": "Kerja keras dan dedikasi jurnalistik selama masa pelatihan."
+  },
+  {
+    "id": "giovani",
+    "name": "Giovani Marino",
+    "formerRole": "Internship",
+    "category": "operational",
+    "badge": "Former Intern",
+    "period": "2025 – 2026",
+    "avatar": "assets/logo/foxsa-icon.jpg",
+    "bio": "Alumni program magang operasional FoxSA News yang telah menyelesaikan orientasi tugas jurnalistik.",
+    "legacy": "Kontribusi dan partisipasi aktif dalam kegiatan pers."
+  }
+]
 };
+
