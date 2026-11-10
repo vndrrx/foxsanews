@@ -149,7 +149,19 @@
     { name: 'Photojournalist & Visual Media', category: 'Operational', color: '#8b5cf6', bg: '#f5f3ff', border: '#ddd6fe', icon: 'fa-camera', isHighStaff: false, level: 22 },
     { name: 'Staff Reporter', category: 'Operational', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', icon: 'fa-pen-nib', isHighStaff: false, level: 20 },
     { name: 'Junior Reporter', category: 'Operational', color: '#22c55e', bg: '#f0fdf4', border: '#bbf7d0', icon: 'fa-pen-fancy', isHighStaff: false, level: 10 },
-    { name: 'Journalism Intern', category: 'Operational', color: '#10b981', bg: '#ecfdf5', border: '#a7f3d0', icon: 'fa-graduation-cap', isHighStaff: false, level: 5 }
+    { name: 'Journalism Intern', category: 'Operational', color: '#10b981', bg: '#ecfdf5', border: '#a7f3d0', icon: 'fa-graduation-cap', isHighStaff: false, level: 5 },
+
+    // Tier 6: Former Staff & Alumni (Purna Tugas & Kehormatan)
+    { name: 'Former Command FoxSA', category: 'Former', color: '#047857', bg: '#ecfdf5', border: '#a7f3d0', icon: 'fa-medal', isHighStaff: false, isFormer: true, level: 3 },
+    { name: 'Former Chief Executive Officer', category: 'Former', color: '#475569', bg: '#f8fafc', border: '#cbd5e1', icon: 'fa-user-graduate', isHighStaff: false, isFormer: true, level: 2 },
+    { name: 'Former Board of Commissioners', category: 'Former', color: '#475569', bg: '#f8fafc', border: '#cbd5e1', icon: 'fa-user-graduate', isHighStaff: false, isFormer: true, level: 2 },
+    { name: 'Former Board of Directors', category: 'Former', color: '#475569', bg: '#f8fafc', border: '#cbd5e1', icon: 'fa-user-graduate', isHighStaff: false, isFormer: true, level: 2 },
+    { name: 'Former Station Manager', category: 'Former', color: '#475569', bg: '#f8fafc', border: '#cbd5e1', icon: 'fa-user-graduate', isHighStaff: false, isFormer: true, level: 2 },
+    { name: 'Former Senior Producer & Supervisor', category: 'Former', color: '#475569', bg: '#f8fafc', border: '#cbd5e1', icon: 'fa-user-graduate', isHighStaff: false, isFormer: true, level: 2 },
+    { name: 'Former Senior Editor', category: 'Former', color: '#475569', bg: '#f8fafc', border: '#cbd5e1', icon: 'fa-user-graduate', isHighStaff: false, isFormer: true, level: 2 },
+    { name: 'Former Senior Field Reporter', category: 'Former', color: '#475569', bg: '#f8fafc', border: '#cbd5e1', icon: 'fa-user-graduate', isHighStaff: false, isFormer: true, level: 2 },
+    { name: 'Former Staff Redaksi', category: 'Former', color: '#475569', bg: '#f8fafc', border: '#cbd5e1', icon: 'fa-user-graduate', isHighStaff: false, isFormer: true, level: 2 },
+    { name: 'Former Member / Alumni', category: 'Former', color: '#475569', bg: '#f8fafc', border: '#cbd5e1', icon: 'fa-user-graduate', isHighStaff: false, isFormer: true, level: 1 }
   ];
 
   function getRoleInfo(roleName) {
@@ -157,6 +169,30 @@
     const clean = String(roleName).trim().toLowerCase();
     const found = OFFICIAL_ROLES.find(r => r.name.toLowerCase() === clean);
     if (found) return found;
+    if (clean.includes('former command')) {
+      return {
+        name: roleName,
+        category: 'Former',
+        color: '#047857',
+        bg: '#ecfdf5',
+        border: '#a7f3d0',
+        icon: 'fa-medal',
+        isHighStaff: false,
+        isFormer: true
+      };
+    }
+    if (clean.includes('former') || clean.includes('alumni')) {
+      return {
+        name: roleName,
+        category: 'Former',
+        color: '#475569',
+        bg: '#f8fafc',
+        border: '#cbd5e1',
+        icon: 'fa-user-graduate',
+        isHighStaff: false,
+        isFormer: true
+      };
+    }
     const partial = OFFICIAL_ROLES.find(r => clean.includes(r.name.toLowerCase()) || r.name.toLowerCase().includes(clean));
     if (partial) return partial;
     return {
@@ -188,13 +224,14 @@
 
   function renderRoleOptionsHtml(selectedRole, options = {}) {
     const selClean = String(selectedRole || '').trim().toLowerCase();
-    const categories = ['Commissioners', 'Directors', 'Management', 'Supervisor', 'Operational'];
+    const categories = ['Commissioners', 'Directors', 'Management', 'Supervisor', 'Operational', 'Former'];
     const catLabels = {
       'Commissioners': '🏛️ Dewan Komisaris (Supervisory Board)',
       'Directors': '👑 Dewan Direksi (Executive Board)',
       'Management': '💼 Manajemen Operasional',
       'Supervisor': '🎬 Tim Supervisor (Redaksi & Produksi)',
-      'Operational': '🎙️ Staf Redaksi & Jurnalis Lapangan'
+      'Operational': '🎙️ Staf Redaksi & Jurnalis Lapangan',
+      'Former': '🎓 Purna Tugas & Alumni (Former Staff)'
     };
     return categories.map(cat => {
       const rolesInCat = OFFICIAL_ROLES.filter(r => r.category === cat);
@@ -313,16 +350,6 @@
       role: 'Commissioner',
       status: 'approved',
       isAdmin: true,
-      avatar: 'assets/logo/foxsa-icon.jpg'
-    },
-    {
-      username: 'park',
-      password: 'parkyounghwan',
-      displayName: 'Park Young-Hwan',
-      authorName: 'Park Young-Hwan',
-      role: 'Line Producer',
-      status: 'approved',
-      isAdmin: false,
       avatar: 'assets/logo/foxsa-icon.jpg'
     },
     {
@@ -552,7 +579,8 @@
     'admin': ['foxsa2026', 'admin', 'foxsa', 'admin123'],
     'arthur': ['arthurfoxsa', 'arthur', 'foxsa2026', 'foxsa'],
     'reinhardt': ['reinhardt2026', 'reinhardt', 'foxsa2026', 'foxsa'],
-    'park': ['parkyounghwan', 'park', 'foxsa2026', 'foxsa'],
+    'rein': ['rein123', 'reinhardt2026', 'rein', 'foxsa2026'],
+    'rei': ['reinhard', 'reinhardt2026', 'rei', 'foxsa2026'],
     'steven': ['stevendeluca', 'steven', 'foxsa2026', 'foxsa']
   };
 

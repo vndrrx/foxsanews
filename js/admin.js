@@ -73,7 +73,19 @@
     { name: 'Photojournalist & Visual Media', group: 'Staf Redaksi & Jurnalis', color: '#8b5cf6', badge: 'bg-violet' },
     { name: 'Staff Reporter', group: 'Staf Redaksi & Jurnalis', color: '#16a34a', badge: 'bg-green' },
     { name: 'Junior Reporter', group: 'Staf Redaksi & Jurnalis', color: '#22c55e', badge: 'bg-emerald' },
-    { name: 'Journalism Intern', group: 'Staf Redaksi & Jurnalis', color: '#10b981', badge: 'bg-emerald' }
+    { name: 'Journalism Intern', group: 'Staf Redaksi & Jurnalis', color: '#10b981', badge: 'bg-emerald' },
+
+    // 🎓 Purna Tugas & Alumni (Former Staff & Alumni)
+    { name: 'Former Command FoxSA', group: 'Former Staff & Alumni', color: '#047857', badge: 'bg-emerald', isFormer: true },
+    { name: 'Former Chief Executive Officer', group: 'Former Staff & Alumni', color: '#475569', badge: 'bg-slate', isFormer: true },
+    { name: 'Former Board of Commissioners', group: 'Former Staff & Alumni', color: '#475569', badge: 'bg-slate', isFormer: true },
+    { name: 'Former Board of Directors', group: 'Former Staff & Alumni', color: '#475569', badge: 'bg-slate', isFormer: true },
+    { name: 'Former Station Manager', group: 'Former Staff & Alumni', color: '#475569', badge: 'bg-slate', isFormer: true },
+    { name: 'Former Senior Producer & Supervisor', group: 'Former Staff & Alumni', color: '#475569', badge: 'bg-slate', isFormer: true },
+    { name: 'Former Senior Editor', group: 'Former Staff & Alumni', color: '#475569', badge: 'bg-slate', isFormer: true },
+    { name: 'Former Senior Field Reporter', group: 'Former Staff & Alumni', color: '#475569', badge: 'bg-slate', isFormer: true },
+    { name: 'Former Staff Redaksi', group: 'Former Staff & Alumni', color: '#475569', badge: 'bg-slate', isFormer: true },
+    { name: 'Former Member / Alumni', group: 'Former Staff & Alumni', color: '#475569', badge: 'bg-slate', isFormer: true }
   ];
 
   const ALL_CATEGORIES = [
@@ -155,7 +167,11 @@
     const cleanLower = clean.toLowerCase();
     let bg = '#eff6ff', color = '#1d4ed8', border = '#bfdbfe', icon = 'fa-user-tag';
 
-    if (cleanLower.includes('commissioner')) {
+    if (cleanLower.includes('former command')) {
+      bg = '#ecfdf5'; color = '#047857'; border = '#a7f3d0'; icon = 'fa-medal';
+    } else if (cleanLower.includes('former') || cleanLower.includes('alumni') || cleanLower.includes('purna')) {
+      bg = '#f8fafc'; color = '#475569'; border = '#cbd5e1'; icon = 'fa-user-graduate';
+    } else if (cleanLower.includes('commissioner')) {
       bg = '#fef2f2'; color = '#b91c1c'; border = '#fecaca'; icon = 'fa-crown';
     } else if (cleanLower.includes('chief executive') || cleanLower.includes('ceo')) {
       bg = '#f5f3ff'; color = '#6d28d9'; border = '#ddd6fe'; icon = 'fa-shield-halved';
@@ -175,6 +191,31 @@
       <i class="fa-solid ${icon}"></i>
       ${escapeHtml(clean || 'Staff Redaksi')}
     </span>`;
+  }
+
+  function getAuthorCurrentRole(post) {
+    if (!post) return 'Junior Reporter';
+    const authorName = String(post.author || '').trim().toLowerCase();
+    if (!authorName) return post.authorBio || 'Staff Redaksi';
+
+    // 1. Search in active staff accounts (Supabase Cloud single source of truth)
+    const staff = (state.staffAccounts || []).find(s => {
+      const dn = String(s.displayName || s.display_name || '').toLowerCase().trim();
+      const an = String(s.authorName || s.author_name || '').toLowerCase().trim();
+      const un = String(s.username || '').toLowerCase().trim();
+      return dn === authorName || an === authorName || un === authorName;
+    });
+    if (staff && staff.role) return staff.role;
+
+    // 2. Search in former staff roster
+    const former = (state.formerStaff || []).find(f => {
+      const fn = String(f.name || '').toLowerCase().trim();
+      return fn === authorName;
+    });
+    if (former && (former.role || former.last_role)) return former.role || former.last_role;
+
+    // 3. Fall back to post.authorBio
+    return post.authorBio || 'Staff Redaksi';
   }
 
   function renderRoleOptionsHtml(selectedRole) {
@@ -325,10 +366,18 @@
         changed = true;
       }
 
-      // Update current user from updated staff accounts
-      if (state.currentUser) {
+      // Update & Validate current user against Supabase staff accounts
+      if (state.currentUser && state.staffAccounts.length > 0) {
         const freshUser = state.staffAccounts.find(a => a.username.toLowerCase() === state.currentUser.username.toLowerCase());
         if (freshUser) {
+          if (freshUser.status && freshUser.status !== 'approved') {
+            console.warn('Current user status is not approved! Revoking session...');
+            localStorage.removeItem(AUTH_SESSION_KEY);
+            clearAdminCache();
+            alert('Akun Anda masih dalam status menunggu persetujuan (ACC) dari High Staff.');
+            window.location.href = 'login.html';
+            return false;
+          }
           state.currentUser = freshUser;
           updateHeaderUserUI();
           try {
@@ -341,6 +390,14 @@
               loginAt: new Date().toISOString()
             }));
           } catch (e) {}
+        } else {
+          // Account was deleted from Supabase! Immediate revocation
+          console.warn('Current user not found in Supabase staff accounts! Revoking session...');
+          localStorage.removeItem(AUTH_SESSION_KEY);
+          clearAdminCache();
+          alert('Akun Anda tidak ditemukan di database cloud atau telah dinonaktifkan/dihapus.');
+          window.location.href = 'login.html';
+          return false;
         }
       }
 
@@ -659,7 +716,7 @@
                 <td>
                   <div style="font-weight:600;font-size:12.5px;color:#1e293b;">${escapeHtml(p.author)}</div>
                   <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
-                    ${renderRoleBadge(p.authorBio)}
+                    ${renderRoleBadge(getAuthorCurrentRole(p))}
                     ${isHighStaff(state.currentUser) ? `
                       <button type="button" class="foxsa-editor-btn" data-set-post-role="${p.id}" style="padding:1px 6px;font-size:10px;" title="Ubah Jabatan Penulis">
                         <i class="fa-solid fa-user-gear"></i> Set Role
@@ -750,25 +807,56 @@
       });
     });
 
-    // Set Role for Post Author
+    // Set Role for Post Author (Cascades to ALL articles by author & staff account)
     bodyEl.querySelectorAll('[data-set-post-role]').forEach(btn => {
       btn.addEventListener('click', () => {
         const postId = btn.getAttribute('data-set-post-role');
         const post = state.posts.find(p => p.id === postId);
         if (!post) return;
+        const authorName = post.author;
+        const currentRole = getAuthorCurrentRole(post);
         openRoleChooserModal({
-          title: `Pilih Jabatan / Role resmi untuk penulis "${post.author}" (Artikel: ${post.title}):`,
-          currentRole: post.authorBio,
+          title: `Pilih Jabatan / Role resmi untuk penulis "${authorName}":`,
+          currentRole: currentRole,
           onSave: async (chosen) => {
-            post.authorBio = chosen;
+            // 1. Cascade update ALL posts by this author in state.posts
+            state.posts.forEach(p => {
+              if (p.author === authorName) {
+                p.authorBio = chosen;
+              }
+            });
+
+            // 2. Cascade update staff account if author matches
+            const matchedStaff = state.staffAccounts.find(s => {
+              const dn = String(s.displayName || s.display_name || '').toLowerCase().trim();
+              const an = String(s.authorName || s.author_name || '').toLowerCase().trim();
+              const un = String(s.username || '').toLowerCase().trim();
+              const target = authorName.toLowerCase().trim();
+              return dn === target || an === target || un === target;
+            });
+            if (matchedStaff) {
+              matchedStaff.role = chosen;
+              if (state.currentUser && state.currentUser.username.toLowerCase() === matchedStaff.username.toLowerCase()) {
+                state.currentUser.role = chosen;
+                updateHeaderUserUI();
+              }
+            }
+
+            saveAdminCache();
             renderPostsTab();
-            showToast(`Jabatan ${post.author} diperbarui menjadi "${chosen}"!`);
+            showToast(`Jabatan ${authorName} diperbarui menjadi "${chosen}" di semua artikel!`);
 
             const sb = getSupabaseClient();
             if (sb) {
               try {
-                await sb.from('foxsa_posts').update({ author_bio: chosen }).eq('id', postId);
-              } catch (e) {}
+                // Update ALL posts by this author in Supabase
+                await sb.from('foxsa_posts').update({ author_bio: chosen }).eq('author', authorName);
+                if (matchedStaff) {
+                  await sb.from('foxsa_staff_accounts').update({ role: chosen }).eq('username', matchedStaff.username);
+                }
+              } catch (e) {
+                console.warn('Cascade update error:', e);
+              }
             }
           }
         });
@@ -1495,14 +1583,37 @@
           currentRole: acc.role,
           onSave: async (chosen) => {
             acc.role = chosen;
+            
+            // Cascade update all posts by this staff member
+            const authorNames = [acc.displayName, acc.authorName, acc.username].filter(Boolean);
+            state.posts.forEach(p => {
+              if (authorNames.includes(p.author)) {
+                p.authorBio = chosen;
+              }
+            });
+
+            if (state.currentUser && state.currentUser.username.toLowerCase() === acc.username.toLowerCase()) {
+              state.currentUser.role = chosen;
+              updateHeaderUserUI();
+            }
+
+            saveAdminCache();
             renderStaffTab();
-            showToast(`Jabatan ${acc.displayName} diperbarui menjadi "${chosen}"!`);
+            showToast(`Jabatan ${acc.displayName} diperbarui menjadi "${chosen}" dan disinkronkan ke seluruh artikel!`);
 
             const sb = getSupabaseClient();
             if (sb) {
               try {
                 await sb.from('foxsa_staff_accounts').update({ role: chosen }).eq('username', username);
-              } catch (e) {}
+                if (acc.displayName) {
+                  await sb.from('foxsa_posts').update({ author_bio: chosen }).eq('author', acc.displayName);
+                }
+                if (acc.authorName && acc.authorName !== acc.displayName) {
+                  await sb.from('foxsa_posts').update({ author_bio: chosen }).eq('author', acc.authorName);
+                }
+              } catch (e) {
+                console.warn('Sync staff role error:', e);
+              }
             }
           }
         });
@@ -1587,8 +1698,17 @@
         if (!confirm(`Hapus akun staff @${username} secara permanen?`)) return;
 
         state.staffAccounts = state.staffAccounts.filter(a => a.username !== username);
+        saveAdminCache();
         renderStaffTab();
         showToast('Akun staff dihapus.');
+
+        if (state.currentUser && state.currentUser.username.toLowerCase() === username.toLowerCase()) {
+          localStorage.removeItem(AUTH_SESSION_KEY);
+          clearAdminCache();
+          alert('Akun Anda telah dihapus. Mengalihkan ke halaman login...');
+          window.location.href = 'login.html';
+          return;
+        }
 
         const sb = getSupabaseClient();
         if (sb) {
@@ -2198,10 +2318,24 @@
       }
     } catch (e) {}
 
-    if (!sessionUser) {
+    if (!sessionUser || ['park', 'younghwan19'].includes(sessionUser.toLowerCase())) {
       // Redirect to login page
+      localStorage.removeItem(AUTH_SESSION_KEY);
+      clearAdminCache();
       window.location.href = 'login.html';
       return;
+    }
+
+    // Check cached accounts if available
+    const earlyCache = loadAdminCache();
+    if (earlyCache && Array.isArray(earlyCache.staffAccounts) && earlyCache.staffAccounts.length > 0) {
+      const foundInCache = earlyCache.staffAccounts.find(a => a.username.toLowerCase() === sessionUser.toLowerCase());
+      if (!foundInCache) {
+        localStorage.removeItem(AUTH_SESSION_KEY);
+        clearAdminCache();
+        window.location.href = 'login.html';
+        return;
+      }
     }
 
     // 2. Set Current User immediately from cached session (Zero flicker!)

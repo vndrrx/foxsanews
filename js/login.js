@@ -13,8 +13,7 @@
     'arthur': ['arthurfoxsa', 'arthur', 'foxsa2026', 'foxsa'],
     'reinhardt': ['reinhardt2026', 'reinhardt', 'foxsa2026', 'foxsa'],
     'rein': ['rein123', 'reinhardt2026', 'rein', 'foxsa2026'],
-    'younghwan19': ['hwan123', 'parkyounghwan', 'foxsa2026'],
-    'park': ['parkyounghwan', 'park', 'foxsa2026', 'foxsa'],
+    'rei': ['reinhard', 'reinhardt2026', 'rei', 'foxsa2026'],
     'steven': ['stevendeluca', 'steven', 'foxsa2026', 'foxsa']
   };
 
@@ -202,6 +201,7 @@
         }
 
         let account = null;
+        let supabaseChecked = false;
 
         // Query Supabase directly
         const sb = getSupabaseClient();
@@ -212,6 +212,7 @@
               .select('*');
 
             if (!error && Array.isArray(accounts)) {
+              supabaseChecked = true;
               account = accounts.find(a => {
                 const u = String(a.username || '').toLowerCase().trim();
                 const d = String(a.display_name || '').toLowerCase().trim();
@@ -232,8 +233,8 @@
           }
         }
 
-        // Fallback to local data if offline or not in Supabase yet
-        if (!account && window.FOXSA_INITIAL_DATA && Array.isArray(window.FOXSA_INITIAL_DATA.staffAccounts)) {
+        // Only fallback to local data if Supabase was NOT reachable (offline/error)
+        if (!account && !supabaseChecked && window.FOXSA_INITIAL_DATA && Array.isArray(window.FOXSA_INITIAL_DATA.staffAccounts)) {
           account = window.FOXSA_INITIAL_DATA.staffAccounts.find(a => {
             const u = String(a.username || '').toLowerCase().trim();
             const d = String(a.displayName || '').toLowerCase().trim();
